@@ -138,7 +138,8 @@ class SlideExporter:
     def _poll(self) -> None:
         self._elapsed += self.POLL_MS
         self.view.page().runJavaScript(
-            "window._reveal_done === true && window._mathjax_done === true",
+            "window._reveal_done === true && window._mathjax_done === true"
+            " && window._diagrams_done === true",
             self._on_poll,
         )
 

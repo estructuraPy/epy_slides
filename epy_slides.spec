@@ -46,6 +46,8 @@ hiddenimports += [
     "epy_slides.assets.reference_pptx",
     "epy_slides.assets.mathjax",
     "epy_slides.assets.revealjs",
+    "epy_slides.assets.mermaid",
+    "epy_slides.assets.nomnoml",
     # Lazy-imported inside _pdf_footer.add_watermark for the grayscale
     # watermark; PyInstaller may miss the in-function import.
     "PIL",

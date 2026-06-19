@@ -40,6 +40,13 @@ LAYOUT_INFO: list[tuple[str, str, str]] = [
     ("quote", "Quote", "A large centred quotation."),
     ("code", "Code", "A syntax-highlighted code block."),
     ("blank", "Blank", "An empty slide to fill freely."),
+    ("big-stat", "Big numbers", "A row of large key figures."),
+    ("agenda", "Agenda", "A numbered agenda / outline."),
+    ("cards", "Cards", "A grid of titled cards."),
+    ("timeline", "Timeline", "A vertical timeline of milestones."),
+    ("image-left", "Image left", "Image left, content right."),
+    ("image-right", "Image right", "Content left, image right."),
+    ("quote-portrait", "Quote + portrait", "A quote beside a portrait."),
 ]
 
 # Skeletons use bare tokens replaced with str.replace (NOT str.format) so
@@ -89,10 +96,63 @@ SLIDE_SKELETONS: dict[str, str] = {
         "```python\ncode_here()\n```\n"
     ),
     "blank": "## TITLE\n<!-- layout: blank -->\n",
+    "big-stat": (
+        "## TITLE\n<!-- layout: big-stat -->\n\n"
+        ":::: stats\n"
+        "::: stat\n**42%**\n\n[first metric]{.stat-label}\n:::\n"
+        "::: stat\n**1931**\n\n[second metric]{.stat-label}\n:::\n"
+        "::: stat\n**381 m**\n\n[third metric]{.stat-label}\n:::\n"
+        "::::\n"
+    ),
+    "agenda": (
+        "## Agenda\n<!-- layout: agenda -->\n\n"
+        "::: {.agenda}\n- First topic\n- Second topic\n- Third topic\n:::\n"
+    ),
+    "cards": (
+        "## TITLE\n<!-- layout: cards -->\n\n"
+        ":::: cards\n"
+        "::: card\n#### Card one\n\nShort description.\n:::\n"
+        "::: card\n#### Card two\n\nShort description.\n:::\n"
+        "::: card\n#### Card three\n\nShort description.\n:::\n"
+        "::::\n"
+    ),
+    "timeline": (
+        "## TITLE\n<!-- layout: timeline -->\n\n"
+        "::: {.timeline}\n"
+        "- **1929** — Excavation begins\n"
+        "- **1930** — Steel frame rises\n"
+        "- **1931** — Opening day\n"
+        ":::\n"
+    ),
+    "image-left": (
+        "## TITLE\n<!-- layout: image-left -->\n\n"
+        ":::: {.columns}\n"
+        '::: {.column width="42%"}\n![](IMAGE)\n:::\n'
+        '::: {.column width="58%"}\n- Point one\n- Point two\n:::\n'
+        "::::\n"
+    ),
+    "image-right": (
+        "## TITLE\n<!-- layout: image-right -->\n\n"
+        ":::: {.columns}\n"
+        '::: {.column width="58%"}\n- Point one\n- Point two\n:::\n'
+        '::: {.column width="42%"}\n![](IMAGE)\n:::\n'
+        "::::\n"
+    ),
+    "quote-portrait": (
+        "## TITLE\n<!-- layout: quote-portrait -->\n\n"
+        ":::: {.columns}\n"
+        '::: {.column width="32%"}\n![](IMAGE)\n:::\n'
+        '::: {.column width="68%"}\n'
+        "> The quotation goes here.\n>\n> — Attribution\n:::\n"
+        "::::\n"
+    ),
 }
 
 # Layouts that take an image path + caption in the New-Slide dialog.
-_IMAGE_LAYOUTS = {"image-caption", "image-fullbleed"}
+_IMAGE_LAYOUTS = {
+    "image-caption", "image-fullbleed",
+    "image-left", "image-right", "quote-portrait",
+}
 
 
 class NewSlideDialog(QDialog):

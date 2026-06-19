@@ -207,6 +207,85 @@ def reveal_config(
     return config
 
 
+_DIAGRAM_PKG = {
+    "mermaid": [("epy_slides.assets.mermaid", "mermaid.min.js")],
+    # nomnoml needs its layout dependency (graphre) loaded first.
+    "nomnoml": [
+        ("epy_slides.assets.nomnoml", "graphre.js"),
+        ("epy_slides.assets.nomnoml", "nomnoml.js"),
+    ],
+}
+
+
+@lru_cache(maxsize=4)
+def _load_diagram_script(engine: str) -> str:
+    """Return the bundled engine file(s) wrapped in ``<script>`` (cached)."""
+    parts: list[str] = []
+    for pkg, name in _DIAGRAM_PKG[engine]:
+        js = resources.files(pkg).joinpath(name).read_text(encoding="utf-8")
+        parts.append(f"<script>{js}</script>")
+    return "".join(parts)
+
+
+_MERMAID_CONFIG = """
+<script>
+window._epy_init_mermaid = function () {
+  if (!window.mermaid) return Promise.resolve();
+  var cs = getComputedStyle(document.documentElement);
+  function v(n, d) { return (cs.getPropertyValue(n) || d).trim(); }
+  mermaid.initialize({
+    startOnLoad: false, securityLevel: 'loose', theme: 'base',
+    themeVariables: {
+      background: v('--epy-bg', '#ffffff'),
+      primaryColor: v('--epy-soft', '#eeeeee'),
+      primaryTextColor: v('--epy-fg', '#222222'),
+      primaryBorderColor: v('--epy-primary', '#2a76dd'),
+      lineColor: v('--epy-primary', '#2a76dd'),
+      secondaryColor: v('--epy-bg', '#ffffff'),
+      tertiaryColor: v('--epy-bg', '#ffffff'),
+      fontFamily: v('--r-main-font', 'sans-serif')
+    }
+  });
+  return mermaid.run({ querySelector: '.mermaid' });
+};
+</script>
+"""
+
+_NOMNOML_CONFIG = """
+<script>
+window._epy_init_nomnoml = function () {
+  if (!window.nomnoml) return Promise.resolve();
+  var cs = getComputedStyle(document.documentElement);
+  function v(n, d) { return (cs.getPropertyValue(n) || d).trim(); }
+  var head = '#stroke: ' + v('--epy-primary', '#2a76dd') + '\\n' +
+             '#fill: ' + v('--epy-soft', '#eeeeee') + '\\n';
+  document.querySelectorAll('pre.nomnoml').forEach(function (el) {
+    try {
+      var wrap = document.createElement('div');
+      wrap.className = 'nomnoml';
+      wrap.innerHTML = nomnoml.renderSvg(head + el.textContent);
+      el.replaceWith(wrap);
+    } catch (e) { el.textContent = 'nomnoml: ' + e.message; }
+  });
+  return Promise.resolve();
+};
+</script>
+"""
+
+
+def _diagram_assets(diagrams: frozenset[str]) -> tuple[str, list[str]]:
+    """Return ``(head_html, init_calls)`` for the diagram engines in use."""
+    head = ""
+    inits: list[str] = []
+    if "mermaid" in diagrams:
+        head += _load_diagram_script("mermaid") + _MERMAID_CONFIG
+        inits.append("window._epy_init_mermaid()")
+    if "nomnoml" in diagrams:
+        head += _load_diagram_script("nomnoml") + _NOMNOML_CONFIG
+        inits.append("window._epy_init_nomnoml()")
+    return head, inits
+
+
 def build_reveal_document(
     body: str,
     base_dir: Path | None,
@@ -216,6 +295,7 @@ def build_reveal_document(
     *,
     for_export: bool = False,
     continuous: bool = False,
+    diagrams: frozenset[str] = frozenset(),
 ) -> str:
     """Assemble a self-contained reveal.js deck around Pandoc's sections.
 
@@ -234,6 +314,8 @@ def build_reveal_document(
         continuous: Render the deck in reveal's scroll view — one
             continuous scrollable page instead of discrete slides. Used
             by the HTML export.
+        diagrams: Diagram engines used by the deck (``mermaid`` /
+            ``nomnoml``); their bundles and init are injected when present.
 
     Returns:
         A complete, self-contained HTML5 reveal.js document.
@@ -250,12 +332,20 @@ def build_reveal_document(
     reveal_js = _reveal_text("dist", "reveal.js")
     title_slide = _title_slide(meta)
     overlays = _overlays(meta)
+    diagram_head, diagram_inits = _diagram_assets(diagrams)
     init = (
         "<script>\n"
         "document.addEventListener('DOMContentLoaded', function () {\n"
-        "  var deck = new Reveal(document.querySelector('.reveal'), "
-        f"{json.dumps(config)});\n"
-        "  deck.initialize().then(function () { window._reveal_done = true; });\n"
+        "  function initDeck() {\n"
+        "    var deck = new Reveal(document.querySelector('.reveal'), "
+        + json.dumps(config) + ");\n"
+        "    deck.initialize()"
+        ".then(function () { window._reveal_done = true; });\n"
+        "  }\n"
+        "  window._diagrams_done = false;\n"
+        "  Promise.all([" + ", ".join(diagram_inits) + "])"
+        ".then(function () { window._diagrams_done = true; initDeck(); })\n"
+        ".catch(function () { window._diagrams_done = true; initDeck(); });\n"
         "});\n"
         "</script>\n"
     )
@@ -283,6 +373,7 @@ def build_reveal_document(
         f"{overlays}\n"
         "</div>\n"
         f"<script>{reveal_js}</script>\n"
+        f"{diagram_head}"
         f"{init}"
         "</body>\n"
         "</html>\n"

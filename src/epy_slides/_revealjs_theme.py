@@ -15,6 +15,7 @@ themed.
 
 from __future__ import annotations
 
+from epy_slides._design import design_css
 from epy_slides.themes_base import Theme
 
 CALLOUT_KINDS = ("note", "tip", "warning", "important", "caution")
@@ -70,6 +71,11 @@ def reveal_css_for(theme: Theme) -> str:
   --r-code-font: {font_code};
   --r-selection-background-color: {mark_bg};
   --r-selection-color: {fg};
+  --epy-primary: {link};
+  --epy-fg: {fg};
+  --epy-bg: {bg};
+  --epy-soft: {_v(theme, "bg-soft", code_bg)};
+  --epy-border: {border};
 }}
 .reveal-viewport {{ background: {bg}; }}
 .reveal {{ font-family: {font_text}; color: {fg}; }}
@@ -110,4 +116,15 @@ def reveal_css_for(theme: Theme) -> str:
   max-height: 8%; opacity: 0.9; z-index: 10;
 }}
 {callouts}
-"""
+.reveal .slide-image-left .columns {{
+  display: grid; grid-template-columns: 42% 1fr; align-items: center;
+}}
+.reveal .slide-image-right .columns {{
+  display: grid; grid-template-columns: 1fr 42%; align-items: center;
+}}
+.reveal .slide-quote-portrait .columns {{
+  display: grid; grid-template-columns: 30% 1fr; align-items: center;
+}}
+.reveal .slide-image-left img, .reveal .slide-image-right img,
+.reveal .slide-quote-portrait img {{ width: 100%; border-radius: 8px; }}
+""" + design_css(theme, scope=".reveal ")

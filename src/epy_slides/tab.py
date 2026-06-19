@@ -532,7 +532,8 @@ class MarkdownTab(QWidget):
 
             self.view.page().runJavaScript(
                 "window._reveal_done === true && "
-                "window._mathjax_done === true",
+                "window._mathjax_done === true && "
+                "window._diagrams_done === true",
                 handle,
             )
 

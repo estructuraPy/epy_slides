@@ -19,7 +19,11 @@ from pathlib import Path
 
 import pypandoc
 
-from epy_slides.slide_md import expand_for_pptx, expand_for_revealjs
+from epy_slides.slide_md import (
+    diagram_engines,
+    expand_for_pptx,
+    expand_for_revealjs,
+)
 from epy_slides.snippets import parse_front_matter
 from epy_slides.template import build_reveal_document
 
@@ -99,6 +103,7 @@ def render_revealjs(
         theme_css=theme_css,
         for_export=for_export,
         continuous=continuous,
+        diagrams=frozenset(diagram_engines(source)),
     )
 
 

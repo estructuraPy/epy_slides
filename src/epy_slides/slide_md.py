@@ -74,6 +74,55 @@ def _heading_with_layout(hashes: str, rest: str, layout: str) -> str:
     return f"{hashes} {rest} {{{added}}}"
 
 
+_MERMAID_FENCE_RE = re.compile(
+    r"^[ \t]*`{3,}[ \t]*\{?\.?mermaid[^\n}]*\}?[ \t]*\n(?P<body>.*?)\n"
+    r"[ \t]*`{3,}[ \t]*$",
+    re.MULTILINE | re.DOTALL,
+)
+_NOMNOML_FENCE_RE = re.compile(
+    r"^[ \t]*`{3,}[ \t]*\{?\.?nomnoml[^\n}]*\}?[ \t]*\n(?P<body>.*?)\n"
+    r"[ \t]*`{3,}[ \t]*$",
+    re.MULTILINE | re.DOTALL,
+)
+
+
+def _diagram_pre(body: str, cls: str) -> str:
+    """Wrap a diagram definition in a raw-HTML ``<pre>`` of class *cls*.
+
+    The text is HTML-escaped so characters like ``<`` (UML, DOT edges)
+    survive; the browser decodes ``textContent`` before the diagram engine
+    reads it.
+    """
+    esc = (
+        body.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    )
+    return f'\n```{{=html}}\n<pre class="{cls}">\n{esc}\n</pre>\n```\n'
+
+
+def expand_diagrams(source: str) -> str:
+    """Convert ```mermaid / ```dot fences to raw-HTML diagram placeholders.
+
+    The browser-side engines (Mermaid, nomnoml) render these ``<pre>``
+    elements at load time.
+    """
+    source = _MERMAID_FENCE_RE.sub(
+        lambda m: _diagram_pre(m.group("body"), "mermaid"), source
+    )
+    return _NOMNOML_FENCE_RE.sub(
+        lambda m: _diagram_pre(m.group("body"), "nomnoml"), source
+    )
+
+
+def diagram_engines(source: str) -> set[str]:
+    """Return the diagram engines used in *source* (mermaid / nomnoml)."""
+    engines: set[str] = set()
+    if _MERMAID_FENCE_RE.search(source):
+        engines.add("mermaid")
+    if _NOMNOML_FENCE_RE.search(source):
+        engines.add("nomnoml")
+    return engines
+
+
 def expand_for_revealjs(source: str) -> str:
     """Rewrite layout directives into reveal section classes.
 
@@ -82,6 +131,7 @@ def expand_for_revealjs(source: str) -> str:
     Pandoc emits the class on the reveal ``<section>``. Orphan directives
     are dropped. Everything else passes through untouched.
     """
+    source = expand_diagrams(source)
     out: list[str] = []
     in_fence = False
     last_heading_idx = -1
