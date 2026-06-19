@@ -837,6 +837,7 @@ class SlideWindow(QMainWindow):
             title=title,
             theme_css=reveal_css_for(self._current_theme),
             for_export=True,
+            continuous=True,
         )
         target.write_text(html, encoding="utf-8")
         self.statusBar().showMessage(f"Saved HTML: {target}", 3000)

@@ -58,6 +58,7 @@ def render_revealjs(
     title: str = "epy_slides",
     theme_css: str = "",
     for_export: bool = False,
+    continuous: bool = False,
 ) -> str:
     """Render slide Markdown ``source`` to a self-contained reveal.js deck.
 
@@ -69,6 +70,9 @@ def render_revealjs(
         title: Fallback ``<title>``; overridden by ``title:`` front matter.
         theme_css: Reveal theme CSS for the active visual theme.
         for_export: Tweaks the deck for export (no on-screen chrome).
+        continuous: Render the deck in reveal's scroll view — one
+            continuous scrollable page instead of discrete slides. Used
+            for the HTML export.
 
     Returns:
         A complete, self-contained HTML5 reveal.js document.
@@ -94,6 +98,7 @@ def render_revealjs(
         metadata=metadata,
         theme_css=theme_css,
         for_export=for_export,
+        continuous=continuous,
     )
 
 

@@ -148,14 +148,21 @@ def reveal_config(
     width: int,
     height: int,
     for_export: bool,
+    continuous: bool = False,
 ) -> dict[str, object]:
-    """Build the ``Reveal.initialize`` config object for a deck."""
+    """Build the ``Reveal.initialize`` config object for a deck.
+
+    When ``continuous`` is set the deck renders in reveal's scroll view —
+    every slide flows top-to-bottom as one scrollable page instead of
+    discrete, separately navigated slides. Used for the HTML export so a
+    shared deck reads like a continuous web page.
+    """
     transition = (metadata.get("transition") or "slide").strip().lower()
     valid = {"none", "fade", "slide", "convex", "concave", "zoom"}
     if transition not in valid:
         transition = "slide"
     slide_number = is_truthy(metadata.get("slide-number"))
-    return {
+    config: dict[str, object] = {
         "width": width,
         "height": height,
         "margin": 0.04,
@@ -170,6 +177,12 @@ def reveal_config(
         "pdfMaxPagesPerSlide": 1,
         "pdfSeparateFragments": False,
     }
+    if continuous:
+        config["view"] = "scroll"
+        config["scrollSnap"] = False
+        config["controls"] = False
+        config["progress"] = False
+    return config
 
 
 def build_reveal_document(
@@ -180,6 +193,7 @@ def build_reveal_document(
     theme_css: str = "",
     *,
     for_export: bool = False,
+    continuous: bool = False,
 ) -> str:
     """Assemble a self-contained reveal.js deck around Pandoc's sections.
 
@@ -195,6 +209,9 @@ def build_reveal_document(
             (see :func:`epy_slides._revealjs_theme.reveal_css_for`).
         for_export: Tweaks the reveal config for a clean export (no
             controls/progress chrome).
+        continuous: Render the deck in reveal's scroll view — one
+            continuous scrollable page instead of discrete slides. Used
+            by the HTML export.
 
     Returns:
         A complete, self-contained HTML5 reveal.js document.
@@ -202,7 +219,8 @@ def build_reveal_document(
     meta = metadata or {}
     width, height = slide_dimensions(meta)
     config = reveal_config(
-        meta, width=width, height=height, for_export=for_export
+        meta, width=width, height=height,
+        for_export=for_export, continuous=continuous,
     )
     reset_css = _reveal_text("dist", "reset.css")
     reveal_css = _reveal_text("dist", "reveal.css")

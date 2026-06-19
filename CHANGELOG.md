@@ -4,6 +4,18 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **HTML export is now continuous.** The deck renders as a reveal.js scroll
+  view — one continuous scrollable page — instead of a click-through
+  slideshow. The PDF and PowerPoint exports keep their per-slide pagination.
+
+### Added
+- `examples/empire_state_building/` — a feature-complete demo deck (every
+  layout and content block) with a `render_all_themes.py` harness that
+  exports HTML + PPTX + PDF per theme.
+
 ## [0.1.0] — 2026-06-18
 
 Initial release. `epy_slides` is a desktop Markdown slide editor: one Markdown
