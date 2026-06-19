@@ -1,0 +1,45 @@
+# Changelog
+
+All notable changes to `epy_slides` are documented here.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.1.0] — 2026-06-18
+
+Initial release. `epy_slides` is a desktop Markdown slide editor: one Markdown
+source renders live as a reveal.js deck and exports to PDF, HTML and PowerPoint.
+
+### Authoring
+- Multi-tab editor (PySide6) with a live **reveal.js** preview; slides are
+  separated by `## ` headings.
+- **New Slide** layout picker (*Slides ▸ New slide…*) with predefined layouts:
+  section divider, title + bullets, two columns, comparison, image + caption,
+  full-bleed image, quote, code and blank.
+- **Content** blocks inserted from dialogs: bullet list (optionally revealed
+  incrementally), two columns, quote, speaker notes, image, figure, table,
+  LaTeX equation, code block, callouts and checklist.
+- **Presentation properties** form writes the YAML front matter (title block,
+  theme, aspect ratio, transition, slide numbers, footer, logo, watermark,
+  copyright).
+
+### Export
+- **PDF** via reveal.js print mode — one slide per landscape page (16:9 or 4:3),
+  with the document metadata and copyright embedded and an optional grayscale
+  watermark.
+- **HTML** — a single self-contained reveal.js file that works offline.
+- **PowerPoint (.pptx)** via Pandoc, with a per-theme reference deck so the
+  exported slides carry the theme's colours and fonts.
+
+### Appearance
+- Nine bundled themes plus a **theme editor** for custom ones; the active theme
+  drives the preview and every export.
+- Bilingual interface (English / Spanish), switchable live from
+  *View ▸ Language*.
+- Appearance **templates** capture theme + aspect ratio + transition + footer +
+  logo + watermark + copyright for reuse.
+
+### Packaging
+- Windows (`.exe`, per-user) and Ubuntu (`.deb`, PEP 668-safe virtualenv)
+  installers, with a CI workflow that publishes a GitHub Release on a `v*` tag.
+- reveal.js (MIT) and MathJax are bundled; PDF stamping uses pypdf + reportlab +
+  Pillow (no AGPL dependencies).
