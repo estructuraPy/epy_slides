@@ -286,6 +286,27 @@ def _diagram_assets(diagrams: frozenset[str]) -> tuple[str, list[str]]:
     return head, inits
 
 
+# Restores the slide the preview was showing before a re-render. The live
+# preview reloads the whole deck on every edit, which would otherwise reset
+# reveal to slide 0; the editor appends ``#epypos=v:<h>.<v>`` to the preview
+# URL and this hook navigates there once reveal is ready. Export URLs carry
+# no such hash, so it is a no-op there.
+_RESTORE_FN = (
+    "window._epyRestore = function () {\n"
+    "  try {\n"
+    "    var m = (location.hash || '').match(/epypos=([^&]+)/);\n"
+    "    if (!m) return;\n"
+    "    var val = decodeURIComponent(m[1]);\n"
+    "    var d = window._epyDeck;\n"
+    "    if (val.charAt(0) === 'v' && d && d.slide) {\n"
+    "      var p = val.slice(2).split('.');\n"
+    "      d.slide(parseInt(p[0], 10) || 0, parseInt(p[1], 10) || 0);\n"
+    "    }\n"
+    "  } catch (e) {}\n"
+    "};\n"
+)
+
+
 def build_reveal_document(
     body: str,
     base_dir: Path | None,
@@ -335,12 +356,15 @@ def build_reveal_document(
     diagram_head, diagram_inits = _diagram_assets(diagrams)
     init = (
         "<script>\n"
-        "document.addEventListener('DOMContentLoaded', function () {\n"
+        + _RESTORE_FN
+        + "document.addEventListener('DOMContentLoaded', function () {\n"
         "  function initDeck() {\n"
         "    var deck = new Reveal(document.querySelector('.reveal'), "
         + json.dumps(config) + ");\n"
-        "    deck.initialize()"
-        ".then(function () { window._reveal_done = true; });\n"
+        "    window._epyDeck = deck;\n"
+        "    deck.initialize().then(function () {\n"
+        "      window._reveal_done = true; window._epyRestore();\n"
+        "    });\n"
         "  }\n"
         "  window._diagrams_done = false;\n"
         "  Promise.all([" + ", ".join(diagram_inits) + "])"

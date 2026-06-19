@@ -54,6 +54,21 @@ UNTITLED = "untitled.md"
 _EXPORT_TIMEOUT_MS = 60_000
 _EXPORT_POLL_MS = 100
 
+# Reads the slide reveal is showing so the next preview render can return to
+# it (see ``_RESTORE_FN`` in template.py). Returns "" before reveal exists.
+_CAPTURE_POS_JS = (
+    "(function () {"
+    "  try {"
+    "    var d = window._epyDeck;"
+    "    if (d && d.getIndices) {"
+    "      var i = d.getIndices();"
+    "      return 'epypos=v:' + (i.h || 0) + '.' + (i.v || 0);"
+    "    }"
+    "  } catch (e) {}"
+    "  return '';"
+    "})()"
+)
+
 
 def next_label_suffix(text: str, kind: str) -> str:
     """Return the next sequential integer suffix for ``kind`` labels.
@@ -111,7 +126,7 @@ class MarkdownTab(QWidget):
         self._render_timer = QTimer(self)
         self._render_timer.setSingleShot(True)
         self._render_timer.setInterval(RENDER_DEBOUNCE_MS)
-        self._render_timer.timeout.connect(self._render_now)
+        self._render_timer.timeout.connect(self._render_scheduled)
 
         self.editor.textChanged.connect(self._on_text_changed)
 
@@ -191,7 +206,8 @@ class MarkdownTab(QWidget):
     def set_theme_css(self, css: str) -> None:
         """Update the preview's reveal theme CSS and re-render."""
         self._theme_css = css
-        self._render_now()
+        # Same deck, only the theme changed — keep the current slide.
+        self._render_now(preserve=True)
 
     # --------------------------------------------------- slide blocks
 
@@ -605,13 +621,22 @@ class MarkdownTab(QWidget):
             self._set_dirty(True)
         self._render_timer.start()
 
-    def _render_now(self) -> None:
+    def _render_scheduled(self) -> None:
+        """Debounced re-render after an edit; keeps the current slide."""
+        self._render_now(preserve=True)
+
+    def _render_now(self, *, preserve: bool = False) -> None:
         """Render the buffer into the preview via a temp ``file://`` URL.
 
         The deck embeds reveal.js and the ~2 MB MathJax bundle inline, so
         ``setHtml`` (capped at 2 MB) would truncate it; writing to a temp
         file and using ``view.load`` removes the cap. The ``<base href>``
         still points at the document directory so relative images resolve.
+
+        When ``preserve`` is set (an edit or a theme change to the same
+        deck), the slide reveal is currently showing is captured and
+        re-applied after the reload, so the preview does not jump back to
+        the first slide on every keystroke.
         """
         text = self.editor.toPlainText()
         base_dir = self._path.parent if self._path is not None else None
@@ -625,7 +650,21 @@ class MarkdownTab(QWidget):
             )
         preview_path = self._preview_tmp_dir / "preview.html"
         preview_path.write_text(html, encoding="utf-8")
-        self.view.load(QUrl.fromLocalFile(str(preview_path.resolve())))
+        url = QUrl.fromLocalFile(str(preview_path.resolve()))
+        if preserve:
+            self.view.page().runJavaScript(
+                _CAPTURE_POS_JS,
+                lambda pos: self._load_preview(url, pos),
+            )
+        else:
+            self._load_preview(url, None)
+
+    def _load_preview(self, url: QUrl, pos: object) -> None:
+        """Load ``url`` into the preview, optionally with a restore hash."""
+        if isinstance(pos, str) and pos:
+            url = QUrl(url)
+            url.setFragment(pos)
+        self.view.load(url)
 
     def cleanup_preview_tmp(self) -> None:
         """Delete the temp dir backing the live preview (call on close)."""

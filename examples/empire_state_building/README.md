@@ -35,8 +35,9 @@ WebEngine; on a headless machine set `QT_QPA_PLATFORM=offscreen`.
 
 One Markdown source, three formats:
 
-- The **HTML** export is a continuous, scrollable web page — not a click-through
-  slideshow — so it reads naturally when shared as a link.
+- The **HTML** export is a standalone reveal.js slideshow — arrow keys
+  navigate, `F` goes full screen, `S` opens the speaker view — so it presents
+  like a deck when shared as a link.
 - The **PDF** keeps the slide pagination (one slide per page) for printing.
 - The **PPTX** opens in PowerPoint with the standard slide layouts and the
   theme's colours and fonts. Mermaid/nomnoml diagrams and the display equation

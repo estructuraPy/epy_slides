@@ -871,13 +871,17 @@ class SlideWindow(QMainWindow):
         text = tab.editor.toPlainText()
         base_dir = tab.path.parent if tab.path is not None else None
         title = tab.path.name if tab.path is not None else "untitled"
+        # epy_slides is a *presentation* tool: the HTML export is a real
+        # reveal.js slideshow (arrow-key navigation, F for full screen,
+        # S for speaker notes), not a continuous scroll page — that
+        # continuous mode is epy_mdr's job (a web document).
         html = render_revealjs(
             text,
             base_dir=base_dir,
             title=title,
             theme_css=reveal_css_for(self._current_theme),
             for_export=True,
-            continuous=True,
+            continuous=False,
         )
         target.write_text(html, encoding="utf-8")
         self.statusBar().showMessage(f"Saved HTML: {target}", 3000)

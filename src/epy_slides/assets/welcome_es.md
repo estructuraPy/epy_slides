@@ -204,7 +204,7 @@ estampada.
 :::
 ::: {.card}
 #### HTML
-Una página web continua y desplazable — natural para compartir como enlace.
+Una presentación reveal.js independiente — las flechas navegan, `F` pantalla completa.
 :::
 ::: {.card}
 #### PowerPoint

@@ -63,6 +63,15 @@ def reveal_css_for(theme: Theme) -> str:
   --r-background-color: {bg};
   --r-main-font: {font_text};
   --r-main-color: {fg};
+  /* A 960x540 slide is shorter than reveal's default canvas, so its 42px
+     base font overflows content-rich slides off the page in the PDF.
+     A smaller base plus tighter heading/paragraph spacing (below) keeps a
+     heading + paragraph + equation + callout slide within one slide. */
+  --r-main-font-size: 32px;
+  --r-heading1-size: 2.0em;
+  --r-heading2-size: 1.5em;
+  --r-heading3-size: 1.2em;
+  --r-block-margin: 16px;
   --r-heading-font: {font_head};
   --r-heading-color: {heading};
   --r-heading-font-weight: {h_weight};
@@ -77,6 +86,15 @@ def reveal_css_for(theme: Theme) -> str:
   --epy-soft: {_v(theme, "bg-soft", code_bg)};
   --epy-border: {border};
 }}
+/* Tighten vertical rhythm so dense slides fit the page in the PDF. */
+.reveal h1, .reveal h2 {{ margin: 0 0 0.4em; }}
+.reveal h3, .reveal h4 {{ margin: 0 0 0.3em; }}
+.reveal p {{ margin: 0.4em 0; }}
+.reveal .callout-note, .reveal .callout-tip, .reveal .callout-warning,
+.reveal .callout-important, .reveal .callout-caution {{
+  padding: 0.4em 0.7em; margin: 0.45em 0;
+}}
+.reveal mjx-container[display="true"] {{ margin: 0.5em 0; }}
 .reveal-viewport {{ background: {bg}; }}
 .reveal {{ font-family: {font_text}; color: {fg}; }}
 .reveal h1, .reveal h2, .reveal h3,
@@ -102,6 +120,18 @@ def reveal_css_for(theme: Theme) -> str:
 .reveal mark {{ background: {mark_bg}; color: {fg}; }}
 .reveal section img {{
   border: none; box-shadow: none; background: transparent;
+}}
+/* Keep any image within the slide so nothing spills past the page edge in
+   the PDF: cap the height and let object-fit preserve the aspect ratio even
+   when an explicit width would otherwise make the image too tall. */
+.reveal .slides section img {{
+  max-width: 100%; max-height: 62vh; object-fit: contain;
+}}
+.reveal .slides section .slide-image-left img,
+.reveal .slides section .slide-image-right img {{ max-height: 70vh; }}
+/* A full-bleed background image must cover, not overflow. */
+.reveal .slides section.slide-image-fullbleed img {{
+  max-height: 100vh; width: 100%; object-fit: cover;
 }}
 .reveal .columns {{
   display: flex; flex-direction: row; gap: 1.2em; align-items: flex-start;

@@ -2,8 +2,9 @@
 
 From the single Markdown deck, each theme is exported to three formats:
 
-  * **HTML** — a continuous reveal.js scroll view (a shareable web page,
-    not a click-through slideshow).
+  * **HTML** — a standalone reveal.js slideshow (arrow-key navigation,
+    F for full screen, S for speaker notes) — a presentation, not a
+    continuous scroll page.
   * **PPTX** — PowerPoint via Pandoc, using the per-theme reference deck so
     the slides carry the theme's colours and fonts.
   * **PDF**  — reveal.js print mode, one slide per landscape page, with the
@@ -98,7 +99,7 @@ class SlideExporter:
 
         html = render_revealjs(
             self.source, base_dir=ROOT, theme_css=css,
-            for_export=True, continuous=True,
+            for_export=True, continuous=False,
         )
         html_path = OUT_DIR / f"empire_state_{self.theme_id}.html"
         html_path.write_text(html, encoding="utf-8")

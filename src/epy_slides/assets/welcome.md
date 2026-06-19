@@ -203,7 +203,7 @@ One slide per landscape page, with metadata and the watermark stamped in.
 :::
 ::: {.card}
 #### HTML
-A continuous, scrollable web page — natural to share as a link.
+A standalone reveal.js slideshow — arrow keys navigate, `F` for full screen.
 :::
 ::: {.card}
 #### PowerPoint
