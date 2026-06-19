@@ -142,6 +142,28 @@ def _overlays(metadata: dict[str, str]) -> str:
     return "\n".join(out)
 
 
+def _watermark_css(metadata: dict[str, str]) -> str:
+    """Return CSS painting a faint grayscale watermark behind every slide.
+
+    Restricted to screen media so it shows live in the preview and the HTML
+    export; the PDF export stamps its own watermark via ``_pdf_footer`` so
+    it prints reliably on every page.
+    """
+    watermark = (metadata.get("watermark") or "").strip()
+    if not watermark:
+        return ""
+    src = html.escape(watermark, quote=True)
+    return (
+        "@media screen {\n"
+        ".reveal .slides section::after {\n"
+        '  content: ""; position: absolute; inset: 0;\n'
+        f'  background: url("{src}") center / 55% no-repeat;\n'
+        "  opacity: 0.10; filter: grayscale(1);\n"
+        "  pointer-events: none; z-index: -1;\n"
+        "}\n}\n"
+    )
+
+
 def reveal_config(
     metadata: dict[str, str],
     *,
@@ -248,6 +270,7 @@ def build_reveal_document(
         f"{reset_css}\n{reveal_css}\n{base_theme}\n"
         ".reveal aside.notes { display: none; }\n"
         f"{theme_css}\n"
+        f"{_watermark_css(meta)}"
         "</style>\n"
         f"{_MATHJAX_CONFIG}\n"
         f"{_load_mathjax_script()}\n"

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.resources
+import shutil
 import sys
 from pathlib import Path
 
@@ -784,16 +785,24 @@ class SlideWindow(QMainWindow):
         dialog = PresentationPropertiesDialog(self, meta)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
+        updates = dialog.updates()
         updated = text
-        for field, value, raw in dialog.updates():
+        for field, value, raw in updates:
+            # Copy a picked logo / watermark into the project so it travels
+            # with the deck and resolves in the preview and every export.
+            if field in ("logo", "watermark") and value:
+                value = self._localize_asset(tab, value)
             updated = snippets.set_metadata_field(
                 updated, field, value, raw=raw
             )
         if updated != text:
             self._replace_buffer(tab, updated)
+            # Repaint the preview immediately so title slide, logo and
+            # watermark reflect the new properties without waiting.
+            tab.set_theme_css(reveal_css_for(self._current_theme))
         # A theme change in the form should also repaint the live preview.
         new_theme = next(
-            (v for f, v, _ in dialog.updates() if f == "theme"), None
+            (v for f, v, _ in updates if f == "theme"), None
         )
         if new_theme and new_theme in themes.THEMES:
             self._apply_theme(new_theme)
@@ -807,6 +816,25 @@ class SlideWindow(QMainWindow):
         cursor.select(cursor.SelectionType.Document)
         cursor.insertText(new_text)
         cursor.endEditBlock()
+
+    @staticmethod
+    def _localize_asset(tab: MarkdownTab, value: str) -> str:
+        """Copy a picked image into the deck's ``figures/`` directory.
+
+        Returns a project-relative path (``figures/<name>``) so the logo or
+        watermark travels with the deck and resolves in the preview and
+        every export. Values that are already relative, missing on disk, or
+        belong to an unsaved deck are returned unchanged.
+        """
+        src = Path(value)
+        if tab.path is None or not src.is_absolute() or not src.is_file():
+            return value
+        figures = tab.path.parent / "figures"
+        figures.mkdir(parents=True, exist_ok=True)
+        dst = figures / src.name
+        if src.resolve() != dst.resolve() and not dst.exists():
+            shutil.copy2(str(src), str(dst))
+        return f"figures/{dst.name}"
 
     # ----------------------------------------------- export helpers
 
