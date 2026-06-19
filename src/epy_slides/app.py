@@ -355,6 +355,15 @@ class SlideWindow(QMainWindow):
             self.callout_actions.append(act)
         self.callout_actions[0].setShortcut(QKeySequence("Ctrl+Shift+C"))
 
+        self.act_diagram_mermaid = QAction("Diagram: Mermaid", self)
+        self.act_diagram_mermaid.triggered.connect(
+            lambda: self._on_active_tab("insert_diagram", "mermaid")
+        )
+        self.act_diagram_nomnoml = QAction("Diagram: nomnoml (UML)", self)
+        self.act_diagram_nomnoml.triggered.connect(
+            lambda: self._on_active_tab("insert_diagram", "nomnoml")
+        )
+
     def _build_menu(self) -> None:
         """Build the content menus reused by the toolbar dropdowns."""
         self.file_menu = QMenu("&File", self)
@@ -400,6 +409,9 @@ class SlideWindow(QMainWindow):
         self.callout_sub = self.content_menu.addMenu("Callout")
         for act in self.callout_actions:
             self.callout_sub.addAction(act)
+        self.diagram_sub = self.content_menu.addMenu("Diagram")
+        self.diagram_sub.addAction(self.act_diagram_mermaid)
+        self.diagram_sub.addAction(self.act_diagram_nomnoml)
         self.content_menu.addSeparator()
         self.content_menu.addAction(self.act_notes)
 

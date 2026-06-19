@@ -364,6 +364,27 @@ _ES: dict[str, str] = {
     "Footer:": "Pie de página:",
     "Logo:": "Logo:",
     "Copyright:": "Derechos de autor:",
+    # --- composition layouts ---
+    "Big numbers": "Cifras grandes",
+    "A row of large key figures.": "Una fila de cifras clave grandes.",
+    "A numbered agenda / outline.": "Una agenda / índice numerado.",
+    "Cards": "Tarjetas",
+    "A grid of titled cards.": "Una grilla de tarjetas con título.",
+    "Timeline": "Línea de tiempo",
+    "A vertical timeline of milestones.":
+        "Una línea de tiempo vertical de hitos.",
+    "Image left": "Imagen a la izquierda",
+    "Image left, content right.":
+        "Imagen a la izquierda, contenido a la derecha.",
+    "Image right": "Imagen a la derecha",
+    "Content left, image right.":
+        "Contenido a la izquierda, imagen a la derecha.",
+    "Quote + portrait": "Cita + retrato",
+    "A quote beside a portrait.": "Una cita junto a un retrato.",
+    # --- diagrams ---
+    "Diagram": "Diagrama",
+    "Diagram: Mermaid": "Diagrama: Mermaid",
+    "Diagram: nomnoml (UML)": "Diagrama: nomnoml (UML)",
 }
 
 

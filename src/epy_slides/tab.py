@@ -242,6 +242,19 @@ class MarkdownTab(QWidget):
             return
         self._insert_block(dialog.build_markdown())
 
+    def insert_diagram(self, engine: str = "mermaid") -> None:
+        """Insert a diagram code block (Mermaid or nomnoml) at the caret."""
+        skeletons = {
+            "mermaid": (
+                "```mermaid\nflowchart LR\n"
+                "  A[Start] --> B[Build] --> C[Ship]\n```"
+            ),
+            "nomnoml": (
+                "```nomnoml\n[First] -> [Second]\n[Second] -> [Third]\n```"
+            ),
+        }
+        self._insert_block(skeletons.get(engine, skeletons["mermaid"]))
+
     # --------------------------------------------- reused content blocks
 
     def _next_label_suffix(self, kind: str) -> str:
