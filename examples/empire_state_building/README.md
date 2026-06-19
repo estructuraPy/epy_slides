@@ -40,6 +40,7 @@ One Markdown source, three formats:
   like a deck when shared as a link.
 - The **PDF** keeps the slide pagination (one slide per page) for printing.
 - The **PPTX** opens in PowerPoint with the standard slide layouts and the
-  theme's colours and fonts. Mermaid/nomnoml diagrams and the display equation
-  are reveal-native; in PPTX they degrade to their code/text (a documented
-  limitation of the PowerPoint writer).
+  theme's colours and fonts. Mermaid/nomnoml diagrams are rasterized to themed
+  images and the design components become native tables/blocks, so the slides
+  keep their look; the display equation is the one element the PowerPoint
+  writer renders as text.

@@ -171,8 +171,8 @@ flowchart TD
 
 ::: {.notes}
 Both diagram engines read the active theme's colours, so a diagram always
-matches the deck. They render in HTML and PDF; in PowerPoint they fall back
-to their source text.
+matches the deck. They render in HTML and PDF, and the PowerPoint export
+rasterizes each one to a themed image so the slide keeps the picture.
 :::
 
 ## Themes
@@ -230,6 +230,37 @@ Standard slide layouts with the theme's colours, fonts and speaker notes.
 - Export to PPTX for PowerPoint
 :::
 ::::
+
+## Python API — render without the app
+<!-- layout: code -->
+
+```python
+from pathlib import Path
+from epy_slides.renderer import render_revealjs, export_pptx
+from epy_slides import themes
+from epy_slides._revealjs_theme import reveal_css_for
+
+deck = Path("talk.md").read_text(encoding="utf-8")
+css = reveal_css_for(themes.get("corporate"))
+
+# Standalone reveal.js slideshow (HTML)
+html = render_revealjs(deck, theme_css=css, for_export=True)
+Path("talk.html").write_text(html, encoding="utf-8")
+
+# PowerPoint, using the theme's reference deck
+export_pptx(deck, Path("talk.pptx"), theme_id="corporate")
+```
+
+## Python API — themes and PDF
+<!-- layout: title-content -->
+
+- `themes.THEMES` lists the nine theme ids; `reveal_css_for(theme)` builds
+  the deck CSS from any of them
+- The **PDF** export drives Qt WebEngine (reveal's print mode), so it needs
+  a `QApplication`
+- The reference script
+  `examples/empire_state_building/render_all_themes.py` renders one deck to
+  **HTML + PPTX + PDF** for every theme — copy it as a starting point
 
 ## You are ready
 <!-- layout: quote -->

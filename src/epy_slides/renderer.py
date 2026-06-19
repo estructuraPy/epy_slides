@@ -14,11 +14,18 @@ The conversion is delegated to Pandoc (bundled by ``pypandoc-binary``);
 
 from __future__ import annotations
 
+import shutil
+import tempfile
 from importlib import resources
 from pathlib import Path
 
 import pypandoc
 
+from epy_slides._media_export import (
+    collect_diagrams,
+    render_diagram_pngs,
+    substitute_diagram_images,
+)
 from epy_slides.slide_md import (
     diagram_engines,
     expand_for_pptx,
@@ -145,7 +152,25 @@ def export_pptx(
     """
     metadata = parse_front_matter(source)
     resolved_theme = theme_id or metadata.get("theme") or "corporate"
-    prepared = expand_for_pptx(source)
+
+    # PowerPoint cannot draw Mermaid/nomnoml, so render each diagram to a
+    # themed PNG (best-effort; falls back to the source text when no Qt is
+    # available) and swap the fences for image links before the conversion.
+    prepared_source = source
+    diag_tmp: Path | None = None
+    diagrams = collect_diagrams(source)
+    if diagrams:
+        from epy_slides import themes as _themes  # noqa: PLC0415
+        from epy_slides._revealjs_theme import (  # noqa: PLC0415
+            reveal_css_for,
+        )
+
+        diag_tmp = Path(tempfile.mkdtemp(prefix="epy_slides_pptx_diag_"))
+        css = reveal_css_for(_themes.get(resolved_theme))
+        pngs = render_diagram_pngs(diagrams, diag_tmp, theme_css=css)
+        prepared_source = substitute_diagram_images(source, pngs)
+
+    prepared = expand_for_pptx(prepared_source)
     extra_args = ["--slide-level=2"]
     if base_dir is not None:
         extra_args.append(f"--resource-path={base_dir}")
@@ -159,10 +184,14 @@ def export_pptx(
         "on",
     }:
         extra_args.append("--incremental")
-    pypandoc.convert_text(
-        prepared,
-        to="pptx",
-        format=PANDOC_FORMAT,
-        outputfile=str(target),
-        extra_args=extra_args,
-    )
+    try:
+        pypandoc.convert_text(
+            prepared,
+            to="pptx",
+            format=PANDOC_FORMAT,
+            outputfile=str(target),
+            extra_args=extra_args,
+        )
+    finally:
+        if diag_tmp is not None:
+            shutil.rmtree(diag_tmp, ignore_errors=True)

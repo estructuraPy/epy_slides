@@ -197,13 +197,152 @@ def _callout_to_blockquote(
     return out, j - start
 
 
+# Design-component fenced divs that have no native PowerPoint/Word
+# equivalent. ``stats`` and ``cards`` are rewritten to native structures
+# below; the rest are simply unwrapped so their inner list/text survives.
+_COMPONENT_OPEN_RE = re.compile(
+    r"^[ \t]*:::+[ \t]*\{[^}]*\.(?P<cls>"
+    r"stats|stat|cards|card|timeline|agenda|lead|muted|accent)\b[^}]*\}"
+    r"[ \t]*$"
+)
+_BOLD_RE = re.compile(r"\*\*(?P<text>.+?)\*\*")
+_STAT_LABEL_RE = re.compile(r"\[(?P<text>[^\]]+)\]\{\.stat-label\}")
+_CARD_HEAD_RE = re.compile(r"^[ \t]*#{1,6}[ \t]+(?P<text>.+?)[ \t]*$")
+
+
+def _collect_div(lines: list[str], start: int) -> tuple[list[str], int]:
+    """Return the inner lines of the fenced div opened at ``start``.
+
+    ``start`` indexes the opening ``::: {...}`` line. Nested divs are kept
+    in the returned body. The second value is the index just past the
+    matching close fence.
+    """
+    body: list[str] = []
+    depth = 1
+    j = start + 1
+    while j < len(lines):
+        line = lines[j]
+        if _DIV_OPEN_RE.match(line):
+            depth += 1
+            body.append(line)
+        elif _DIV_CLOSE_RE.match(line):
+            depth -= 1
+            if depth == 0:
+                return body, j + 1
+            body.append(line)
+        else:
+            body.append(line)
+        j += 1
+    return body, j
+
+
+def _stats_to_table(inner: list[str]) -> list[str]:
+    """Render a ``.stats`` block as a 2-row pipe table (numbers / labels)."""
+    numbers: list[str] = []
+    labels: list[str] = []
+    i = 0
+    while i < len(inner):
+        if _COMPONENT_OPEN_RE.match(inner[i]) and ".stat" in inner[i]:
+            body, i = _collect_div(inner, i)
+            num = next(
+                (m.group("text") for m in map(_BOLD_RE.search, body) if m),
+                "",
+            )
+            label = ""
+            for line in body:
+                lm = _STAT_LABEL_RE.search(line)
+                if lm:
+                    label = lm.group("text")
+                    break
+                stripped = line.strip()
+                if stripped and not _BOLD_RE.fullmatch(stripped):
+                    label = stripped
+            numbers.append(f"**{num}**" if num else "")
+            labels.append(label)
+        else:
+            i += 1
+    if not numbers:
+        return []
+    header = "| " + " | ".join(numbers) + " |"
+    sep = "|" + "|".join([":--:"] * len(numbers)) + "|"
+    label_row = "| " + " | ".join(labels) + " |"
+    return ["", header, sep, label_row, ""]
+
+
+def _cards_to_blocks(inner: list[str]) -> list[str]:
+    """Render a ``.cards`` block as bold-titled paragraphs, one per card."""
+    out: list[str] = []
+    i = 0
+    while i < len(inner):
+        if _COMPONENT_OPEN_RE.match(inner[i]) and ".card" in inner[i]:
+            body, i = _collect_div(inner, i)
+            out.append("")
+            for line in body:
+                hm = _CARD_HEAD_RE.match(line)
+                if hm:
+                    out.append(f"**{hm.group('text')}**")
+                    out.append("")
+                else:
+                    out.append(line)
+            out.append("")
+        else:
+            i += 1
+    return out
+
+
+def simplify_components_for_export(source: str) -> str:
+    """Rewrite design components into PowerPoint/Word-friendly structures.
+
+    The theme-driven components (``.stats``, ``.cards``, ``.timeline`` …)
+    are styled with CSS that the pptx/docx writers ignore, so a raw export
+    would flatten them to anonymous text. This keeps their meaning: big
+    stats become a numbers-over-labels table, cards become bold-titled
+    blocks, and the remaining wrappers are unwrapped so their list or text
+    survives intact. Columns are left untouched (the pptx writer maps them
+    to Two-Content layouts).
+    """
+    lines = source.splitlines()
+    out: list[str] = []
+    in_fence = False
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if _FENCE_RE.match(line):
+            in_fence = not in_fence
+            out.append(line)
+            i += 1
+            continue
+        if in_fence:
+            out.append(line)
+            i += 1
+            continue
+        m = _COMPONENT_OPEN_RE.match(line)
+        if m:
+            cls = m.group("cls")
+            inner, i = _collect_div(lines, i)
+            if cls == "stats":
+                out.extend(_stats_to_table(inner))
+            elif cls == "cards":
+                out.extend(_cards_to_blocks(inner))
+            else:
+                # timeline / agenda / stray .stat|.card / lead block — unwrap:
+                # keep the inner list/text, drop only this matching wrapper.
+                out.extend(inner)
+            continue
+        out.append(line)
+        i += 1
+    return "\n".join(out) + ("\n" if source.endswith("\n") else "")
+
+
 def expand_for_pptx(source: str) -> str:
     """Prepare slide Markdown for Pandoc's PowerPoint writer.
 
     Drops reveal-only constructs (layout hints, ``. . .`` pauses,
-    ``background-*`` heading attributes) and rewrites callouts to
-    bold-titled blockquotes, which the pptx writer renders cleanly.
+    ``background-*`` heading attributes), rewrites callouts to bold-titled
+    blockquotes and design components to native tables/blocks, which the
+    pptx writer renders cleanly.
     """
+    source = simplify_components_for_export(source)
     lines = source.splitlines()
     out: list[str] = []
     in_fence = False

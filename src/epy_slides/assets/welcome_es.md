@@ -170,8 +170,9 @@ flowchart TD
 
 ::: {.notes}
 Ambos motores de diagramas leen los colores del tema activo, así que un
-diagrama siempre combina con la presentación. Se renderizan en HTML y PDF;
-en PowerPoint caen a su texto fuente.
+diagrama siempre combina con la presentación. Se renderizan en HTML y PDF, y
+la exportación a PowerPoint los rasteriza a una imagen con el color del tema
+para conservar el dibujo.
 :::
 
 ## Temas
@@ -231,6 +232,38 @@ Layouts estándar con los colores, fuentes y notas del orador del tema.
 - Exporte a PPTX para PowerPoint
 :::
 ::::
+
+## API de Python — renderizar sin la app
+<!-- layout: code -->
+
+```python
+from pathlib import Path
+from epy_slides.renderer import render_revealjs, export_pptx
+from epy_slides import themes
+from epy_slides._revealjs_theme import reveal_css_for
+
+deck = Path("charla.md").read_text(encoding="utf-8")
+css = reveal_css_for(themes.get("corporate"))
+
+# Presentacion reveal.js independiente (HTML)
+html = render_revealjs(deck, theme_css=css, for_export=True)
+Path("charla.html").write_text(html, encoding="utf-8")
+
+# PowerPoint, usando la plantilla del tema
+export_pptx(deck, Path("charla.pptx"), theme_id="corporate")
+```
+
+## API de Python — temas y PDF
+<!-- layout: title-content -->
+
+- `themes.THEMES` lista los nueve ids de tema; `reveal_css_for(theme)`
+  construye el CSS de la presentación a partir de cualquiera
+- La exportación a **PDF** usa Qt WebEngine (el modo impresión de reveal),
+  así que requiere un `QApplication`
+- El script de referencia
+  `examples/empire_state_building/render_all_themes.py` renderiza una
+  presentación a **HTML + PPTX + PDF** por cada tema — cópielo como punto
+  de partida
 
 ## Ya está listo
 <!-- layout: quote -->
