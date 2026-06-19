@@ -98,10 +98,10 @@ SLIDE_SKELETONS: dict[str, str] = {
     "blank": "## TITLE\n<!-- layout: blank -->\n",
     "big-stat": (
         "## TITLE\n<!-- layout: big-stat -->\n\n"
-        ":::: stats\n"
-        "::: stat\n**42%**\n\n[first metric]{.stat-label}\n:::\n"
-        "::: stat\n**1931**\n\n[second metric]{.stat-label}\n:::\n"
-        "::: stat\n**381 m**\n\n[third metric]{.stat-label}\n:::\n"
+        ":::: {.stats}\n"
+        "::: {.stat}\n**42%**\n\n[first metric]{.stat-label}\n:::\n"
+        "::: {.stat}\n**1931**\n\n[second metric]{.stat-label}\n:::\n"
+        "::: {.stat}\n**381 m**\n\n[third metric]{.stat-label}\n:::\n"
         "::::\n"
     ),
     "agenda": (
@@ -110,10 +110,10 @@ SLIDE_SKELETONS: dict[str, str] = {
     ),
     "cards": (
         "## TITLE\n<!-- layout: cards -->\n\n"
-        ":::: cards\n"
-        "::: card\n#### Card one\n\nShort description.\n:::\n"
-        "::: card\n#### Card two\n\nShort description.\n:::\n"
-        "::: card\n#### Card three\n\nShort description.\n:::\n"
+        ":::: {.cards}\n"
+        "::: {.card}\n#### Card one\n\nShort description.\n:::\n"
+        "::: {.card}\n#### Card two\n\nShort description.\n:::\n"
+        "::: {.card}\n#### Card three\n\nShort description.\n:::\n"
         "::::\n"
     ),
     "timeline": (
