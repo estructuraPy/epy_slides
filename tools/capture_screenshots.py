@@ -195,7 +195,7 @@ def main() -> int:
     pump(app, 300)
     capture_language(app, win, "_es")
 
-    # Stale screenshots inherited from the epy_mdr clone that no longer map
+    # Stale screenshots inherited from the epy_reports clone that no longer map
     # to any epy_slides feature; remove them so the package stays honest.
     stale = [
         "dlg_checklist", "dlg_footnote", "dlg_xref", "dlg_bib",

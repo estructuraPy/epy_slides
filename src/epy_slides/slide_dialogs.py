@@ -1,6 +1,6 @@
 """Dialogs that build slide skeletons and presentation content blocks.
 
-Every dialog follows the same contract as the reused epy_mdr dialogs: it
+Every dialog follows the same contract as the reused epy_reports dialogs: it
 collects a few fields and exposes ``build_markdown()`` returning the
 Markdown snippet the editor drops at the caret. Layout skeletons use plain
 uppercase tokens (``TITLE``, ``IMAGE``…) replaced verbatim, so the

@@ -1,7 +1,7 @@
 # Example deck — The Empire State Building
 
 A feature-complete epy_slides deck about the Empire State Building, mirroring
-the `newmark` example from epy_mdr but built for **presentations**.
+the `newmark` example from epy_reports but built for **presentations**.
 
 ## Files
 

@@ -1,6 +1,6 @@
 """Presentation properties form — writes the deck's YAML front matter.
 
-Mirrors the epy_mdr Document-properties contract: the dialog is built from
+Mirrors the epy_reports Document-properties contract: the dialog is built from
 the current front matter and exposes ``updates()`` returning
 ``(field, value, raw)`` triplets the window writes back with
 ``snippets.set_metadata_field``.
