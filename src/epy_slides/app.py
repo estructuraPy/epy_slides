@@ -31,7 +31,7 @@ from epy_slides import _i18n as i18n
 from epy_slides import snippets, themes
 from epy_slides._revealjs_theme import reveal_css_for
 from epy_slides.about_dialog import _load_branding_pixmap
-from epy_slides.renderer import export_pptx, render_revealjs
+from epy_slides.renderer import CSL_STYLES, export_pptx, render_revealjs
 from epy_slides.tab import MarkdownTab
 
 APP_NAME = "epy_slides"
@@ -122,6 +122,7 @@ class SlideWindow(QMainWindow):
         self._build_format_actions()
         self._build_slide_actions()
         self._build_content_actions()
+        self._build_references_actions()
         self._build_menu()
         self._build_toolbar()
         self.menuBar().hide()
@@ -367,6 +368,37 @@ class SlideWindow(QMainWindow):
             lambda: self._on_active_tab("insert_diagram", "nomnoml")
         )
 
+    def _build_references_actions(self) -> None:
+        """Create References menu actions (citations + bibliography)."""
+        self.act_insert_citation = QAction("Insert citation...", self)
+        self.act_insert_citation.setShortcut(
+            QKeySequence("Ctrl+Shift+R")
+        )
+        self.act_insert_citation.triggered.connect(
+            self._insert_citation
+        )
+        self.act_link_bib = QAction(
+            "Link bibliography (.bib)...", self
+        )
+        self.act_link_bib.triggered.connect(self._link_bibliography)
+        self.act_new_bib_entry = QAction(
+            "New bibliography entry...", self
+        )
+        self.act_new_bib_entry.triggered.connect(self._new_bib_entry)
+
+        self.csl_group = QActionGroup(self)
+        self.csl_group.setExclusive(True)
+        self.csl_actions: dict[str, QAction] = {}
+        for key in CSL_STYLES:
+            act = QAction(key.upper(), self, checkable=True)
+            act.setData(key)
+            self.csl_group.addAction(act)
+            self.csl_actions[key] = act
+        self.csl_actions["ieee"].setChecked(True)
+        self.csl_group.triggered.connect(
+            lambda action: self._set_csl_style(action.data())
+        )
+
     def _build_menu(self) -> None:
         """Build the content menus reused by the toolbar dropdowns."""
         self.file_menu = QMenu("&File", self)
@@ -418,6 +450,16 @@ class SlideWindow(QMainWindow):
         self.content_menu.addSeparator()
         self.content_menu.addAction(self.act_notes)
 
+        self.references_menu = QMenu("&References", self)
+        self.references_menu.addAction(self.act_insert_citation)
+        self.references_menu.addSeparator()
+        self.references_menu.addAction(self.act_link_bib)
+        self.references_menu.addAction(self.act_new_bib_entry)
+        self.references_menu.addSeparator()
+        self.csl_sub = self.references_menu.addMenu("Citation style")
+        for act in self.csl_group.actions():
+            self.csl_sub.addAction(act)
+
         self.export_menu = QMenu("E&xport", self)
         self.export_menu.addAction(self.act_pdf)
         self.export_menu.addAction(self.act_export_html)
@@ -455,6 +497,7 @@ class SlideWindow(QMainWindow):
         self._add_dropdown(bar, "Text", self.text_menu)
         self._add_dropdown(bar, "Slides", self.slides_menu)
         self._add_dropdown(bar, "Content", self.content_menu)
+        self._add_dropdown(bar, "References", self.references_menu)
         self._add_dropdown(bar, "Presentation", self.presentation_menu)
         self._add_dropdown(bar, "Export", self.export_menu)
         self._add_dropdown(bar, "View", self.view_menu)
@@ -1208,6 +1251,124 @@ class SlideWindow(QMainWindow):
             path = Path(url.toLocalFile())
             if path.suffix.lower() in SUPPORTED_EXTENSIONS:
                 self.open_path(path)
+
+
+    # ----------------------------------------------- citations / bib
+
+    def _insert_citation(self) -> None:
+        """Open the citation picker and insert ``[@key]`` at the caret."""
+        from epy_slides.xref_dialog import (  # noqa: PLC0415
+            CrossRefDialog,
+        )
+
+        tab = self._current_tab()
+        if tab is None:
+            return
+        entries = tab.bib_entries()
+        if not entries:
+            QMessageBox.information(
+                self,
+                APP_NAME,
+                i18n.tr(
+                    "Link a .bib file first via "
+                    "References ▸ Link bibliography."
+                ),
+            )
+            return
+        from epy_slides.bib import BibEntry  # noqa: PLC0415
+        from epy_slides.snippets import Label  # noqa: PLC0415
+
+        bib_lookup: dict[str, BibEntry] = {
+            e.key: e for e in entries
+        }
+        labels = [
+            Label(kind="cite", name=e.key) for e in entries
+        ]
+        dialog = CrossRefDialog(
+            labels, parent=self, bib_lookup=bib_lookup
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        label = dialog.selected_label()
+        if label is None:
+            return
+        cursor = tab.editor.textCursor()
+        cursor.insertText(f"[@{label.name}]")
+        tab.editor.setFocus()
+
+    def _link_bibliography(self) -> None:
+        """File picker → write ``bibliography:`` to the front matter."""
+        tab = self._current_tab()
+        if tab is None:
+            return
+        start = (
+            str(tab.path.parent)
+            if tab.path is not None
+            else ""
+        )
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Link bibliography (.bib)",
+            start,
+            "BibTeX (*.bib);;All files (*)",
+        )
+        if not filename:
+            return
+        tab.link_bibliography(Path(filename))
+        self.statusBar().showMessage(
+            f"Linked bibliography: {Path(filename).name}", 3000
+        )
+
+    def _new_bib_entry(self) -> None:
+        """Open the entry form and append the result to the .bib file."""
+        from epy_slides.bib import (  # noqa: PLC0415
+            append_entry_to_file,
+            keys_in_file,
+        )
+        from epy_slides.bib_dialog import (  # noqa: PLC0415
+            BibEntryDialog,
+        )
+
+        tab = self._current_tab()
+        bib_path = tab.bib_path() if tab is not None else None
+        if bib_path is None:
+            QMessageBox.information(
+                self,
+                APP_NAME,
+                i18n.tr(
+                    "Link a .bib file first via "
+                    "References ▸ Link bibliography."
+                ),
+            )
+            return
+        dialog = BibEntryDialog(
+            parent=self,
+            existing_keys=keys_in_file(bib_path),
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        draft = dialog.build_draft()
+        append_entry_to_file(bib_path, draft)
+        self.statusBar().showMessage(
+            f"Added bibliography entry: @{draft.key}", 3000
+        )
+
+    def _set_csl_style(self, key: str) -> None:
+        """Write ``citation-style: <key>`` to the deck's front matter."""
+        tab = self._current_tab()
+        if tab is None:
+            return
+        text = tab.editor.toPlainText()
+        updated = snippets.set_metadata_field(
+            text, "citation-style", key
+        )
+        if updated != text:
+            self._replace_buffer(tab, updated)
+        if key in self.csl_actions:
+            self.csl_actions[key].setChecked(True)
+        self.statusBar().showMessage(
+            f"Citation style: {key.upper()}", 2000
+        )
 
 
 def _run_gui(files: list[str]) -> int:

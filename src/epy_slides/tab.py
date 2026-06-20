@@ -323,6 +323,52 @@ class MarkdownTab(QWidget):
         cursor.insertText(dialog.build_markdown())
         self.editor.setFocus()
 
+    def bib_path(self) -> Path | None:
+        """Return the .bib path declared in the front matter, if any."""
+        text = self.editor.toPlainText()
+        meta = snippets.parse_front_matter(text)
+        bib_value = meta.get("bibliography")
+        if not bib_value:
+            return None
+        candidate = Path(bib_value)
+        if not candidate.is_absolute() and self._path is not None:
+            candidate = (self._path.parent / candidate).resolve()
+        return candidate if candidate.is_file() else None
+
+    def bib_entries(self):
+        """Return parsed BibEntry list from the linked .bib, or []."""
+        from epy_slides.bib import parse_bib_file  # noqa: PLC0415
+
+        bib = self.bib_path()
+        if bib is None:
+            return []
+        return parse_bib_file(bib)
+
+    def link_bibliography(self, bib_path: Path) -> None:
+        """Write ``bibliography: <path>`` into the deck's YAML front matter.
+
+        The path is stored relative to the deck file when possible so
+        the deck stays portable; otherwise the absolute path is used.
+        """
+        if self._path is not None:
+            try:
+                rel = bib_path.relative_to(self._path.parent)
+                value = str(rel).replace("\\", "/")
+            except ValueError:
+                value = str(bib_path).replace("\\", "/")
+        else:
+            value = str(bib_path).replace("\\", "/")
+        text = self.editor.toPlainText()
+        updated = snippets.set_metadata_field(
+            text, "bibliography", value
+        )
+        if updated != text:
+            cursor = self.editor.textCursor()
+            cursor.beginEditBlock()
+            cursor.select(cursor.SelectionType.Document)
+            cursor.insertText(updated)
+            cursor.endEditBlock()
+
     def insert_code_block(self) -> None:
         """Insert a fenced Python code-block skeleton."""
         self._insert_template(snippets.CODE_BLOCK_TEMPLATE, "CODE")

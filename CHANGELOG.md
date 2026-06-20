@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   slideshow. The PDF and PowerPoint exports keep their per-slide pagination.
 
 ### Added
+- **Citation / bibliography support.** Link a `.bib` file from
+  *References ▸ Link bibliography*, insert citations with `[@key]` or
+  via *Insert citation…*, choose IEEE / APA / Chicago style. A References
+  slide is appended automatically when the deck declares `bibliography:`.
 - **Slide-layout previews.** The *New slide* picker shows a small schematic
   preview of every layout, so you choose the structure at a glance, not just
   by its name.

@@ -35,9 +35,20 @@ from epy_slides.slide_md import (
 from epy_slides.snippets import parse_front_matter
 from epy_slides.template import build_reveal_document
 
+# Citation Style Language: short names users can type in YAML
+# (``citation-style: ieee``) or pick from the References menu,
+# mapped to the bundled .csl file under ``epy_slides/assets/csl/``.
+CSL_STYLES: dict[str, str] = {
+    "ieee":    "ieee.csl",
+    "apa":     "apa.csl",
+    "chicago": "chicago-author-date.csl",
+}
+DEFAULT_CSL_STYLE = "ieee"
+
 # Pandoc input dialect: CommonMark-ish Markdown plus the Quarto-style
 # extensions the editor relies on (fenced divs for columns/notes/callouts,
 # dollar math, pipe/grid tables, fenced-code attributes, task lists…).
+# ``+citations`` enables Pandoc's citeproc ``[@key]`` syntax.
 PANDOC_FORMAT = (
     "markdown"
     "+fenced_divs"
@@ -60,6 +71,7 @@ PANDOC_FORMAT = (
     "+strikeout"
     "+subscript"
     "+superscript"
+    "+citations"
 )
 
 
@@ -70,16 +82,126 @@ PANDOC_FORMAT = (
 # page). Cards are leaf elements, so turning those sections back into divs is
 # safe and keeps them as plain content.
 _CARD_SECTION_RE = re.compile(
-    r'<section\b[^>]*\bclass="[^"]*\bcard\b[^"]*"[^>]*>(?P<inner>.*?)</section>',
+    r'<section\b[^>]*\bclass="[^"]*\bcard\b[^"]*"[^>]*>'
+    r"(?P<inner>.*?)</section>",
     re.DOTALL,
+)
+
+# Detect whether the source already has an explicit references container
+# (``{#refs}``) or a "## References" / "## Bibliography" slide so we do
+# not double-append the placeholder.
+_REFS_DIV_RE = re.compile(
+    r":::\s*\{[^}]*#refs[^}]*\}",
+    re.IGNORECASE,
+)
+_REFS_HEADING_RE = re.compile(
+    r"^#{1,6}\s+(References|Bibliography)\s*$",
+    re.MULTILINE | re.IGNORECASE,
 )
 
 
 def _cards_sections_to_divs(body: str) -> str:
     """Rewrite Pandoc's ``<section class="card">`` blocks back to divs."""
     return _CARD_SECTION_RE.sub(
-        lambda m: '<div class="card">' + m.group("inner") + "</div>", body
+        lambda m: '<div class="card">' + m.group("inner") + "</div>",
+        body,
     )
+
+
+def _resolve_doc_path(
+    value: str, base_dir: Path | None
+) -> Path | None:
+    """Resolve a path declared in YAML metadata.
+
+    ``value`` is interpreted relative to ``base_dir`` (the directory of
+    the .md file) unless it is absolute. Returns ``None`` when the
+    resolved path does not exist on disk.
+    """
+    candidate = Path(value)
+    if not candidate.is_absolute() and base_dir is not None:
+        candidate = (base_dir / candidate).resolve()
+    return candidate if candidate.is_file() else None
+
+
+def _resolve_csl(
+    csl_value: str | None, base_dir: Path | None
+) -> Path | None:
+    """Resolve a YAML ``citation-style:`` value to a .csl file.
+
+    Accepts a short name (``ieee`` / ``apa`` / ``chicago``) that maps to
+    a bundled stylesheet, a relative path to a ``.csl`` next to the
+    document, or an absolute path. ``None`` or empty selects the bundled
+    default (IEEE).
+    """
+    key = (csl_value or DEFAULT_CSL_STYLE).strip().lower()
+    if key in CSL_STYLES:
+        try:
+            anchor = resources.files("epy_slides.assets.csl")
+            target = anchor.joinpath(CSL_STYLES[key])
+            with resources.as_file(target) as path:
+                if Path(path).is_file():
+                    return Path(path)
+        except (FileNotFoundError, ModuleNotFoundError):
+            return None
+        return None
+    return _resolve_doc_path(csl_value or "", base_dir)
+
+
+def _bibliography_args(
+    metadata: dict[str, str], base_dir: Path | None
+) -> list[str]:
+    """Build the ``--citeproc`` / ``--bibliography`` Pandoc arguments.
+
+    If the YAML front matter declares ``bibliography:`` and the file
+    resolves on disk, citeproc is enabled. ``citation-style:`` is
+    optional; it selects a bundled or custom CSL stylesheet.
+    """
+    bib_value = metadata.get("bibliography")
+    if not bib_value:
+        return []
+    bib_path = _resolve_doc_path(bib_value, base_dir)
+    if bib_path is None:
+        return []
+    extra: list[str] = [
+        "--citeproc",
+        f"--bibliography={bib_path}",
+    ]
+    csl_path = _resolve_csl(
+        metadata.get("citation-style") or metadata.get("csl"),
+        base_dir,
+    )
+    if csl_path is not None:
+        extra.append(f"--csl={csl_path}")
+    return extra
+
+
+def _ensure_refs_slide(
+    source: str, metadata: dict[str, str]
+) -> str:
+    """Append a References slide when bibliography is set but absent.
+
+    Pandoc citeproc places the generated bibliography into a
+    ``<div id="refs">`` container at the *end* of the converted body.
+    For a reveal.js deck with ``--slide-level=2``, that container lands
+    AFTER the last ``</section>`` and therefore does NOT appear as a
+    slide.
+
+    Fix: if the source declares a ``bibliography:`` but has no explicit
+    ``{#refs}`` div or a ``## References`` heading, append a final
+    slide that contains the ``{#refs}`` fenced div so Pandoc places the
+    bibliography inside it — and reveal.js wraps it in a real
+    ``<section>``.
+
+    If the user already placed a ``{#refs}`` div or a References
+    heading, this function is a no-op.
+    """
+    if not metadata.get("bibliography"):
+        return source
+    if _REFS_DIV_RE.search(source):
+        return source
+    if _REFS_HEADING_RE.search(source):
+        return source
+    return source + "\n\n## References\n\n::: {#refs}\n:::\n"
 
 
 def render_revealjs(
@@ -96,6 +218,9 @@ def render_revealjs(
     Args:
         source: Slide-structured Markdown (YAML front matter + ``##``
             slides). Layout directives and fenced divs are honoured.
+            When ``bibliography:`` is set in the front matter, citeproc
+            is enabled and a References slide is appended automatically
+            (unless the source already contains one).
         base_dir: Directory used as the HTML ``<base>`` so relative image
             paths resolve.
         title: Fallback ``<title>``; overridden by ``title:`` front matter.
@@ -111,16 +236,19 @@ def render_revealjs(
     metadata = parse_front_matter(source)
     if metadata.get("title"):
         title = metadata["title"]
-    prepared = expand_for_revealjs(source)
+    prepared = _ensure_refs_slide(source, metadata)
+    prepared = expand_for_revealjs(prepared)
+    extra_args = [
+        "--slide-level=2",
+        "--highlight-style=tango",
+        "--wrap=preserve",
+    ]
+    extra_args += _bibliography_args(metadata, base_dir)
     body = pypandoc.convert_text(
         prepared,
         to="revealjs",
         format=PANDOC_FORMAT,
-        extra_args=[
-            "--slide-level=2",
-            "--highlight-style=tango",
-            "--wrap=preserve",
-        ],
+        extra_args=extra_args,
     )
     body = _cards_sections_to_divs(body)
     return build_reveal_document(
@@ -138,9 +266,9 @@ def render_revealjs(
 def _resolve_reference_pptx(theme_id: str) -> Path | None:
     """Resolve a theme id to its bundled ``reference_pptx/<id>.pptx``."""
     try:
-        anchor = resources.files("epy_slides.assets.reference_pptx").joinpath(
-            f"{theme_id}.pptx"
-        )
+        anchor = resources.files(
+            "epy_slides.assets.reference_pptx"
+        ).joinpath(f"{theme_id}.pptx")
         with resources.as_file(anchor) as path:
             if Path(path).is_file():
                 return Path(path)
@@ -162,7 +290,8 @@ def export_pptx(
     constructs stripped, callouts rewritten to blockquotes). When a
     per-theme ``reference_pptx/<theme>.pptx`` is bundled it supplies the
     master slide layouts, fonts and colours; otherwise Pandoc's default
-    template is used.
+    template is used. When ``bibliography:`` is set in the front matter,
+    citeproc resolves citations in the PowerPoint output too.
 
     Args:
         source: Slide-structured Markdown.
@@ -186,7 +315,9 @@ def export_pptx(
             reveal_css_for,
         )
 
-        diag_tmp = Path(tempfile.mkdtemp(prefix="epy_slides_pptx_diag_"))
+        diag_tmp = Path(
+            tempfile.mkdtemp(prefix="epy_slides_pptx_diag_")
+        )
         css = reveal_css_for(_themes.get(resolved_theme))
         pngs = render_diagram_pngs(diagrams, diag_tmp, theme_css=css)
         prepared_source = substitute_diagram_images(source, pngs)
@@ -205,6 +336,7 @@ def export_pptx(
         "on",
     }:
         extra_args.append("--incremental")
+    extra_args += _bibliography_args(metadata, base_dir)
     try:
         pypandoc.convert_text(
             prepared,

@@ -95,9 +95,14 @@ _ES: dict[str, str] = {
     "List of tables  [[lot]]": "Lista de tablas  [[lot]]",
     "List of equations  [[loe]]": "Lista de ecuaciones  [[loe]]",
     # --- References menu ---
+    "Insert citation...": "Insertar cita...",
     "Insert reference...": "Insertar referencia...",
     "Link bibliography (.bib)...": "Enlazar bibliografía (.bib)...",
+    "Link bibliography (.bib)": "Enlazar bibliografía (.bib)",
     "New bibliography entry...": "Nueva entrada bibliográfica...",
+    "Link a .bib file first via References ▸ Link bibliography.":
+        "Enlace primero un archivo .bib desde "
+        "Referencias ▸ Enlazar bibliografía.",
     "(no document open)": "(no hay documento abierto)",
     "(no labels in this file)": "(no hay etiquetas en este archivo)",
     "Citations": "Citas",

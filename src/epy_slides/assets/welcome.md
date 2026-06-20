@@ -272,6 +272,22 @@ export_pptx(deck, Path("talk.pptx"), theme_id="corporate")
   `examples/empire_state_building/render_all_themes.py` renders one deck to
   **HTML + PPTX + PDF** for every theme — copy it as a starting point
 
+## Citations
+<!-- layout: title-content -->
+
+- Add `bibliography: refs.bib` to the YAML front matter
+- Write `[@key]` in any slide to cite an entry
+- Use *References ▸ Insert citation…* to pick a key from a dialog
+- Choose a style: IEEE (default), APA or Chicago from
+  *References ▸ Citation style*
+- A **References** slide is appended automatically; the rendered list
+  appears on that slide inside the deck
+
+::: {.callout-tip title="Manage entries"}
+*References ▸ New bibliography entry…* opens a form to compose a new
+BibTeX entry and append it to the linked file.
+:::
+
 ## You are ready
 <!-- layout: quote -->
 

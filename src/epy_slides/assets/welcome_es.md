@@ -276,6 +276,22 @@ export_pptx(deck, Path("charla.pptx"), theme_id="corporate")
   presentación a **HTML + PPTX + PDF** por cada tema — cópielo como punto
   de partida
 
+## Citas
+<!-- layout: title-content -->
+
+- Agregue `bibliography: refs.bib` al bloque YAML del frente
+- Escriba `[@clave]` en cualquier diapositiva para citar una entrada
+- Use *Referencias ▸ Insertar cita…* para elegir una clave desde un diálogo
+- Elija un estilo: IEEE (por defecto), APA o Chicago desde
+  *Referencias ▸ Estilo de cita*
+- Una diapositiva de **Referencias** se agrega automáticamente; la lista
+  aparece en esa diapositiva dentro de la presentación
+
+::: {.callout-tip title="Gestionar entradas"}
+*Referencias ▸ Nueva entrada bibliográfica…* abre un formulario para
+componer una nueva entrada BibTeX y agregarla al archivo vinculado.
+:::
+
 ## Ya está listo
 <!-- layout: quote -->
 

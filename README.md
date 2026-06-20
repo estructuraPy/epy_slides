@@ -20,6 +20,9 @@ Author: Ing. Angel Navarro-Mora M.Sc. — ANM Ingeniería. License: MIT.
   gallery (*View ▸ Theme ▸ Browse themes…*); the active theme styles the
   preview and every export.
 - **Bilingual UI** (English / Spanish), switchable live.
+- **Citations.** Link a `.bib` file, write `[@key]` inline, choose
+  IEEE / APA / Chicago from *References*; a References slide is appended
+  automatically.
 
 ## Writing a deck
 
