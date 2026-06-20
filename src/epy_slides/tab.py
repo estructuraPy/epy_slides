@@ -48,6 +48,7 @@ from epy_slides.slide_dialogs import (
 from epy_slides.table_dialog import TableDialog
 
 RENDER_DEBOUNCE_MS = 250
+POS_POLL_MS = 400
 UNTITLED = "untitled.md"
 
 # Export readiness poll (reveal init + MathJax typeset) before giving up.
@@ -127,6 +128,21 @@ class MarkdownTab(QWidget):
         self._render_timer.setSingleShot(True)
         self._render_timer.setInterval(RENDER_DEBOUNCE_MS)
         self._render_timer.timeout.connect(self._render_scheduled)
+
+        # The current slide is polled into ``_last_pos`` on a timer so a
+        # re-render can return to it WITHOUT making the reload depend on an
+        # async callback (a dropped callback used to leave the preview, and
+        # theme switches, never updating).
+        self._last_pos = ""
+        # A monotonic query param makes every preview URL unique. Loading the
+        # same file path with only a changed ``#fragment`` is an in-page
+        # navigation that does NOT reload — which silently swallowed theme
+        # switches; the changing ``?r=`` forces a full reload every time.
+        self._render_seq = 0
+        self._pos_timer = QTimer(self)
+        self._pos_timer.setInterval(POS_POLL_MS)
+        self._pos_timer.timeout.connect(self._poll_position)
+        self._pos_timer.start()
 
         self.editor.textChanged.connect(self._on_text_changed)
 
@@ -474,8 +490,16 @@ class MarkdownTab(QWidget):
                     from epy_slides import _pdf_footer  # noqa: PLC0415
 
                     if watermark_path is not None:
+                        from epy_slides.template import (  # noqa: PLC0415
+                            watermark_pdf_params,
+                        )
+
+                        wm_ratio, wm_opacity = watermark_pdf_params(meta)
                         with contextlib.suppress(OSError, RuntimeError):
-                            _pdf_footer.add_watermark(out_pdf, watermark_path)
+                            _pdf_footer.add_watermark(
+                                out_pdf, watermark_path,
+                                opacity=wm_opacity, width_ratio=wm_ratio,
+                            )
                     _pdf_footer.add_metadata(
                         out_pdf,
                         title=meta.get("title", "").strip() or title,
@@ -518,9 +542,16 @@ class MarkdownTab(QWidget):
 
     @staticmethod
     def _slide_inches(meta: dict[str, str]) -> tuple[float, float]:
-        """Return the slide page size in inches for the deck aspect ratio."""
+        """Return the slide page size in inches for the deck aspect ratio.
+
+        reveal lays out each PDF page at the slide's *pixel* size (960x540
+        for 16:9, 960x720 for 4:3). At the CSS standard 96 px/inch that is
+        10 x 5.625 in and 10 x 7.5 in. The print page MUST match exactly, or
+        every PDF page is offset from its slide and shows parts of two
+        (the wide 13.333 x 7.5 used before drifted ~33% per page).
+        """
         aspect = (meta.get("aspect-ratio") or "16:9").strip()
-        return (10.0, 7.5) if aspect == "4:3" else (13.333, 7.5)
+        return (10.0, 7.5) if aspect == "4:3" else (10.0, 5.625)
 
     @staticmethod
     def _slide_page_layout(width_in: float, height_in: float) -> QPageLayout:
@@ -651,20 +682,25 @@ class MarkdownTab(QWidget):
         preview_path = self._preview_tmp_dir / "preview.html"
         preview_path.write_text(html, encoding="utf-8")
         url = QUrl.fromLocalFile(str(preview_path.resolve()))
-        if preserve:
-            self.view.page().runJavaScript(
-                _CAPTURE_POS_JS,
-                lambda pos: self._load_preview(url, pos),
-            )
-        else:
-            self._load_preview(url, None)
-
-    def _load_preview(self, url: QUrl, pos: object) -> None:
-        """Load ``url`` into the preview, optionally with a restore hash."""
-        if isinstance(pos, str) and pos:
-            url = QUrl(url)
-            url.setFragment(pos)
+        # Load immediately and unconditionally; ``?r=`` forces a real reload
+        # and, when preserving, the ``#fragment`` carries the slide to return
+        # to. Never wait on a callback.
+        self._render_seq += 1
+        url.setQuery(f"r={self._render_seq}")
+        if preserve and self._last_pos:
+            url.setFragment(self._last_pos)
         self.view.load(url)
+
+    def _poll_position(self) -> None:
+        """Cache the slide reveal is showing for the next preview render."""
+        page = self.view.page()
+        if page is not None:
+            page.runJavaScript(_CAPTURE_POS_JS, self._store_position)
+
+    def _store_position(self, pos: object) -> None:
+        """Record a captured ``epypos=…`` token (ignore empty/None)."""
+        if isinstance(pos, str) and pos:
+            self._last_pos = pos
 
     def cleanup_preview_tmp(self) -> None:
         """Delete the temp dir backing the live preview (call on close)."""

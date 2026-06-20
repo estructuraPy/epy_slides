@@ -55,7 +55,9 @@ OUT_DIR = ROOT / "_render" / "themes"
 def _page_layout(meta: dict) -> QPageLayout:
     """Landscape, zero-margin page sized to the deck's aspect ratio."""
     aspect = (meta.get("aspect-ratio") or "16:9").strip()
-    width_in, height_in = (10.0, 7.5) if aspect == "4:3" else (13.333, 7.5)
+    # Match reveal's PDF page pixel size at 96 px/inch (960x540 / 960x720),
+    # or every page drifts and shows parts of two slides.
+    width_in, height_in = (10.0, 7.5) if aspect == "4:3" else (10.0, 5.625)
     size = QPageSize(
         QSizeF(width_in, height_in),
         QPageSize.Unit.Inch,
@@ -161,7 +163,15 @@ class SlideExporter:
             try:
                 watermark = str(self.meta.get("watermark", "") or "").strip()
                 if watermark and (ROOT / watermark).is_file():
-                    add_watermark(self.pdf_path, ROOT / watermark)
+                    from epy_slides.template import (
+                        watermark_pdf_params,
+                    )
+
+                    wm_ratio, wm_opacity = watermark_pdf_params(self.meta)
+                    add_watermark(
+                        self.pdf_path, ROOT / watermark,
+                        opacity=wm_opacity, width_ratio=wm_ratio,
+                    )
                 add_metadata(
                     self.pdf_path,
                     title=str(self.meta.get("title", "")),

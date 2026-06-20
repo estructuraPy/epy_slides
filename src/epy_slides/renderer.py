@@ -14,6 +14,7 @@ The conversion is delegated to Pandoc (bundled by ``pypandoc-binary``);
 
 from __future__ import annotations
 
+import re
 import shutil
 import tempfile
 from importlib import resources
@@ -62,6 +63,25 @@ PANDOC_FORMAT = (
 )
 
 
+# A ``::: {.card}`` div that contains a heading (``#### Title``) is emitted
+# by Pandoc's revealjs writer as a nested ``<section class="card">`` rather
+# than a ``<div>``. reveal then treats the slide as a vertical *stack*, which
+# breaks navigation and the print-pdf page layout (a stray, mis-positioned
+# page). Cards are leaf elements, so turning those sections back into divs is
+# safe and keeps them as plain content.
+_CARD_SECTION_RE = re.compile(
+    r'<section\b[^>]*\bclass="[^"]*\bcard\b[^"]*"[^>]*>(?P<inner>.*?)</section>',
+    re.DOTALL,
+)
+
+
+def _cards_sections_to_divs(body: str) -> str:
+    """Rewrite Pandoc's ``<section class="card">`` blocks back to divs."""
+    return _CARD_SECTION_RE.sub(
+        lambda m: '<div class="card">' + m.group("inner") + "</div>", body
+    )
+
+
 def render_revealjs(
     source: str,
     base_dir: Path | None = None,
@@ -102,6 +122,7 @@ def render_revealjs(
             "--wrap=preserve",
         ],
     )
+    body = _cards_sections_to_divs(body)
     return build_reveal_document(
         body=body,
         base_dir=base_dir,

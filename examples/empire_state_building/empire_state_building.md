@@ -9,6 +9,8 @@ transition: slide
 slide-number: true
 footer: epy_slides — Empire State Building
 watermark: esb_skyline.png
+watermark-size: 26%
+watermark-opacity: "0.06"
 copyright: © 2026 ANM Ingeniería
 ---
 

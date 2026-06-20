@@ -153,15 +153,39 @@ def _watermark_css(metadata: dict[str, str]) -> str:
     if not watermark:
         return ""
     src = html.escape(watermark, quote=True)
+    # Size (as a % of the slide width) and opacity are tunable from the
+    # front matter so a busy or oversized mark can be dialled back.
+    size = (metadata.get("watermark-size") or "32%").strip()
+    opacity = (metadata.get("watermark-opacity") or "0.07").strip()
     return (
         "@media screen {\n"
         ".reveal .slides section::after {\n"
         '  content: ""; position: absolute; inset: 0;\n'
-        f'  background: url("{src}") center / 55% no-repeat;\n'
-        "  opacity: 0.10; filter: grayscale(1);\n"
+        f'  background: url("{src}") center / {size} no-repeat;\n'
+        f"  opacity: {opacity}; filter: grayscale(1);\n"
         "  pointer-events: none; z-index: -1;\n"
         "}\n}\n"
     )
+
+
+def watermark_pdf_params(metadata: dict[str, str]) -> tuple[float, float]:
+    """Return ``(width_ratio, opacity)`` for the PDF watermark stamp.
+
+    Reads the same ``watermark-size`` (a percentage of the page width) and
+    ``watermark-opacity`` front-matter keys as the on-screen watermark, so a
+    deck's watermark looks the same in the preview and the printed PDF.
+    """
+    raw = (metadata.get("watermark-size") or "32%").strip().rstrip("%")
+    try:
+        ratio = float(raw) / 100.0
+    except ValueError:
+        ratio = 0.32
+    ratio = max(0.05, min(1.0, ratio))
+    try:
+        opacity = float((metadata.get("watermark-opacity") or "0.10").strip())
+    except ValueError:
+        opacity = 0.10
+    return ratio, max(0.02, min(1.0, opacity))
 
 
 def reveal_config(
@@ -190,7 +214,11 @@ def reveal_config(
         "margin": 0.04,
         "minScale": 0.2,
         "maxScale": 2.0,
-        "center": True,
+        # reveal's JS vertical centering computes per-slide ``top`` offsets
+        # that misplace slides across page boundaries in the print-pdf
+        # export (slides overlap / bleed onto the wrong page). Centering is
+        # done with CSS flexbox instead (see ``reveal_css_for``).
+        "center": False,
         "hash": False,
         "controls": not for_export,
         "progress": not for_export,
@@ -246,7 +274,38 @@ window._epy_init_mermaid = function () {
       fontFamily: v('--r-main-font', 'sans-serif')
     }
   });
-  return mermaid.run({ querySelector: '.mermaid' });
+  // reveal hides every slide but the active one, so mermaid.run() (which
+  // measures the element in place) would size a hidden diagram to zero.
+  // mermaid.render() measures in its own temporary container on <body>
+  // instead, so it renders at full size regardless of slide visibility.
+  var els = Array.prototype.slice.call(
+    document.querySelectorAll('pre.mermaid, .mermaid')
+  );
+  return Promise.all(els.map(function (el, i) {
+    var src = el.textContent;
+    return mermaid.render('epy-mermaid-' + i, src).then(function (out) {
+      var div = document.createElement('div');
+      div.className = 'mermaid';
+      div.innerHTML = out.svg;
+      var svg = div.querySelector('svg');
+      if (svg) {
+        // mermaid emits width="100%" + max-width:<natural>; inside a
+        // shrink-to-fit centred slide "100%" collapses to ~0. Pin the SVG
+        // to its natural size (from the viewBox) and let it scale down.
+        var vb = (svg.getAttribute('viewBox') || '').split(/\\s+/);
+        var w = parseFloat(vb[2]) || 0, h = parseFloat(vb[3]) || 0;
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+        svg.style.maxWidth = '100%';
+        svg.style.height = 'auto';
+        if (w) { svg.style.width = w + 'px'; }
+        if (w && h) { svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h); }
+      }
+      el.replaceWith(div);
+    }).catch(function (e) {
+      el.textContent = 'mermaid: ' + ((e && e.message) || e);
+    });
+  }));
 };
 </script>
 """
@@ -305,6 +364,44 @@ _RESTORE_FN = (
     "  } catch (e) {}\n"
     "};\n"
 )
+
+
+def _print_css(height: int) -> str:
+    """Pin reveal's print-pdf pages to the exact slide height, no drift.
+
+    reveal's own print layout left a top offset and slightly over-tall pages
+    (~560 px for a 540 px slide), so each printed page captured parts of two
+    slides. Forcing the page boxes to exactly ``height`` px, anchored at the
+    top with overflow clipped, makes every PDF page hold exactly one slide.
+    """
+    # reveal puts the ``print-pdf`` class on <html>, so the override must be
+    # anchored there (``.reveal.print-pdf`` never matches). Only the
+    # ``.pdf-page`` wrappers are pinned — forcing a height on the inner
+    # sections inflated reveal's leftover stack and pushed a blank page in.
+    return (
+        "html.print-pdf, html.print-pdf body { margin: 0 !important;"
+        " padding: 0 !important; }\n"
+        "html.print-pdf .reveal .slides {"
+        " left: 0 !important; top: 0 !important; transform: none !important; }\n"
+        "html.print-pdf .pdf-page {"
+        f" height: {height}px !important; min-height: {height}px !important;"
+        f" max-height: {height}px !important;"
+        " overflow: hidden !important; margin: 0 !important;"
+        " padding: 0 !important; page-break-after: always !important; }\n"
+        "html.print-pdf .pdf-page > section {"
+        " overflow: hidden !important; top: 0 !important;"
+        f" max-height: {height}px !important; }}\n"
+        # Center the title / section / quote layouts on their page (reveal's
+        # JS centering is off, and the flex rules in reveal_css_for only
+        # match the preview's ``.slides > section``, not the print wrappers).
+        "html.print-pdf .pdf-page > section.slide-title,"
+        " html.print-pdf .pdf-page > section.slide-section,"
+        " html.print-pdf .pdf-page > section.slide-quote,"
+        " html.print-pdf .pdf-page > section.center {"
+        " display: flex !important; flex-direction: column;"
+        " justify-content: center !important; align-items: center;"
+        f" height: {height}px !important; }}\n"
+    )
 
 
 def build_reveal_document(
@@ -384,6 +481,7 @@ def build_reveal_document(
         f"{reset_css}\n{reveal_css}\n{base_theme}\n"
         ".reveal aside.notes { display: none; }\n"
         f"{theme_css}\n"
+        f"{_print_css(height)}"
         f"{_watermark_css(meta)}"
         "</style>\n"
         f"{_MATHJAX_CONFIG}\n"

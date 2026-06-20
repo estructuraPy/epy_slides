@@ -157,4 +157,24 @@ def reveal_css_for(theme: Theme) -> str:
 }}
 .reveal .slide-image-left img, .reveal .slide-image-right img,
 .reveal .slide-quote-portrait img {{ width: 100%; border-radius: 8px; }}
+.reveal .mermaid, .reveal .nomnoml {{ text-align: center; margin: 0.4em 0; }}
+.reveal .mermaid svg, .reveal .nomnoml svg {{
+  display: inline-block; max-height: 62vh;
+}}
+/* Centering is done here, not by reveal's JS (which misplaces slides in the
+   PDF). Every slide fills its height; ``center`` layouts pack their content
+   to the middle, content layouts stay top-aligned. */
+.reveal .slides > section {{
+  height: 100%; box-sizing: border-box;
+  display: flex; flex-direction: column; justify-content: flex-start;
+}}
+.reveal .slides > section.center {{ justify-content: center; }}
+.reveal .slides > section.slide-title {{ justify-content: center; }}
+.reveal .slides > section.slide-section {{
+  justify-content: center; align-items: center; text-align: center;
+}}
+.reveal .slides > section.slide-quote {{ justify-content: center; }}
+.reveal .slides > section.slide-image-fullbleed {{
+  justify-content: center; align-items: center;
+}}
 """ + design_css(theme, scope=".reveal ")
