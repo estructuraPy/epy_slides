@@ -65,6 +65,10 @@ class PresentationPropertiesDialog(QDialog):
             self._aspect.setCurrentText(meta["aspect-ratio"])
         form.addRow("Aspect ratio:", self._aspect)
 
+        self._margin = QLineEdit(meta.get("margin", ""), self)
+        self._margin.setPlaceholderText("0.06")
+        form.addRow("Margin:", self._margin)
+
         self._transition = QComboBox(self)
         self._transition.addItems(_TRANSITIONS)
         if (meta.get("transition") or "").lower() in _TRANSITIONS:
@@ -142,6 +146,7 @@ class PresentationPropertiesDialog(QDialog):
             ("date", self._date.text().strip(), False),
             ("theme", self._theme.currentData(), False),
             ("aspect-ratio", self._aspect.currentText(), False),
+            ("margin", self._margin.text().strip(), False),
             ("transition", self._transition.currentText(), False),
             (
                 "slide-number",

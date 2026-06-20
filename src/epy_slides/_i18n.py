@@ -368,6 +368,7 @@ _ES: dict[str, str] = {
     "Author, Source": "Autor, Fuente",
     # --- Presentation properties dialog ---
     "Aspect ratio:": "Relación de aspecto:",
+    "Margin:": "Margen:",
     "Transition:": "Transición:",
     "Show slide numbers": "Mostrar números de diapositiva",
     "Footer:": "Pie de página:",

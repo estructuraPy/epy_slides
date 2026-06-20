@@ -82,6 +82,22 @@ def _is_dark(c: str) -> bool:
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) < 0.5
 
 
+def is_dark(color: str | list[int] | tuple[int, int, int] | None) -> bool:
+    """Return True when ``color`` reads as a dark background.
+
+    Public, defensive wrapper over :func:`_is_dark`. Accepts a ``#RRGGBB``
+    string or an ``[r, g, b]`` triplet; an unparseable or missing value is
+    treated as light (returns False) so callers can pass raw theme values
+    without guarding.
+    """
+    if not color:
+        return False
+    try:
+        return _is_dark(_coerce_hex(color))
+    except (ValueError, IndexError, TypeError):
+        return False
+
+
 def _contrast_text(bg_hex: str) -> str:
     """Pick black or white text for ``bg_hex`` using WCAG luminance."""
     return "#000000" if not _is_dark(bg_hex) else "#FFFFFF"

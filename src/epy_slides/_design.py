@@ -77,16 +77,19 @@ def design_css(theme: Theme, *, scope: str = "") -> str:
 
 /* big stats */
 {s}.stats {{
-  display: grid; gap: 1em; align-items: end;
+  display: grid; gap: 1em; align-items: end; width: 100%;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
 }}
-{s}.stat {{ text-align: center; }}
+{s}.stat {{ text-align: center; min-width: 0; }}
 {s}.stat p {{ margin: 0.1em 0; }}
 {s}.stat strong {{
-  display: block; font-size: 2.6em; font-weight: 800; line-height: 1;
-  color: {primary}; font-family: {font_head};
+  display: block; font-size: 2.2em; font-weight: 800; line-height: 1;
+  color: {primary}; font-family: {font_head}; white-space: nowrap;
 }}
 {s}.stat .stat-label {{ display: block; font-size: 0.68em; opacity: 0.8; }}
+/* shrink the figures as more stats share the row so they keep fitting */
+{s}.stats:has(.stat:nth-child(4)) .stat strong {{ font-size: 1.8em; }}
+{s}.stats:has(.stat:nth-child(5)) .stat strong {{ font-size: 1.5em; }}
 
 /* timeline */
 {s}.timeline ul {{

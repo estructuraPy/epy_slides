@@ -39,3 +39,15 @@ def test_slide_number_unchecked_defaults_false(qapp):
     fields = {field: value for field, value, _raw in dlg.updates()}
     assert fields["slide-number"] == "false"
     assert fields["aspect-ratio"] == "16:9"
+
+
+def test_margin_field_roundtrip(qapp):
+    dlg = PresentationPropertiesDialog(None, {"margin": "0.1"})
+    fields = {field: value for field, value, _raw in dlg.updates()}
+    assert fields["margin"] == "0.1"
+
+
+def test_margin_empty_when_absent(qapp):
+    dlg = PresentationPropertiesDialog(None, {})
+    fields = {field: value for field, value, _raw in dlg.updates()}
+    assert fields["margin"] == ""

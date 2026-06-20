@@ -25,3 +25,13 @@ def test_reveal_css_covers_all_callouts():
     css = reveal_css_for(themes.get("academic"))
     for kind in ("note", "tip", "warning", "important", "caution"):
         assert f".reveal .callout-{kind}" in css
+
+
+def test_reveal_css_big_stat_is_responsive():
+    css = reveal_css_for(themes.get("corporate"))
+    # Figures shrink as more stats share the row so they keep fitting.
+    assert ".stats:has(.stat:nth-child(4)) .stat strong" in css
+    assert ".stats:has(.stat:nth-child(5)) .stat strong" in css
+    # Numbers never wrap mid-value and columns may shrink below content.
+    assert "white-space: nowrap" in css
+    assert "min-width: 0" in css

@@ -6,7 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Watermark stays visible on every slide.** The on-screen watermark now
+  adapts to the deck background (a `multiply` blend on light themes, `screen`
+  + invert on dark ones) and uses a `difference` blend on full-bleed image
+  slides, so it no longer washes out over photos or dark backgrounds. The
+  default opacity rose from 0.07 to 0.12.
+- **Big-number slides keep fitting.** The `big-stat` figures shrink as more
+  stats share the row (smaller for 4 and 5 columns) and no longer wrap
+  mid-value, so three to five large numbers stay on one legible line.
+
 ### Changed
+- **Adjustable slide margin.** A `margin:` front-matter key (set from
+  *Presentation properties ▸ Margin*) controls the reveal margin fraction;
+  the default rose from 0.04 to 0.06 for more breathing room.
 - **HTML export is now continuous.** The deck renders as a reveal.js scroll
   view — one continuous scrollable page — instead of a click-through
   slideshow. The PDF and PowerPoint exports keep their per-slide pagination.

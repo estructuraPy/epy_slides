@@ -13,9 +13,12 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from functools import lru_cache
 from importlib import resources
 from pathlib import Path
+
+from epy_slides.epyson import is_dark
 
 _REVEAL_PKG = "epy_slides.assets.revealjs"
 
@@ -142,28 +145,57 @@ def _overlays(metadata: dict[str, str]) -> str:
     return "\n".join(out)
 
 
-def _watermark_css(metadata: dict[str, str]) -> str:
-    """Return CSS painting a faint grayscale watermark behind every slide.
+# Default watermark size (fraction of slide width) and opacity. The screen
+# opacity is higher than the print stamp because the on-screen mark relies
+# on a blend mode for contrast rather than a flat alpha wash.
+_WATERMARK_SIZE = "32%"
+_WATERMARK_OPACITY = "0.12"
+_THEME_BG_RE = re.compile(r"--r-background-color:\s*([^;]+);")
 
-    Restricted to screen media so it shows live in the preview and the HTML
-    export; the PDF export stamps its own watermark via ``_pdf_footer`` so
-    it prints reliably on every page.
+
+def _theme_background(theme_css: str) -> str:
+    """Extract the deck background colour from the compiled theme CSS."""
+    match = _THEME_BG_RE.search(theme_css or "")
+    return match.group(1).strip() if match else "#ffffff"
+
+
+def _watermark_css(metadata: dict[str, str], theme_css: str = "") -> str:
+    """Return CSS painting a faint watermark behind every slide.
+
+    The mark adapts to the deck background luminance so it stays legible on
+    light and dark themes alike, and uses ``mix-blend-mode: difference`` on
+    full-bleed image slides so it never washes out over a photo. Screen
+    media only: the PDF export stamps its own watermark via ``_pdf_footer``.
     """
     watermark = (metadata.get("watermark") or "").strip()
     if not watermark:
         return ""
     src = html.escape(watermark, quote=True)
-    # Size (as a % of the slide width) and opacity are tunable from the
-    # front matter so a busy or oversized mark can be dialled back.
-    size = (metadata.get("watermark-size") or "32%").strip()
-    opacity = (metadata.get("watermark-opacity") or "0.07").strip()
+    # Size (fraction of slide width) and opacity are tunable from the front
+    # matter so a busy or oversized mark can be dialled back.
+    size = (metadata.get("watermark-size") or _WATERMARK_SIZE).strip()
+    opacity = (
+        metadata.get("watermark-opacity") or _WATERMARK_OPACITY
+    ).strip()
+    # On a light deck ``multiply`` sinks the mark into the page; on a dark
+    # deck ``screen`` + ``invert`` lifts it. Either reads as a faint ghost
+    # instead of vanishing at low alpha the way flat grayscale did.
+    if is_dark(_theme_background(theme_css)):
+        blend, extra_filter = "screen", " filter: invert(1);"
+    else:
+        blend, extra_filter = "multiply", ""
     return (
         "@media screen {\n"
         ".reveal .slides section::after {\n"
         '  content: ""; position: absolute; inset: 0;\n'
         f'  background: url("{src}") center / {size} no-repeat;\n'
-        f"  opacity: {opacity}; filter: grayscale(1);\n"
+        f"  opacity: {opacity}; mix-blend-mode: {blend};{extra_filter}\n"
         "  pointer-events: none; z-index: -1;\n"
+        "}\n"
+        # Over an arbitrary full-bleed photo neither multiply nor screen is
+        # guaranteed to show; ``difference`` always yields contrast.
+        ".reveal .slides section.slide-image-fullbleed::after {\n"
+        "  mix-blend-mode: difference; opacity: 0.16;\n"
         "}\n}\n"
     )
 
@@ -186,6 +218,29 @@ def watermark_pdf_params(metadata: dict[str, str]) -> tuple[float, float]:
     except ValueError:
         opacity = 0.10
     return ratio, max(0.02, min(1.0, opacity))
+
+
+# Fraction of the viewport reveal keeps clear around slide content. The
+# default gives more breathing room than reveal's own 0.04.
+DEFAULT_MARGIN = 0.06
+_MAX_MARGIN = 0.3
+
+
+def _read_margin(metadata: dict[str, str]) -> float:
+    """Return the slide margin fraction from the front matter.
+
+    Accepts a bare fraction (``0.08``) or a percentage (``8%``). Out-of-range
+    or unparseable values fall back to :data:`DEFAULT_MARGIN`; the result is
+    clamped to ``[0, 0.3]`` so a deck can never push its content off-canvas.
+    """
+    raw = (metadata.get("margin") or "").strip()
+    if not raw:
+        return DEFAULT_MARGIN
+    try:
+        value = float(raw[:-1]) / 100.0 if raw.endswith("%") else float(raw)
+    except ValueError:
+        return DEFAULT_MARGIN
+    return max(0.0, min(_MAX_MARGIN, value))
 
 
 def reveal_config(
@@ -211,7 +266,7 @@ def reveal_config(
     config: dict[str, object] = {
         "width": width,
         "height": height,
-        "margin": 0.04,
+        "margin": _read_margin(metadata),
         "minScale": 0.2,
         "maxScale": 2.0,
         # reveal's JS vertical centering computes per-slide ``top`` offsets
@@ -482,7 +537,7 @@ def build_reveal_document(
         ".reveal aside.notes { display: none; }\n"
         f"{theme_css}\n"
         f"{_print_css(height)}"
-        f"{_watermark_css(meta)}"
+        f"{_watermark_css(meta, theme_css)}"
         "</style>\n"
         f"{_MATHJAX_CONFIG}\n"
         f"{_load_mathjax_script()}\n"
