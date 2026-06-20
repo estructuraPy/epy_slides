@@ -64,7 +64,7 @@ You never leave Markdown. Every menu just drops the right text at the cursor.
 ## The New Slide dialog
 <!-- layout: image-caption -->
 
-![Slides ▸ New slide — pick a layout, type a title, optionally add an image](__SHOT_NEW_SLIDE__){width=42%}
+![Slides ▸ New slide — every layout shows a small preview; pick one, type a title, optionally add an image](__SHOT_NEW_SLIDE__){width=42%}
 
 ## The layouts you can pick
 <!-- layout: cards -->
@@ -83,6 +83,11 @@ Image + caption · Full-bleed · Image left · Image right · Quote + portrait
 Big numbers · Agenda · Cards · Timeline · Quote · Code
 :::
 ::::
+
+::: {.callout-tip title="Pick by sight"}
+Every entry in the New Slide list shows a small schematic preview of the
+layout, so you choose the structure at a glance — not just by its name.
+:::
 
 ## Design components
 <!-- layout: big-stat -->
@@ -179,6 +184,11 @@ rasterizes each one to a themed image so the slide keeps the picture.
 <!-- layout: image-caption -->
 
 ![View ▸ Theme switches all nine palettes; New theme… opens the editor](__SHOT_THEME_EDITOR__){width=46%}
+
+## Browse themes in a gallery
+<!-- layout: image-caption -->
+
+![View ▸ Theme ▸ Browse themes… — every theme as a live preview swatch, custom themes included](__SHOT_THEME_GALLERY__){width=58%}
 
 ## Presentation properties
 <!-- layout: image-caption -->

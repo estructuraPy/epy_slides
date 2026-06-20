@@ -32,6 +32,13 @@ def test_new_slide_every_layout_builds(qapp):
         assert md.startswith("#")
 
 
+def test_new_slide_items_have_preview_icons(qapp):
+    dlg = NewSlideDialog()
+    assert dlg._list.count() > 0
+    for i in range(dlg._list.count()):
+        assert not dlg._list.item(i).icon().isNull()
+
+
 def test_new_slide_two_column_skeleton(qapp):
     dlg = NewSlideDialog()
     _select_layout(dlg, "two-column")

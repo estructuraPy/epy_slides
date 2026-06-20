@@ -9,6 +9,7 @@ fenced-div braces (``{.columns}``) are never confused with format fields.
 
 from __future__ import annotations
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -27,6 +28,7 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides import _i18n as i18n
+from epy_slides._previews import LAYOUT_THUMB, layout_preview
 
 # (id, label, one-line description) for the New-Slide picker. ``title`` is
 # omitted — the title slide is generated from the presentation properties.
@@ -168,10 +170,12 @@ class NewSlideDialog(QDialog):
         layout.addWidget(QLabel("Choose a slide layout:"))
 
         self._list = QListWidget(self)
+        self._list.setIconSize(LAYOUT_THUMB)
         for layout_id, label, description in LAYOUT_INFO:
             item = QListWidgetItem(
                 f"{i18n.tr(label)}  —  {i18n.tr(description)}"
             )
+            item.setIcon(QIcon(layout_preview(layout_id)))
             item.setData(0x0100, layout_id)  # Qt.UserRole
             self._list.addItem(item)
         self._list.setCurrentRow(1)  # title + bullets

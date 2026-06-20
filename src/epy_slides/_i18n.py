@@ -288,6 +288,10 @@ _ES: dict[str, str] = {
         "¿Eliminar el tema personalizado {name}?",
     "No custom themes to delete.":
         "No hay temas personalizados para eliminar.",
+    # --- theme gallery dialog ---
+    "Browse themes…": "Explorar temas…",
+    "Themes": "Temas",
+    "Choose a theme:": "Elija un tema:",
     # --- slides: menus + toolbar ---
     "&Slides": "&Diapositivas",
     "&Content": "&Contenido",

@@ -12,12 +12,13 @@ Author: Ing. Angel Navarro-Mora M.Sc. — ANM Ingeniería. License: MIT.
   (preview + HTML), a paginated PDF, and a native `.pptx`.
 - **Predefined slide layouts.** A *New Slide* picker inserts ready-made
   skeletons (section, title + bullets, two columns, comparison, image, quote,
-  code, blank).
+  code, blank) — each shown with a small preview thumbnail.
 - **Block-based content.** Insert bullet lists (with incremental reveals), two
   columns, quotes, speaker notes, images, tables, LaTeX equations, code and
   callouts from dialogs.
-- **Themes.** Nine bundled themes plus a theme editor; the active theme styles
-  the preview and every export.
+- **Themes.** Nine bundled themes plus a theme editor, browsable in a preview
+  gallery (*View ▸ Theme ▸ Browse themes…*); the active theme styles the
+  preview and every export.
 - **Bilingual UI** (English / Spanish), switchable live.
 
 ## Writing a deck

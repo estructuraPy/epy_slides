@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   slideshow. The PDF and PowerPoint exports keep their per-slide pagination.
 
 ### Added
+- **Slide-layout previews.** The *New slide* picker shows a small schematic
+  preview of every layout, so you choose the structure at a glance, not just
+  by its name.
+- **Theme gallery** (*View ▸ Theme ▸ Browse themes…*) — every theme as a live
+  colour/typography preview swatch, custom themes included.
 - `examples/empire_state_building/` — a feature-complete demo deck (every
   layout and content block) with a `render_all_themes.py` harness that
   exports HTML + PPTX + PDF per theme.

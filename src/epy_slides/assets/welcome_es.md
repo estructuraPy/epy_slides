@@ -63,7 +63,7 @@ Nunca sale de Markdown. Cada menú solo deja el texto correcto en el cursor.
 ## El diálogo Nueva diapositiva
 <!-- layout: image-caption -->
 
-![Diapositivas ▸ Nueva diapositiva — elija un layout, escriba un título, agregue una imagen](__SHOT_NEW_SLIDE__){width=42%}
+![Diapositivas ▸ Nueva diapositiva — cada layout muestra una vista previa; elija uno, escriba un título, agregue una imagen](__SHOT_NEW_SLIDE__){width=42%}
 
 ## Los layouts que puede elegir
 <!-- layout: cards -->
@@ -82,6 +82,12 @@ Imagen + pie · A sangre · Imagen izquierda · Imagen derecha · Cita + retrato
 Números grandes · Agenda · Tarjetas · Línea de tiempo · Cita · Código
 :::
 ::::
+
+::: {.callout-tip title="Elija a simple vista"}
+Cada entrada de la lista Nueva diapositiva muestra una pequeña vista previa
+esquemática del layout, así elige la estructura de un vistazo — no solo por
+su nombre.
+:::
 
 ## Componentes de diseño
 <!-- layout: big-stat -->
@@ -179,6 +185,11 @@ para conservar el dibujo.
 <!-- layout: image-caption -->
 
 ![Ver ▸ Tema cambia los nueve temas; Nuevo tema… abre el editor](__SHOT_THEME_EDITOR__){width=46%}
+
+## Explore los temas en una galería
+<!-- layout: image-caption -->
+
+![Ver ▸ Tema ▸ Explorar temas… — cada tema como una vista previa en vivo, incluidos sus temas personalizados](__SHOT_THEME_GALLERY__){width=58%}
 
 ## Propiedades de la presentación
 <!-- layout: image-caption -->

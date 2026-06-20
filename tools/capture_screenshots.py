@@ -49,6 +49,7 @@ from epy_slides.presentation_properties_dialog import (  # noqa: E402
 from epy_slides.slide_dialogs import NewSlideDialog  # noqa: E402
 from epy_slides.table_dialog import TableDialog  # noqa: E402
 from epy_slides.theme_editor_dialog import ThemeEditorDialog  # noqa: E402
+from epy_slides.theme_gallery_dialog import ThemeGalleryDialog  # noqa: E402
 
 OUT = ROOT / "src" / "epy_slides" / "assets" / "screenshots"
 
@@ -146,6 +147,11 @@ def capture_dialogs(app: QApplication, win: SlideWindow, suffix: str) -> None:
             "dlg_theme",
             lambda: ThemeEditorDialog(win, base_theme_id="corporate"),
             None,
+        ),
+        (
+            "dlg_theme_gallery",
+            lambda: ThemeGalleryDialog(win, current_id="corporate"),
+            (640, 460),
         ),
     ]
     for stem, factory, size in specs:

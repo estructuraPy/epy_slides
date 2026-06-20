@@ -64,6 +64,7 @@ def _load_manual_text(filename: str = "welcome.md") -> str:
         "__SHOT_TABLE__": ("screenshots", "dlg_table.png"),
         "__SHOT_EQUATION__": ("screenshots", "dlg_equation.png"),
         "__SHOT_THEME_EDITOR__": ("screenshots", "dlg_theme.png"),
+        "__SHOT_THEME_GALLERY__": ("screenshots", "dlg_theme_gallery.png"),
     }
     is_es = Path(filename).stem.endswith("_es")
     root = importlib.resources.files("epy_slides.assets")
@@ -220,6 +221,8 @@ class SlideWindow(QMainWindow):
         self.act_edit_theme.triggered.connect(self._edit_current_theme)
         self.act_delete_theme = QAction("Delete custom theme…", self)
         self.act_delete_theme.triggered.connect(self._delete_custom_theme)
+        self.act_theme_gallery = QAction("Browse themes…", self)
+        self.act_theme_gallery.triggered.connect(self._open_theme_gallery)
 
         self.lang_group = QActionGroup(self)
         self.lang_group.setExclusive(True)
@@ -559,6 +562,8 @@ class SlideWindow(QMainWindow):
     def _populate_theme_menu(self) -> None:
         """Fill the Theme submenu: theme radios + custom-theme actions."""
         self.theme_sub.clear()
+        self.theme_sub.addAction(self.act_theme_gallery)
+        self.theme_sub.addSeparator()
         for act in self.theme_group.actions():
             self.theme_sub.addAction(act)
         self.theme_sub.addSeparator()
@@ -601,6 +606,19 @@ class SlideWindow(QMainWindow):
             i18n.tr("Theme saved: {name}").format(name=dialog.theme_name()),
             3000,
         )
+
+    def _open_theme_gallery(self) -> None:
+        """Open the theme gallery; apply the chosen theme on accept."""
+        from epy_slides.theme_gallery_dialog import (  # noqa: PLC0415
+            ThemeGalleryDialog,
+        )
+
+        dialog = ThemeGalleryDialog(self, current_id=self._current_theme.id)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        theme_id = dialog.selected_theme_id()
+        if theme_id:
+            self._apply_theme(theme_id)
 
     def _edit_current_theme(self) -> None:
         """Edit the active theme in place if custom, otherwise clone it."""
