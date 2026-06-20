@@ -39,9 +39,20 @@ from epy_slides.template import build_reveal_document
 # (``citation-style: ieee``) or pick from the References menu,
 # mapped to the bundled .csl file under ``epy_slides/assets/csl/``.
 CSL_STYLES: dict[str, str] = {
-    "ieee":    "ieee.csl",
-    "apa":     "apa.csl",
-    "chicago": "chicago-author-date.csl",
+    "ieee":      "ieee.csl",
+    "apa":       "apa.csl",
+    "chicago":   "chicago-author-date.csl",
+    "harvard":   "harvard-cite-them-right.csl",
+    "mla":       "modern-language-association.csl",
+    "acs":       "american-chemical-society.csl",
+    "ama":       "american-medical-association.csl",
+    "vancouver": "elsevier-vancouver.csl",
+    "nature":    "nature.csl",
+    "science":   "science.csl",
+    "asce":      "american-society-of-civil-engineers.csl",
+    "elsevier":  "elsevier-harvard.csl",
+    "springer":  "springer-basic-author-date.csl",
+    "apsa":      "american-political-science-association.csl",
 }
 DEFAULT_CSL_STYLE = "ieee"
 
