@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.resources
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -77,12 +78,26 @@ def _load_manual_text(filename: str = "welcome.md") -> str:
                     name = es_name
             except OSError:
                 pass
+        uri = ""
         try:
             res = root.joinpath(subdir).joinpath(name)
-            uri = Path(str(res)).resolve().as_uri()
+            if res.is_file():
+                uri = Path(str(res)).resolve().as_uri()
         except (FileNotFoundError, ValueError, OSError):
             uri = ""
-        text = text.replace(placeholder, uri)
+        if uri:
+            text = text.replace(placeholder, uri)
+        else:
+            # A missing bundled image must never break an export: Pandoc
+            # aborts if an image src points at a non-existent file. Drop the
+            # whole image (with its caption/attributes) and any bare use.
+            text = re.sub(
+                r"!\[[^\]]*\]\(\s*" + re.escape(placeholder) + r"\s*\)"
+                r"(?:\{[^}]*\})?",
+                "",
+                text,
+            )
+            text = text.replace(placeholder, "")
     return text
 
 

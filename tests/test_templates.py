@@ -58,3 +58,13 @@ def test_delete_missing_is_noop(base_dir):
 def test_empty_name_rejected(base_dir):
     with pytest.raises(ValueError):
         templates.save_template("///", {"theme": "x"}, base_dir=base_dir)
+
+
+def test_default_config_dir_used_when_base_dir_none(qapp):
+    """With no base_dir, the default config-location path is resolved.
+
+    Needs a QApplication for QStandardPaths; only the directory wiring is
+    exercised (an absent dir returns an empty list).
+    """
+    result = templates.list_templates()
+    assert isinstance(result, list)
