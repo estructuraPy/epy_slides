@@ -383,6 +383,24 @@ class SlideWindow(QMainWindow):
             lambda: self._on_active_tab("insert_diagram", "nomnoml")
         )
 
+        # Shared design blocks (cards, big stats, timelines, agendas) — the
+        # same insert options epy_reports and epy_paper expose, one engine.
+        from epy_slides._design import (  # noqa: PLC0415
+            DESIGN_BLOCK_LABELS,
+            DESIGN_BLOCKS,
+        )
+
+        self.design_actions: dict[str, QAction] = {}
+        for kind in DESIGN_BLOCKS:
+            label = DESIGN_BLOCK_LABELS.get(kind, kind.title())
+            act = QAction(label, self)
+            act.triggered.connect(
+                lambda _checked=False, k=kind: self._on_active_tab(
+                    "insert_design_block", k
+                )
+            )
+            self.design_actions[kind] = act
+
     def _build_references_actions(self) -> None:
         """Create References menu actions (citations + bibliography)."""
         self.act_insert_citation = QAction("Insert citation...", self)
@@ -462,6 +480,9 @@ class SlideWindow(QMainWindow):
         self.diagram_sub = self.content_menu.addMenu("Diagram")
         self.diagram_sub.addAction(self.act_diagram_mermaid)
         self.diagram_sub.addAction(self.act_diagram_nomnoml)
+        self.design_sub = self.content_menu.addMenu("Design block")
+        for act in self.design_actions.values():
+            self.design_sub.addAction(act)
         self.content_menu.addSeparator()
         self.content_menu.addAction(self.act_notes)
 
