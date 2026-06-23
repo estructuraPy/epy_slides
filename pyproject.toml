@@ -1,6 +1,6 @@
 [project]
 name = "epy_slides"
-version = "0.1.1"
+version = "0.1.2"
 description = "Markdown slide editor with live reveal.js preview and PDF / HTML / PowerPoint export."
 authors = [
     { name = "Ing. Angel Navarro-Mora M.Sc.", email = "ahnavarro@anmingenieria.com" },

@@ -1,10 +1,10 @@
 ; Inno Setup script for epy_slides
-; Version 0.1.0
+; Version 0.1.2
 ;
 ; Build from the project root AFTER running `python build.py`:
 ;   ISCC.exe installer\windows\epy_slides.iss
 ;
-; Output: installer\dist\epy_slides-setup-0.1.0.exe
+; Output: installer\dist\epy_slides-setup-0.1.2.exe
 ;
 ; Design decisions:
 ;   - PrivilegesRequired=lowest  -> per-user install; no UAC prompt.
@@ -26,7 +26,7 @@
 ;     checkbox below launches "ms-settings:defaultapps" as a convenience.
 
 #define AppName "epy_slides"
-#define AppVersion "0.1.1"
+#define AppVersion "0.1.2"
 #define AppPublisher "Ing. Angel Navarro-Mora M.Sc."
 #define AppURL "https://github.com/estructuraPy/epy_slides"
 #define AppId "{{B2C3D4E5-6F70-4811-9A2B-3C4D5E6F7081}"

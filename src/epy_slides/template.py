@@ -421,42 +421,71 @@ _RESTORE_FN = (
 )
 
 
-def _print_css(height: int) -> str:
+def _print_css(width: int, height: int, margin: float) -> str:
     """Pin reveal's print-pdf pages to the exact slide height, no drift.
 
     reveal's own print layout left a top offset and slightly over-tall pages
     (~560 px for a 540 px slide), so each printed page captured parts of two
     slides. Forcing the page boxes to exactly ``height`` px, anchored at the
     top with overflow clipped, makes every PDF page hold exactly one slide.
+
+    Pinning the pages also dropped reveal's on-screen ``margin`` (it lives in
+    the scale transform we override away), which let content run to the very
+    page edge. The same ``margin`` fraction is reapplied here as padding on
+    the printed section, scaled to the slide size, so the PDF keeps the
+    breathing room the preview shows. Full-bleed image slides are exempt so
+    their artwork still reaches the edge.
     """
+    pad_x = round(width * margin)
+    pad_y = round(height * margin)
     # reveal puts the ``print-pdf`` class on <html>, so the override must be
     # anchored there (``.reveal.print-pdf`` never matches). Only the
     # ``.pdf-page`` wrappers are pinned — forcing a height on the inner
     # sections inflated reveal's leftover stack and pushed a blank page in.
-    return (
-        "html.print-pdf, html.print-pdf body { margin: 0 !important;"
-        " padding: 0 !important; }\n"
-        "html.print-pdf .reveal .slides {"
-        " left: 0 !important; top: 0 !important; transform: none !important; }\n"
-        "html.print-pdf .pdf-page {"
-        f" height: {height}px !important; min-height: {height}px !important;"
-        f" max-height: {height}px !important;"
-        " overflow: hidden !important; margin: 0 !important;"
-        " padding: 0 !important; page-break-after: always !important; }\n"
-        "html.print-pdf .pdf-page > section {"
-        " overflow: hidden !important; top: 0 !important;"
-        f" max-height: {height}px !important; }}\n"
-        # Center the title / section / quote layouts on their page (reveal's
-        # JS centering is off, and the flex rules in reveal_css_for only
-        # match the preview's ``.slides > section``, not the print wrappers).
-        "html.print-pdf .pdf-page > section.slide-title,"
-        " html.print-pdf .pdf-page > section.slide-section,"
-        " html.print-pdf .pdf-page > section.slide-quote,"
-        " html.print-pdf .pdf-page > section.center {"
-        " display: flex !important; flex-direction: column;"
-        " justify-content: center !important; align-items: center;"
-        f" height: {height}px !important; }}\n"
-    )
+    return f"""\
+html.print-pdf, html.print-pdf body {{ margin: 0 !important; padding: 0 !important; }}
+html.print-pdf .reveal .slides {{
+  left: 0 !important; top: 0 !important; transform: none !important;
+}}
+html.print-pdf .pdf-page {{
+  height: {height}px !important; min-height: {height}px !important;
+  max-height: {height}px !important; overflow: hidden !important;
+  margin: 0 !important; padding: 0 !important;
+  page-break-after: always !important;
+}}
+/* The forced always-break above is !important, so it would clobber reveal's
+   own (non-!important) ``.pdf-page:last-of-type {{ page-break-after: avoid }}``
+   and make the printer emit one extra blank page after the last slide. Drop
+   the break on the final page so the PDF ends on the last real slide. */
+html.print-pdf .pdf-page:last-of-type {{ page-break-after: avoid !important; }}
+/* reveal's print stylesheet zeroes the section box with
+   ``html.reveal-print .reveal .slides section {{ padding: 0 !important }}`` —
+   specificity (0,3,2). To reintroduce the slide margin (reveal's on-screen
+   ``margin`` lives in the scale transform we override away) we must outrank
+   it, hence the longer ``.reveal .slides .pdf-page > section`` chain (0,4,2).
+   Full-bleed image slides are exempt so their artwork still reaches the edge. */
+html.print-pdf .reveal .slides .pdf-page > section {{
+  overflow: hidden !important; top: 0 !important;
+  box-sizing: border-box !important; max-height: {height}px !important;
+  padding: {pad_y}px {pad_x}px !important;
+}}
+html.print-pdf .reveal .slides .pdf-page > section.slide-image-fullbleed {{
+  padding: 0 !important;
+}}
+/* Center the title / section / quote layouts on their page (reveal's JS
+   centering is off, and the flex rules in reveal_css_for only match the
+   preview's ``.slides > section``, not the print wrappers). The same chain
+   also outranks reveal's ``display: block !important`` on print sections. */
+html.print-pdf .reveal .slides .pdf-page > section.slide-title,
+html.print-pdf .reveal .slides .pdf-page > section.slide-section,
+html.print-pdf .reveal .slides .pdf-page > section.slide-quote,
+html.print-pdf .reveal .slides .pdf-page > section.center {{
+  display: flex !important; flex-direction: column;
+  justify-content: center !important; align-items: center;
+  box-sizing: border-box !important; padding: {pad_y}px {pad_x}px !important;
+  height: {height}px !important;
+}}
+"""
 
 
 def build_reveal_document(
@@ -536,7 +565,7 @@ def build_reveal_document(
         f"{reset_css}\n{reveal_css}\n{base_theme}\n"
         ".reveal aside.notes { display: none; }\n"
         f"{theme_css}\n"
-        f"{_print_css(height)}"
+        f"{_print_css(width, height, _read_margin(meta))}"
         f"{_watermark_css(meta, theme_css)}"
         "</style>\n"
         f"{_MATHJAX_CONFIG}\n"
