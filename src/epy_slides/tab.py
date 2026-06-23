@@ -51,9 +51,11 @@ RENDER_DEBOUNCE_MS = 250
 POS_POLL_MS = 400
 UNTITLED = "untitled.md"
 
-# Export readiness poll (reveal init + MathJax typeset) before giving up.
+# Export readiness poll (reveal print layout + MathJax typeset) before
+# giving up, plus a short settle so the freshly built print pages paint.
 _EXPORT_TIMEOUT_MS = 60_000
 _EXPORT_POLL_MS = 100
+_EXPORT_SETTLE_MS = 300
 
 # Reads the slide reveal is showing so the next preview render can return to
 # it (see ``_RESTORE_FN`` in template.py). Returns "" before reveal exists.
@@ -629,24 +631,35 @@ class MarkdownTab(QWidget):
         )
 
     def _wait_for_export_ready(self, then: Callable[[], None]) -> None:
-        """Poll until reveal has initialised and MathJax has typeset."""
+        """Poll until reveal's print layout is ready and MathJax has typeset.
+
+        In ``?print-pdf`` mode the readiness flags (``_reveal_done`` etc.) flip
+        true as soon as reveal *initialises*, but reveal builds the per-page
+        ``.pdf-page`` wrappers one animation frame LATER. Printing on the flags
+        alone captures a single blank page, so the poll also requires the print
+        pages to exist, then lets one more paint settle before printing.
+        """
         elapsed = [0]
+
+        def fire() -> None:
+            QTimer.singleShot(_EXPORT_SETTLE_MS, then)
 
         def check() -> None:
             def handle(done: object) -> None:
                 if done is True:
-                    then()
+                    fire()
                     return
                 elapsed[0] += _EXPORT_POLL_MS
                 if elapsed[0] >= _EXPORT_TIMEOUT_MS:
-                    then()
+                    fire()
                     return
                 QTimer.singleShot(_EXPORT_POLL_MS, check)
 
             self.view.page().runJavaScript(
                 "window._reveal_done === true && "
                 "window._mathjax_done === true && "
-                "window._diagrams_done === true",
+                "window._diagrams_done === true && "
+                "document.querySelectorAll('.pdf-page').length > 0",
                 handle,
             )
 

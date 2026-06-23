@@ -92,9 +92,13 @@ def render_deck_pdf(
         timer.start()
         while not loaded["ok"] and timer.elapsed() < timeout_ms:
             app.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 30)
+        # In print-pdf mode the flags flip true as soon as reveal initialises,
+        # but the per-page .pdf-page wrappers are built one frame later — wait
+        # for them too, or the print captures a single blank page.
         ready_js = (
             "window._reveal_done === true && window._mathjax_done === true"
             " && window._diagrams_done === true"
+            " && document.querySelectorAll('.pdf-page').length > 0"
         )
         while js(ready_js) is not True and timer.elapsed() < timeout_ms:
             pump(150)
