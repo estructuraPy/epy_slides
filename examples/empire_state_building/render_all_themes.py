@@ -51,6 +51,10 @@ except ImportError:
 SOURCE = ROOT / "empire_state_building.md"
 OUT_DIR = ROOT / "_render" / "themes"
 
+# (output suffix, source file) — the base .md is English, _es is Spanish; the
+# example ships both languages and every theme is rendered in each one.
+LANGS = [("", SOURCE), ("_es", ROOT / "empire_state_building_es.md")]
+
 
 def _page_layout(meta: dict) -> QPageLayout:
     """Landscape, zero-margin page sized to the deck's aspect ratio."""
@@ -78,13 +82,16 @@ class SlideExporter:
     MAX_WAIT_MS = 60_000
     POLL_MS = 200
 
-    def __init__(self, theme_id: str, source: str, meta: dict, on_done) -> None:
+    def __init__(
+        self, theme_id: str, source: str, meta: dict, suffix: str, on_done
+    ) -> None:
         self.theme_id = theme_id
         self.source = source
         self.meta = meta
+        self.suffix = suffix
         self.on_done = on_done
-        self.pdf_path = OUT_DIR / f"empire_state_{theme_id}.pdf"
-        self._tmp_html = ROOT / f"_tmp_{theme_id}.html"
+        self.pdf_path = OUT_DIR / f"empire_state_{theme_id}{suffix}.pdf"
+        self._tmp_html = ROOT / f"_tmp_{theme_id}{suffix}.html"
         self._elapsed = 0
 
         self.view = QWebEngineView()
@@ -95,7 +102,8 @@ class SlideExporter:
         self.view.show()
 
     def go(self) -> None:
-        print(f"\n=== theme: {self.theme_id} ===")
+        lang = self.suffix or " (en)"
+        print(f"\n=== theme: {self.theme_id}{lang} ===")
         theme = themes.get(self.theme_id)
         css = reveal_css_for(theme)
 
@@ -103,11 +111,11 @@ class SlideExporter:
             self.source, base_dir=ROOT, theme_css=css,
             for_export=True, continuous=False,
         )
-        html_path = OUT_DIR / f"empire_state_{self.theme_id}.html"
+        html_path = OUT_DIR / f"empire_state_{self.theme_id}{self.suffix}.html"
         html_path.write_text(html, encoding="utf-8")
         print(f"  HTML  -> {html_path.name}  ({len(html):,} chars)")
 
-        pptx_path = OUT_DIR / f"empire_state_{self.theme_id}.pptx"
+        pptx_path = OUT_DIR / f"empire_state_{self.theme_id}{self.suffix}.pptx"
         try:
             export_pptx(
                 self.source, pptx_path, base_dir=ROOT, theme_id=self.theme_id
@@ -197,20 +205,27 @@ class SlideExporter:
 
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    source = SOURCE.read_text(encoding="utf-8")
-    meta = parse_front_matter(source)
-
     app = QApplication.instance() or QApplication(sys.argv)
     only = sys.argv[1] if len(sys.argv) > 1 else None
-    remaining = [only] if only else list(themes.THEMES.keys())
+    theme_ids = [only] if only else list(themes.THEMES.keys())
+
+    # Flat queue of (theme_id, source_text, meta, suffix) over both languages.
+    jobs: list[tuple] = []
+    for suffix, src in LANGS:
+        if not src.is_file():
+            continue
+        text = src.read_text(encoding="utf-8")
+        meta = parse_front_matter(text)
+        for theme_id in theme_ids:
+            jobs.append((theme_id, text, meta, suffix))
 
     def kick_next() -> None:
-        if not remaining:
+        if not jobs:
             print("\nAll themes rendered.")
             app.quit()
             return
-        theme_id = remaining.pop(0)
-        exporter = SlideExporter(theme_id, source, meta, on_done=kick_next)
+        theme_id, text, meta, suffix = jobs.pop(0)
+        exporter = SlideExporter(theme_id, text, meta, suffix, on_done=kick_next)
         main._current = exporter  # type: ignore[attr-defined]
         exporter.go()
 

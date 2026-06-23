@@ -212,3 +212,8 @@ Floors per week:  ~4.5       (at peak erection)
 > to build it fast — and build it to last.
 >
 > — On the 1931 construction
+
+## Disclaimer
+<!-- layout: title-content -->
+
+[This deck is a demonstration example. Its content is illustrative and has not been reviewed in detail; it must not be used as a basis for engineering or any other decisions. Provided as is, without warranty of any kind.]{.muted}
