@@ -149,7 +149,7 @@ def _draw_layout_body(p: QPainter, c: QRectF, layout_id: str) -> None:
         p.setPen(pen)
         p.setBrush(Qt.BrushStyle.NoBrush)
         p.drawRoundedRect(QRectF(x, y, w, h), 3.0, 3.0)
-    elif layout_id == "big-stat":
+    elif layout_id in ("big-stat", "stats"):
         title(0.45)
         bw = (w - 12.0) / 3.0
         for i in range(3):
@@ -166,6 +166,31 @@ def _draw_layout_body(p: QPainter, c: QRectF, layout_id: str) -> None:
                 _INK,
                 1.5,
             )
+    elif layout_id == "stat":
+        title(0.45)
+        bw = w * 0.5
+        _rounded(
+            p, QRectF(x + (w - bw) / 2, body_top + 2, bw, 11.0), _ACCENT, 2.0
+        )
+        _rounded(
+            p, QRectF(x + w * 0.30, body_top + 16, w * 0.40, 3.0), _INK, 1.5
+        )
+    elif layout_id == "lead":
+        _rounded(
+            p, QRectF(x, y + h * 0.24, w * 0.92, 6.0), _INK_STRONG, 2.5
+        )
+        _rounded(p, QRectF(x, y + h * 0.46, w * 0.80, 4.0), _INK, 2.0)
+        _rounded(p, QRectF(x, y + h * 0.62, w * 0.55, 4.0), _INK, 2.0)
+    elif layout_id == "badge":
+        title(0.55)
+        _rounded(p, QRectF(x, body_top + 4, w * 0.28, 7.0), _ACCENT, 3.5)
+        _rounded(
+            p, QRectF(x + w * 0.32, body_top + 5, w * 0.50, 5.0), _INK, 2.0
+        )
+    elif layout_id == "card":
+        _rounded(p, QRectF(x, body_top - 4, w, body_h + 4), _MUTED, 3.0)
+        _rounded(p, QRectF(x + 4, body_top, w * 0.55, 4.0), _ACCENT, 2.0)
+        _bars(p, x + 4, body_top + 8, w - 8, n=2, color=_INK, h=2.5, gap=3.5)
     elif layout_id == "agenda":
         title(0.40)
         for i in range(3):

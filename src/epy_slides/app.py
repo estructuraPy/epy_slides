@@ -383,23 +383,12 @@ class SlideWindow(QMainWindow):
             lambda: self._on_active_tab("insert_diagram", "nomnoml")
         )
 
-        # Shared design blocks (cards, big stats, timelines, agendas) — the
-        # same insert options epy_reports and epy_paper expose, one engine.
-        from epy_slides._design import (  # noqa: PLC0415
-            DESIGN_BLOCK_LABELS,
-            DESIGN_BLOCKS,
+        # Shared design blocks (cards, big stats, timelines, agendas) opened
+        # through a visual picker, like the slide-layout picker.
+        self.act_design_block = QAction("Design block…", self)
+        self.act_design_block.triggered.connect(
+            self._open_design_block_picker
         )
-
-        self.design_actions: dict[str, QAction] = {}
-        for kind in DESIGN_BLOCKS:
-            label = DESIGN_BLOCK_LABELS.get(kind, kind.title())
-            act = QAction(label, self)
-            act.triggered.connect(
-                lambda _checked=False, k=kind: self._on_active_tab(
-                    "insert_design_block", k
-                )
-            )
-            self.design_actions[kind] = act
 
     def _build_references_actions(self) -> None:
         """Create References menu actions (citations + bibliography)."""
@@ -480,9 +469,7 @@ class SlideWindow(QMainWindow):
         self.diagram_sub = self.content_menu.addMenu("Diagram")
         self.diagram_sub.addAction(self.act_diagram_mermaid)
         self.diagram_sub.addAction(self.act_diagram_nomnoml)
-        self.design_sub = self.content_menu.addMenu("Design block")
-        for act in self.design_actions.values():
-            self.design_sub.addAction(act)
+        self.content_menu.addAction(self.act_design_block)
         self.content_menu.addSeparator()
         self.content_menu.addAction(self.act_notes)
 
@@ -698,6 +685,19 @@ class SlideWindow(QMainWindow):
         theme_id = dialog.selected_theme_id()
         if theme_id:
             self._apply_theme(theme_id)
+
+    def _open_design_block_picker(self) -> None:
+        """Open the design-block picker; insert the chosen block on accept."""
+        from epy_slides.design_block_dialog import (  # noqa: PLC0415
+            DesignBlockDialog,
+        )
+
+        dialog = DesignBlockDialog(self)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        kind = dialog.selected_kind()
+        if kind:
+            self._on_active_tab("insert_design_block", kind)
 
     def _edit_current_theme(self) -> None:
         """Edit the active theme in place if custom, otherwise clone it."""
@@ -1533,5 +1533,6 @@ def main(argv: list[str] | None = None) -> int:
     return _run_gui(args.files)
 
 
-if __name__ == "__main__":
+# pragma below: module-run entrypoint; never imported as __main__ in tests.
+if __name__ == "__main__":  # pragma: no cover - module-run entrypoint
     raise SystemExit(main())
