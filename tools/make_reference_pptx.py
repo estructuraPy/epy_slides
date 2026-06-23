@@ -29,6 +29,13 @@ from lxml import etree  # noqa: E402
 from pptx import Presentation  # noqa: E402
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT  # noqa: E402
 from pptx.oxml.ns import qn  # noqa: E402
+from pptx.util import Emu  # noqa: E402
+
+# PowerPoint 16:9 "widescreen" (13.333 x 7.5 in). python-pptx's default
+# template is 4:3 (10 x 7.5 in); the decks are 16:9, so a 4:3 reference makes
+# Pandoc lay 16:9 content into a 4:3 frame and the text shifts / clips.
+_WIDESCREEN_W = Emu(12192000)
+_WIDESCREEN_H = Emu(6858000)
 
 from epy_slides import themes  # noqa: E402
 from epy_slides.themes_base import Theme  # noqa: E402
@@ -87,9 +94,42 @@ def _set_font(font_scheme, which: str, typeface: str) -> None:
         latin.set("typeface", typeface)
 
 
+def _widen_placeholders(container, ratio: float) -> None:
+    """Scale the x position and width of placeholders that own their geometry.
+
+    Converts a 4:3 layout/master to fill the wider 16:9 canvas: only the
+    horizontal axis grows (16:9 height == 4:3 height), so the ``a:off/@x`` and
+    ``a:ext/@cx`` of each *explicit* ``a:xfrm`` scale; top/height stay put.
+    Placeholders that INHERIT their geometry have no ``a:xfrm`` and are skipped
+    — they would otherwise be scaled twice (once on the master they inherit
+    from, once here on the resolved value), blowing a 9 in box up to 16 in.
+    """
+    for ph in container.placeholders:
+        sppr = ph._element.spPr
+        xfrm = sppr.find(qn("a:xfrm")) if sppr is not None else None
+        if xfrm is None:
+            continue
+        off = xfrm.find(qn("a:off"))
+        ext = xfrm.find(qn("a:ext"))
+        if off is not None and off.get("x") is not None:
+            off.set("x", str(int(int(off.get("x")) * ratio)))
+        if ext is not None and ext.get("cx") is not None:
+            ext.set("cx", str(int(int(ext.get("cx")) * ratio)))
+
+
 def build_reference(theme: Theme, target: Path) -> None:
-    """Write a themed reference ``.pptx`` for ``theme`` to ``target``."""
+    """Write a themed 16:9 reference deck for ``theme`` to ``target``."""
     prs = Presentation()
+    # Switch the default 4:3 canvas to 16:9 widescreen and widen the layout
+    # placeholders to fill it, so Pandoc lays slide content across the full
+    # 16:9 width instead of a 4:3 column.
+    ratio = float(_WIDESCREEN_W) / float(prs.slide_width)
+    prs.slide_width = _WIDESCREEN_W
+    prs.slide_height = _WIDESCREEN_H
+    for master in prs.slide_masters:
+        _widen_placeholders(master, ratio)
+        for layout in master.slide_layouts:
+            _widen_placeholders(layout, ratio)
     css = theme.css_vars
     for master in prs.slide_masters:
         theme_part = master.part.part_related_by(RT.THEME)

@@ -11,6 +11,30 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def _scale_pdf(pdf_path: Path, target_width_in: float) -> None:
+    """Scale every page of ``pdf_path`` to ``target_width_in`` (vector-safe).
+
+    reveal sizes the print page to the 960 px deck, which Qt prints a touch
+    under the 16:9 PowerPoint size; the exact printed width also drifts a few
+    percent from the requested page layout. Scaling the finished *vector* PDF
+    to the target width (computed per page from its real media box, so the
+    drift is absorbed) keeps the text crisp and gives the deck the larger
+    widescreen sheet. The aspect ratio is preserved (one uniform scale).
+    """
+    from pypdf import PdfReader, PdfWriter  # noqa: PLC0415
+
+    target_pt = target_width_in * 72.0
+    reader = PdfReader(str(pdf_path))
+    writer = PdfWriter()
+    for page in reader.pages:
+        width_pt = float(page.mediabox.width)
+        if width_pt > 0:
+            page.scale_by(target_pt / width_pt)
+        writer.add_page(page)
+    with pdf_path.open("wb") as handle:
+        writer.write(handle)
+
+
 def render_deck_pdf(
     source: str,
     out_path: Path,
@@ -41,6 +65,11 @@ def render_deck_pdf(
     aspect = (meta.get("aspect-ratio") or "16:9").strip()
     # Match reveal's PDF page pixel size at 96 px/inch (960x540 / 960x720).
     width_in, height_in = (10.0, 7.5) if aspect == "4:3" else (10.0, 5.625)
+    # The 16:9 page reveal produces reads small next to a PowerPoint deck;
+    # after printing, scale the vector PDF to the 13.333 in widescreen width
+    # (crisp — it is vector). 4:3 already prints at the 10x7.5 in PowerPoint
+    # size, so it is left as-is.
+    pdf_target_w = None if aspect == "4:3" else 13.333
 
     app = QApplication.instance() or QApplication([])
     html = render_revealjs(
@@ -119,6 +148,9 @@ def render_deck_pdf(
 
     if not (state["ok"] and out_path.exists()):
         raise RuntimeError("PDF export failed (reveal/print did not complete)")
+
+    if pdf_target_w is not None:
+        _scale_pdf(out_path, pdf_target_w)
 
     watermark = (meta.get("watermark") or "").strip()
     if watermark:

@@ -166,8 +166,15 @@ def reveal_css_for(theme: Theme) -> str:
    to the middle, content layouts stay top-aligned. */
 .reveal .slides > section {{
   height: 100%; box-sizing: border-box;
+  /* Inset the content from the slide edges so paragraphs and headings don't
+     run to the very border on screen / in the HTML export (matches the PDF's
+     print margin). Padding percentages resolve against the deck width, so the
+     vertical inset stays modest to avoid overflowing dense slides. */
+  padding: 2.2% 6%;
   display: flex; flex-direction: column; justify-content: flex-start;
 }}
+/* Full-bleed image slides must reach the edge — no inset. */
+.reveal .slides > section.slide-image-fullbleed {{ padding: 0; }}
 .reveal .slides > section.center {{ justify-content: center; }}
 .reveal .slides > section.slide-title {{ justify-content: center; }}
 .reveal .slides > section.slide-section {{
