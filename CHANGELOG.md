@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Headless by default.** `PySide6` moved from a hard dependency to an optional
+  `[gui]` extra. `pip install epy_slides` now installs the engine headless (the
+  `SlideDeck` facade renders reveal.js HTML with Qt imported lazily); the desktop
+  app and the Paged.js PDF export require `pip install epy_slides[gui]`. This lets
+  Lito and the LitoClaw IDE embed the engine without pulling Qt.
+
 ### Fixed
 - **Watermark stays visible on every slide.** The on-screen watermark now
   adapts to the deck background (a `multiply` blend on light themes, `screen`
