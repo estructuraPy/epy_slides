@@ -14,8 +14,8 @@ watermark-opacity: "0.06"
 copyright: © 2026 ANM Ingeniería
 ---
 
-## Un perfil urbano que definió una era
-<!-- layout: section -->
+## Un perfil urbano que definió una era {background-image="esb1.jpeg"}
+<!-- layout: image-fullbleed -->
 
 ## Agenda
 <!-- layout: agenda -->
@@ -82,6 +82,11 @@ Una planta de piso típica se repetía a lo largo de la torre, de modo que las c
 - **May 1931** — Inauguración; 410 días de construcción
 :::
 
+## Viento — la carga que gobierna
+<!-- layout: image-caption -->
+
+![Atardecer sobre Manhattan: en una torre esbelta, el viento —no la gravedad— gobierna el diseño lateral.](esb4.jpeg){width=76%}
+
 ## El sistema estructural
 <!-- layout: title-content -->
 
@@ -125,7 +130,7 @@ Guiar al público a lo largo de la trayectoria de cargas: el viento lateral y la
 
 :::: {.columns}
 ::: {.column width="42%"}
-![](esb_skyline.png)
+![](esb2.jpeg)
 :::
 ::: {.column width="58%"}
 - Volumetría Art Déco escalonada
@@ -133,6 +138,11 @@ Guiar al público a lo largo de la trayectoria de cargas: el viento lateral y la
 - Un mástil de amarre corona la torre a 381 m
 :::
 ::::
+
+## La ciudad que transformó
+<!-- layout: image-caption -->
+
+![Manhattan desde lo alto — el perfil urbano que la torre llegó a definir.](esb5.jpeg){width=76%}
 
 ## Entonces y hoy
 <!-- layout: two-column -->
@@ -188,7 +198,7 @@ Pisos por semana:      ~4.5       (en el pico del montaje)
 
 :::: {.columns}
 ::: {.column width="32%"}
-![](esb_skyline.png)
+![](esb3.jpeg)
 :::
 ::: {.column width="68%"}
 > Un monumento debería parecer que ha crecido de la roca sobre la que se asienta —
@@ -206,11 +216,25 @@ Pisos por semana:      ~4.5       (en el pico del montaje)
 >
 > — Sobre la construcción de 1931
 
+## Una fuente, muchas miradas
+<!-- layout: two-column -->
+
+:::: {.columns}
+::: {.column width="50%"}
+![](esb6.jpeg){width=100%}
+:::
+::: {.column width="50%"}
+![](esb7.jpeg){width=100%}
+:::
+::::
+
+[Una sola fuente Markdown, cualquier identidad visual — la misma presentación, reimaginada. Imágenes generadas con LitoClaw, el sistema inteligente creado por ANM Ingeniería.]{.muted}
+
 ## Aviso
 <!-- layout: title-content -->
 
 ::: {.disclosure}
-Esta presentación es un ejemplo ilustrativo preparado con asistencia de IA; revise su contenido antes de utilizarlo.
+Esta presentación es un ejemplo ilustrativo preparado con asistencia de IA; revise su contenido antes de utilizarlo. Imágenes generadas con LitoClaw, el sistema inteligente creado por ANM Ingeniería.
 :::
 
 [Fuente y ejemplos hermanos en GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/examples/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Puente de Brooklyn](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}

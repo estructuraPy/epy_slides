@@ -4,6 +4,20 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] — 2026-06-24
+
+### Added
+- **Empire State example: integrated illustrations.** The Empire State deck now
+  weaves seven themed illustrations through the story — a full-bleed cover, two
+  captioned scene slides, the Art Deco tower beside the massing notes, a serene
+  skyline next to the architect's quote, and a two-image style gallery —
+  generated with LitoClaw. Both languages carry the image credit.
+
+### Fixed
+- **Legible titles over full-bleed images.** A title on an `image-fullbleed`
+  slide now sits on a translucent plate with light text and a drop shadow, so it
+  stays readable over any photograph and in any theme.
+
 ## [0.1.5] — 2026-06-24
 
 ### Fixed

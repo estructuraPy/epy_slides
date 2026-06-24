@@ -184,4 +184,15 @@ def reveal_css_for(theme: Theme) -> str:
 .reveal .slides > section.slide-image-fullbleed {{
   justify-content: center; align-items: center;
 }}
+/* A title over a full-bleed image needs a legible plate so it reads on any
+   photo and in any theme (dark text on a busy image would vanish). */
+.reveal .slides section.slide-image-fullbleed h1,
+.reveal .slides section.slide-image-fullbleed h2 {{
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.2em 0.6em; border: none; border-radius: 10px;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}}
 """ + design_css(theme, scope=".reveal ")

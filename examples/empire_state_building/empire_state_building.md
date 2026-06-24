@@ -14,8 +14,8 @@ watermark-opacity: "0.06"
 copyright: © 2026 ANM Ingeniería
 ---
 
-## A skyline that defined an era
-<!-- layout: section -->
+## A skyline that defined an era {background-image="esb1.jpeg"}
+<!-- layout: image-fullbleed -->
 
 ## Agenda
 <!-- layout: agenda -->
@@ -85,6 +85,11 @@ and ran it 80+ times.
 - **May 1931** — Ribbon-cutting; 410 days of construction
 :::
 
+## Wind — the load that governs
+<!-- layout: image-caption -->
+
+![Dusk over Manhattan: for a slender tower, wind — not gravity — governs the lateral design.](esb4.jpeg){width=76%}
+
 ## The structural system
 <!-- layout: title-content -->
 
@@ -132,7 +137,7 @@ Manhattan schist bedrock.
 
 :::: {.columns}
 ::: {.column width="42%"}
-![](esb_skyline.png)
+![](esb2.jpeg)
 :::
 ::: {.column width="58%"}
 - Stepped Art Deco massing
@@ -140,6 +145,11 @@ Manhattan schist bedrock.
 - A mooring mast crowns the tower at 381 m
 :::
 ::::
+
+## The city it reshaped
+<!-- layout: image-caption -->
+
+![Manhattan from above — the skyline the tower came to define.](esb5.jpeg){width=76%}
 
 ## Then and now
 <!-- layout: two-column -->
@@ -195,7 +205,7 @@ Floors per week:  ~4.5       (at peak erection)
 
 :::: {.columns}
 ::: {.column width="32%"}
-![](esb_skyline.png)
+![](esb3.jpeg)
 :::
 ::: {.column width="68%"}
 > A monument should look as if it had grown out of the rock it stands on —
@@ -213,11 +223,25 @@ Floors per week:  ~4.5       (at peak erection)
 >
 > — On the 1931 construction
 
+## One source, many looks
+<!-- layout: two-column -->
+
+:::: {.columns}
+::: {.column width="50%"}
+![](esb6.jpeg){width=100%}
+:::
+::: {.column width="50%"}
+![](esb7.jpeg){width=100%}
+:::
+::::
+
+[One Markdown source, any visual identity — the very same deck, reimagined. Images generated with LitoClaw, the intelligent system created by ANM Ingeniería.]{.muted}
+
 ## Disclosure
 <!-- layout: title-content -->
 
 ::: {.disclosure}
-This deck is an illustrative example prepared with the assistance of AI; review its content before relying on it.
+This deck is an illustrative example prepared with the assistance of AI; review its content before relying on it. Images generated with LitoClaw, the intelligent system created by ANM Ingeniería.
 :::
 
 [Source and sibling examples on GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/examples/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Brooklyn Bridge](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}
