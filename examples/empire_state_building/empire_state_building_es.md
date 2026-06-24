@@ -209,4 +209,6 @@ Pisos por semana:      ~4.5       (en el pico del montaje)
 ## Aviso
 <!-- layout: title-content -->
 
-[Esta presentación es un ejemplo con fines demostrativos. Su contenido es ilustrativo y no ha sido revisado en detalle; no debe usarse como base para decisiones de ingeniería ni de ningún otro tipo. Se entrega tal cual, sin garantía de ningún tipo.]{.muted}
+::: {.disclosure}
+Esta presentación es un ejemplo ilustrativo preparado con asistencia de IA; revise su contenido antes de utilizarlo.
+:::
