@@ -80,8 +80,9 @@ Requires Python ≥ 3.10. Pandoc is bundled via `pypandoc-binary`.
 - **PDF** uses reveal.js print mode (one slide per landscape page) and embeds
   the document metadata and copyright notice.
 - **PowerPoint** is produced by Pandoc using a per-theme reference deck. Some
-  reveal-only features (transitions, fragments, full-bleed backgrounds) do not
-  carry into `.pptx`; equations are rasterised and callouts become blockquotes.
+  reveal-only features (transitions, fragments) do not carry into `.pptx`;
+  full-bleed background images become inline pictures, equations are rasterised
+  and callouts become blockquotes.
 
 ## Credits
 

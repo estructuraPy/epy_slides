@@ -50,6 +50,7 @@ _ATX_RE = re.compile(r"^(?P<hashes>#{1,6})[ \t]+(?P<rest>.*?)[ \t]*$")
 _FENCE_RE = re.compile(r"^[ \t]*(```|~~~)")
 _PAUSE_RE = re.compile(r"^[ \t]*\.[ \t]+\.[ \t]+\.[ \t]*$")
 _BG_ATTR_RE = re.compile(r"[ \t]*\{[^}]*background[^}]*\}")
+_BG_IMAGE_RE = re.compile(r'background-image\s*=\s*"(?P<src>[^"]+)"')
 _CALLOUT_OPEN_RE = re.compile(
     r"^:::+[ \t]*\{\.callout-(?P<kind>" + "|".join(_CALLOUT_KINDS) + r")"
     r"(?:[ \t]+(?P<attrs>[^}]*))?\}[ \t]*$"
@@ -382,9 +383,21 @@ def expand_for_pptx(source: str) -> str:
             i += consumed
             continue
         if _ATX_RE.match(line):
+            bg_src = None
             if "background" in line:
+                m_bg = _BG_IMAGE_RE.search(line)
+                bg_src = m_bg.group("src") if m_bg else None
                 line = _BG_ATTR_RE.sub("", line)
             last_heading_idx = len(out)
+            out.append(line)
+            if bg_src:
+                # The pptx writer drops reveal background images, so a
+                # full-bleed cover would lose its picture entirely. Re-add it
+                # as an inline image so the PowerPoint slide still shows it.
+                out.append("")
+                out.append(f"![]({bg_src})")
+            i += 1
+            continue
         out.append(line)
         i += 1
     return "\n".join(out) + ("\n" if source.endswith("\n") else "")

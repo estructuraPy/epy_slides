@@ -4,6 +4,14 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] — 2026-06-24
+
+### Fixed
+- **Full-bleed cover images now reach PowerPoint.** A slide whose background is
+  set with `{background-image="…"}` previously lost its picture in the `.pptx`
+  export (the reveal background was dropped). The image is now re-added as an
+  inline picture so the PowerPoint slide carries it too.
+
 ## [0.1.6] — 2026-06-24
 
 ### Added
