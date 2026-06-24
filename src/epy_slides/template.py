@@ -54,6 +54,9 @@ window.MathJax = {
     ready() {
       MathJax.startup.defaultReady();
       MathJax.startup.promise.then(() => {
+        // Typesetting can change content height, so re-fit any slide whose
+        // content now overflows before the export poll reads _mathjax_done.
+        if (window._epyAutofit) { window._epyAutofit(); }
         window._mathjax_done = true;
       });
     }
@@ -421,6 +424,39 @@ _RESTORE_FN = (
 )
 
 
+# Shrink-to-fit: reveal slides are a fixed size and clip overflow (the print
+# CSS pins each page with ``overflow: hidden``), so a content-dense slide is
+# silently cut off at the bottom. This wraps each leaf slide's content in an
+# ``.epy-fit`` box and, when that content is taller than the slide, scales it
+# down to fit. It runs after reveal lays out (and again after MathJax typesets,
+# which changes heights) so both the live preview and the PDF export fit.
+_AUTOFIT_FN = (
+    "window._epyAutofit = function () {\n"
+    "  var secs = document.querySelectorAll('.reveal .slides section');\n"
+    "  Array.prototype.forEach.call(secs, function (sec) {\n"
+    "    if (sec.querySelector(':scope > section')) return;\n"
+    "    var fit = sec.querySelector(':scope > .epy-fit');\n"
+    "    if (!fit) {\n"
+    "      fit = document.createElement('div');\n"
+    "      fit.className = 'epy-fit';\n"
+    "      while (sec.firstChild) { fit.appendChild(sec.firstChild); }\n"
+    "      sec.appendChild(fit);\n"
+    "    }\n"
+    "    fit.style.transform = '';\n"
+    "    var cs = getComputedStyle(sec);\n"
+    "    var pad = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);\n"
+    "    var avail = sec.clientHeight - pad;\n"
+    "    var need = fit.scrollHeight;\n"
+    "    if (avail > 4 && need > avail + 1) {\n"
+    "      var f = Math.max(0.4, (avail / need) * 0.98);\n"
+    "      fit.style.transformOrigin = 'top center';\n"
+    "      fit.style.transform = 'scale(' + f + ')';\n"
+    "    }\n"
+    "  });\n"
+    "};\n"
+)
+
+
 def _print_css(width: int, height: int, margin: float) -> str:
     """Pin reveal's print-pdf pages to the exact slide height, no drift.
 
@@ -538,12 +574,20 @@ def build_reveal_document(
     init = (
         "<script>\n"
         + _RESTORE_FN
+        + _AUTOFIT_FN
         + "document.addEventListener('DOMContentLoaded', function () {\n"
         "  function initDeck() {\n"
         "    var deck = new Reveal(document.querySelector('.reveal'), "
         + json.dumps(config) + ");\n"
         "    window._epyDeck = deck;\n"
+        "    deck.on('slidechanged', function () { window._epyAutofit(); });\n"
+        "    deck.on('resize', function () { window._epyAutofit(); });\n"
+        "    // reveal builds the fixed-size print pages (and pins their\n"
+        "    // height) only when exporting; 'pdf-ready' is the moment those\n"
+        "    // boxes exist, so this is where overflowing slides must be fit.\n"
+        "    deck.on('pdf-ready', function () { window._epyAutofit(); });\n"
         "    deck.initialize().then(function () {\n"
+        "      window._epyAutofit();\n"
         "      window._reveal_done = true; window._epyRestore();\n"
         "    });\n"
         "  }\n"
@@ -564,6 +608,7 @@ def build_reveal_document(
         "<style>\n"
         f"{reset_css}\n{reveal_css}\n{base_theme}\n"
         ".reveal aside.notes { display: none; }\n"
+        ".reveal .slides section > .epy-fit { width: 100%; }\n"
         f"{theme_css}\n"
         f"{_print_css(width, height, _read_margin(meta))}"
         f"{_watermark_css(meta, theme_css)}"

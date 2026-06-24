@@ -26,7 +26,7 @@
 ;     checkbox below launches "ms-settings:defaultapps" as a convenience.
 
 #define AppName "epy_slides"
-#define AppVersion "0.1.4"
+#define AppVersion "0.1.5"
 #define AppPublisher "Ing. Angel Navarro-Mora M.Sc."
 #define AppURL "https://github.com/estructuraPy/epy_slides"
 #define AppId "{{B2C3D4E5-6F70-4811-9A2B-3C4D5E6F7081}"

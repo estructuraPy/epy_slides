@@ -79,7 +79,7 @@ Una planta de piso típica se repetía a lo largo de la torre, de modo que las c
 - **Ene 1930** — Excavación y cimentaciones hasta la roca firme
 - **Mar 1930** — Inicio del montaje de la estructura de acero
 - **Sep 1930** — Coronación de la estructura, 102 pisos
-- **May 1931** — Inauguración, 410 días desde el inicio
+- **May 1931** — Inauguración; 410 días de construcción
 :::
 
 ## El sistema estructural
@@ -179,7 +179,7 @@ Guiar al público a lo largo de la trayectoria de cargas: el viento lateral y la
 
 ```text
 Estructura de acero:   ~23 semanas
-Torre completa:         410 días  (de cimentación a inauguración)
+Construcción:           410 días  (del montaje de acero a la inauguración)
 Pisos por semana:      ~4.5       (en el pico del montaje)
 ```
 

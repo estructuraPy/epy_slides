@@ -82,7 +82,7 @@ and ran it 80+ times.
 - **Jan 1930** — Excavation and foundations to bedrock
 - **Mar 1930** — Steel erection begins
 - **Sep 1930** — Frame tops out, 102 floors
-- **May 1931** — Ribbon-cutting, 410 days from start
+- **May 1931** — Ribbon-cutting; 410 days of construction
 :::
 
 ## The structural system
@@ -186,7 +186,7 @@ Manhattan schist bedrock.
 
 ```text
 Steel frame:      ~23 weeks
-Full tower:        410 days  (foundation to ribbon-cutting)
+Construction:      410 days  (steel start to ribbon-cutting)
 Floors per week:  ~4.5       (at peak erection)
 ```
 

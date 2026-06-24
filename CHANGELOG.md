@@ -4,6 +4,19 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] — 2026-06-24
+
+### Fixed
+- **Dense slides no longer clip.** Content taller than the fixed slide frame
+  (e.g. multi-card layouts) was silently cut off at the bottom in both the live
+  preview and the PDF export. A shrink-to-fit pass now scales any overflowing
+  slide down to fit, leaving slides that already fit untouched. It runs after
+  layout, on slide change and resize, when the PDF print pages are built
+  (`pdf-ready`), and after MathJax typesets (which changes heights).
+- **Empire State example wording.** The "410 days" figure is now described as
+  construction time (from the March 1930 steel start), not the span from the
+  January 1930 excavation to opening (~15 months).
+
 ## [0.1.4] — 2026-06-23
 
 ### Added
