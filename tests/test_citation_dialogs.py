@@ -62,6 +62,99 @@ def test_bib_entry_dialog_autosuggest_key(qapp):
     assert dlg._field_edits["key"].text() == "navarro2020"
 
 
+def test_bib_dialog_required_hint_type_without_required(qapp):
+    # ``misc`` has no required fields beyond the key, so the key-only hint
+    # branch runs.
+    dlg = BibEntryDialog()
+    dlg._on_type_changed("misc")
+    assert "key" in dlg.required_label.text().lower()
+
+
+def test_bib_dialog_key_edit_marks_user_typed(qapp):
+    dlg = BibEntryDialog()
+    dlg._user_typed_key = False
+    dlg._on_key_text_edited("mykey")
+    assert dlg._user_typed_key is True
+
+
+def test_bib_dialog_autosuggest_skipped_when_user_typed(qapp):
+    # When the user has typed a key, autosuggest leaves it untouched.
+    dlg = BibEntryDialog()
+    dlg._user_typed_key = True
+    dlg._field_edits["key"].setText("manual")
+    dlg._field_edits["author"].setText("Doe, John")
+    dlg._field_edits["year"].setText("2020")
+    dlg._maybe_autosuggest_key()
+    assert dlg._field_edits["key"].text() == "manual"
+
+
+def test_bib_dialog_accept_warns_on_missing_fields(qapp, monkeypatch):
+    from epy_slides import bib_dialog
+
+    dlg = BibEntryDialog(default_type="article")
+    # Leave required fields blank → the missing-fields warning fires.
+    warned = {"n": 0}
+    monkeypatch.setattr(
+        bib_dialog.QMessageBox, "warning",
+        staticmethod(lambda *a, **k: warned.update(n=warned["n"] + 1)),
+    )
+    accepted = {"n": 0}
+    monkeypatch.setattr(dlg, "accept", lambda: accepted.update(n=1))
+    dlg._accept()
+    assert warned["n"] == 1
+    assert accepted["n"] == 0
+
+
+def test_bib_dialog_accept_succeeds_when_complete(qapp, monkeypatch):
+    dlg = BibEntryDialog(default_type="misc")
+    dlg._user_typed_key = True
+    dlg._field_edits["key"].setText("ok2020")
+    dlg._field_edits["title"].setText("A title")
+    accepted = {"n": 0}
+    monkeypatch.setattr(dlg, "accept", lambda: accepted.update(n=1))
+    dlg._accept()
+    assert accepted["n"] == 1
+
+
+def test_bib_dialog_accept_duplicate_key_declined(qapp, monkeypatch):
+    from epy_slides import bib_dialog
+
+    dlg = BibEntryDialog(default_type="misc", existing_keys={"dup2020"})
+    dlg._user_typed_key = True
+    dlg._field_edits["key"].setText("dup2020")
+    dlg._field_edits["title"].setText("T")
+    monkeypatch.setattr(
+        bib_dialog.QMessageBox, "question",
+        staticmethod(
+            lambda *a, **k: bib_dialog.QMessageBox.StandardButton.No
+        ),
+    )
+    accepted = {"n": 0}
+    monkeypatch.setattr(dlg, "accept", lambda: accepted.update(n=1))
+    dlg._accept()
+    # Declining the "append anyway?" prompt aborts the accept.
+    assert accepted["n"] == 0
+
+
+def test_bib_dialog_accept_duplicate_key_confirmed(qapp, monkeypatch):
+    from epy_slides import bib_dialog
+
+    dlg = BibEntryDialog(default_type="misc", existing_keys={"dup2020"})
+    dlg._user_typed_key = True
+    dlg._field_edits["key"].setText("dup2020")
+    dlg._field_edits["title"].setText("T")
+    monkeypatch.setattr(
+        bib_dialog.QMessageBox, "question",
+        staticmethod(
+            lambda *a, **k: bib_dialog.QMessageBox.StandardButton.Yes
+        ),
+    )
+    accepted = {"n": 0}
+    monkeypatch.setattr(dlg, "accept", lambda: accepted.update(n=1))
+    dlg._accept()
+    assert accepted["n"] == 1
+
+
 def test_crossref_dialog_shows_citations(qapp):
     entries = [
         BibEntry(

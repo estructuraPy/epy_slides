@@ -171,7 +171,7 @@ def test_insert_link_wraps_selection(tab):
     assert "[anchor](URL)" in tab.text()
 
 
-# --------------------------------------------------------------- snippet blocks
+# ------------------------------------------------------------- snippet blocks
 
 
 def test_insert_code_block(tab):

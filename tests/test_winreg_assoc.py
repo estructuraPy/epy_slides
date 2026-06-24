@@ -64,7 +64,9 @@ def test_open_command_quotes_and_appends_arg():
 
 
 def test_open_command_when_launcher_quoted(monkeypatch):
-    monkeypatch.setattr(winreg_assoc, "_launcher_path", lambda: '"C:\\app.exe"')
+    monkeypatch.setattr(
+        winreg_assoc, "_launcher_path", lambda: '"C:\\app.exe"'
+    )
     assert _open_command() == '"C:\\app.exe" "%1"'
 
 
@@ -91,7 +93,7 @@ def test_icon_source_frozen(monkeypatch):
     assert _icon_source() == '"C:\\frozen\\epy_slides.exe",0'
 
 
-# --------------------------------------------------- open_default_apps_settings
+# ------------------------------------------------- open_default_apps_settings
 
 
 def test_open_default_apps_settings_launches_uri(monkeypatch):

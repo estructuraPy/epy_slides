@@ -18,7 +18,6 @@ from epy_slides.theme_editor_dialog import (
     _pt_value,
 )
 
-
 # --------------------------------------------------------------- pure helpers
 
 

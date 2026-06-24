@@ -53,7 +53,10 @@ def _make_png(path, size: tuple[int, int] = (40, 20)) -> None:
 
 @pytest.mark.parametrize(
     ("number", "expected"),
-    [(1, "i"), (4, "iv"), (9, "ix"), (14, "xiv"), (40, "xl"), (2026, "mmxxvi")],
+    [
+        (1, "i"), (4, "iv"), (9, "ix"),
+        (14, "xiv"), (40, "xl"), (2026, "mmxxvi"),
+    ],
 )
 def test_roman_known_values(number, expected):
     assert _roman(number) == expected

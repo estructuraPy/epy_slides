@@ -12,7 +12,6 @@ from epy_slides.snippets import (
     set_metadata_field,
 )
 
-
 # --------------------------------------------------------------- find_labels
 
 

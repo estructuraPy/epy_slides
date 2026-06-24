@@ -72,6 +72,58 @@ def test_supported_extensions():
     assert {".md", ".markdown", ".qmd"} == SUPPORTED_EXTENSIONS
 
 
+def test_load_manual_text_spanish_variant_resolves():
+    # The Spanish manual stem ends with ``_es``; its screenshot resolution
+    # prefers the ``*_es.png`` variants and still drops the logo token.
+    text = _load_manual_text("welcome_es.md")
+    assert "__EPY_LOGO__" not in text
+    assert isinstance(text, str)
+
+
+def test_load_manual_text_drops_missing_image(monkeypatch):
+    # When a bundled image cannot be resolved, its placeholder (and any
+    # image markdown using it) is stripped so Pandoc never aborts.
+    import importlib.resources as ir
+
+    real_files = ir.files
+
+    class _AlwaysMissing:
+        def __init__(self, real):
+            self._real = real
+
+        def joinpath(self, *parts):
+            return _AlwaysMissing(self._real.joinpath(*parts))
+
+        def read_text(self, *a, **k):
+            # The manual body itself must still load.
+            return self._real.read_text(*a, **k)
+
+        def is_file(self):
+            return False
+
+    def fake_files(package):
+        node = real_files(package)
+        if package == "epy_slides.assets":
+            return _AlwaysMissing(node)
+        return node
+
+    monkeypatch.setattr(
+        app_module.importlib.resources, "files", fake_files
+    )
+    text = _load_manual_text("welcome.md")
+    assert "__EPY_LOGO__" not in text
+    assert "__SHOT_EDITOR__" not in text
+
+
+def test_load_welcome_falls_back_on_error(monkeypatch):
+    def boom(_filename="welcome.md"):
+        raise FileNotFoundError("no manual")
+
+    monkeypatch.setattr(app_module, "_load_manual_text", boom)
+    text = _load_welcome()
+    assert "Getting started" in text
+
+
 # --------------------------------------------------------------- construction
 
 
@@ -89,7 +141,7 @@ def test_current_theme_is_a_known_theme(window):
     assert window._current_theme.id in themes.THEMES
 
 
-# --------------------------------------------------------------- tab management
+# ------------------------------------------------------------- tab management
 
 
 def test_new_tab_adds_empty_tab(window):
@@ -119,8 +171,15 @@ def test_open_path_focuses_existing_tab(window, tmp_path):
     assert window.tabs.count() == count_after_first
 
 
-def test_open_path_non_file_is_handled(window, tmp_path):
+def test_open_path_non_file_is_handled(window, tmp_path, monkeypatch):
     missing = tmp_path / "nope.md"
+    # open_path warns via a modal QMessageBox for a non-file; stub it so
+    # the static exec() does not block forever under the offscreen platform.
+    monkeypatch.setattr(
+        app_module.QMessageBox,
+        "warning",
+        staticmethod(lambda *a, **k: None),
+    )
     # Must not raise even though the path is not a file.
     window.open_path(missing)
 
@@ -218,8 +277,31 @@ def test_set_language_updates_state_and_settings(window):
         window._set_language("en")
 
 
-def test_retranslate_ui_runs(window):
+def test_window_applies_saved_spanish_language_on_build(qapp):
+    # A persisted non-English language must be applied as the window builds
+    # (the construction-time set_language branch).
     from epy_slides import _i18n as i18n
+
+    settings = QSettings("ANM Ingeniería", "epy_slides")
+    settings.setValue("language", "es")
+    settings.sync()
+    try:
+        win = SlideWindow()
+        try:
+            assert i18n.current_language() == "es"
+        finally:
+            for i in range(win.tabs.count()):
+                w = win.tabs.widget(i)
+                if isinstance(w, MarkdownTab):
+                    w.cleanup_preview_tmp()
+            win.deleteLater()
+    finally:
+        settings.setValue("language", "en")
+        settings.sync()
+        i18n.set_language("en")
+
+
+def test_retranslate_ui_runs(window):
 
     try:
         window._set_language("es")
@@ -369,19 +451,43 @@ def test_ensure_utf8_streams_runs():
     _ensure_utf8_streams()  # must not raise
 
 
+def test_ensure_utf8_streams_handles_none_and_missing_reconfigure(
+    monkeypatch,
+):
+    import sys
+
+    class _NoReconfigure:
+        # A stream object without a ``reconfigure`` attribute.
+        pass
+
+    # stdout is None (skipped), stderr lacks reconfigure (also skipped).
+    monkeypatch.setattr(sys, "stdout", None)
+    monkeypatch.setattr(sys, "stderr", _NoReconfigure())
+    _ensure_utf8_streams()  # must not raise
+
+
+def test_on_active_tab_without_tab_is_noop(window, monkeypatch):
+    monkeypatch.setattr(window, "_current_tab", lambda: None)
+    # No tab → the forwarded action is silently dropped.
+    window._on_active_tab("set_heading_level", 2)
+
+
 def test_main_dispatches_unregister(monkeypatch):
     called: list[str] = []
-    monkeypatch.setattr(app_module, "_run_unregister", lambda: called.append("u") or 0)
+    monkeypatch.setattr(
+        app_module, "_run_unregister", lambda: called.append("u") or 0
+    )
     assert main(["--unregister"]) == 0
     assert called == ["u"]
 
 
 def test_main_dispatches_register(monkeypatch):
     seen: dict[str, bool] = {}
-    monkeypatch.setattr(
-        app_module, "_run_register",
-        lambda make_default: seen.setdefault("d", make_default) or 0,
-    )
+    def fake_register(make_default):
+        seen["d"] = make_default
+        return 0
+
+    monkeypatch.setattr(app_module, "_run_register", fake_register)
     assert main(["--register", "--as-default"]) == 0
     assert seen["d"] is True
 

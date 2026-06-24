@@ -19,7 +19,6 @@ from epy_slides.template import (
     watermark_pdf_params,
 )
 
-
 # --------------------------------------------------------------- is_truthy
 
 

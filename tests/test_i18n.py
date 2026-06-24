@@ -63,7 +63,7 @@ def test_set_language_fires_observers():
     assert i18n.current_language() == "es"
 
 
-# --------------------------------------------------------------- translate_widget
+# ----------------------------------------------------------- translate_widget
 
 
 def test_translate_widget_noop_in_english(qapp):
