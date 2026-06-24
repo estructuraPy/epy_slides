@@ -374,6 +374,17 @@ class SlideWindow(QMainWindow):
             self.callout_actions.append(act)
         self.callout_actions[0].setShortcut(QKeySequence("Ctrl+Shift+C"))
 
+        from epy_slides._design import DISCLOSURE_PRESETS  # noqa: PLC0415
+        self.disclosure_actions: list[QAction] = []
+        for d_kind, (d_label, _d_text) in DISCLOSURE_PRESETS.items():
+            d_act = QAction(f"Disclosure: {d_label}", self)
+            d_act.triggered.connect(
+                lambda checked=False, k=d_kind: self._on_active_tab(
+                    "insert_disclosure", k
+                )
+            )
+            self.disclosure_actions.append(d_act)
+
         self.act_diagram_mermaid = QAction("Diagram: Mermaid", self)
         self.act_diagram_mermaid.triggered.connect(
             lambda: self._on_active_tab("insert_diagram", "mermaid")
@@ -466,6 +477,9 @@ class SlideWindow(QMainWindow):
         self.callout_sub = self.content_menu.addMenu("Callout")
         for act in self.callout_actions:
             self.callout_sub.addAction(act)
+        self.disclosure_sub = self.content_menu.addMenu("Disclosure")
+        for act in self.disclosure_actions:
+            self.disclosure_sub.addAction(act)
         self.diagram_sub = self.content_menu.addMenu("Diagram")
         self.diagram_sub.addAction(self.act_diagram_mermaid)
         self.diagram_sub.addAction(self.act_diagram_nomnoml)
