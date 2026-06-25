@@ -4,6 +4,16 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] — 2026-06-24
+
+### Fixed
+- **Dense slides fit in the browser too, not just the PDF.** The shrink-to-fit
+  pass measured overflow against the section's height, which on screen grows to
+  fit the content (unlike the pinned print pages), so content-heavy slides were
+  still clipped in the live preview and the standalone HTML deck. It now
+  measures against the configured slide height and re-fits on reveal's `ready`
+  event, so dense slides scale to fit on screen as well as in the PDF.
+
 ## [0.1.7] — 2026-06-24
 
 ### Fixed
