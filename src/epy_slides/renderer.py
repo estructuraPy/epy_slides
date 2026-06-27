@@ -251,7 +251,7 @@ def render_revealjs(
     prepared = expand_for_revealjs(prepared)
     extra_args = [
         "--slide-level=2",
-        "--highlight-style=tango",
+        "--syntax-highlighting=tango",
         "--wrap=preserve",
     ]
     extra_args += _bibliography_args(metadata, base_dir)

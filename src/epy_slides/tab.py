@@ -745,9 +745,18 @@ class MarkdownTab(QWidget):
         text = self.editor.toPlainText()
         base_dir = self._path.parent if self._path is not None else None
         title = self._path.name if self._path is not None else UNTITLED
-        html = render_revealjs(
-            text, base_dir=base_dir, title=title, theme_css=self._theme_css
-        )
+        try:
+            html = render_revealjs(
+                text, base_dir=base_dir, title=title, theme_css=self._theme_css
+            )
+        except Exception as exc:
+            msg = str(exc).replace("&", "&amp;").replace("<", "&lt;")
+            html = (
+                "<!doctype html><html><head><meta charset='utf-8'></head>"
+                "<body style='font-family:monospace;padding:1em;color:#c00'>"
+                f"<b>Render error</b><pre>{msg}</pre>"
+                "</body></html>"
+            )
         if not hasattr(self, "_preview_tmp_dir"):
             self._preview_tmp_dir = Path(
                 tempfile.mkdtemp(prefix="epy_slides_preview_")
