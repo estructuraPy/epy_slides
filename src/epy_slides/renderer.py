@@ -32,7 +32,7 @@ from epy_slides.slide_md import (
     expand_for_pptx,
     expand_for_revealjs,
 )
-from epy_slides.snippets import parse_front_matter
+from epy_slides.snippets import parse_front_matter, strip_front_matter
 from epy_slides.template import build_reveal_document
 
 # Citation Style Language: short names users can type in YAML
@@ -62,6 +62,7 @@ DEFAULT_CSL_STYLE = "ieee"
 # ``+citations`` enables Pandoc's citeproc ``[@key]`` syntax.
 PANDOC_FORMAT = (
     "markdown"
+    "-yaml_metadata_block"
     "+fenced_divs"
     "+bracketed_spans"
     "+fenced_code_attributes"
@@ -69,7 +70,6 @@ PANDOC_FORMAT = (
     "+inline_code_attributes"
     "+tex_math_dollars"
     "+tex_math_single_backslash"
-    "+yaml_metadata_block"
     "+pipe_tables"
     "+grid_tables"
     "+raw_html"
@@ -247,7 +247,8 @@ def render_revealjs(
     metadata = parse_front_matter(source)
     if metadata.get("title"):
         title = metadata["title"]
-    prepared = _ensure_refs_slide(source, metadata)
+    source_body = strip_front_matter(source)
+    prepared = _ensure_refs_slide(source_body, metadata)
     prepared = expand_for_revealjs(prepared)
     extra_args = [
         "--slide-level=2",
@@ -317,9 +318,10 @@ def export_pptx(
     # PowerPoint cannot draw Mermaid/nomnoml, so render each diagram to a
     # themed PNG (best-effort; falls back to the source text when no Qt is
     # available) and swap the fences for image links before the conversion.
-    prepared_source = source
+    source_body = strip_front_matter(source)
+    prepared_source = source_body
     diag_tmp: Path | None = None
-    diagrams = collect_diagrams(source)
+    diagrams = collect_diagrams(source_body)
     if diagrams:
         from epy_slides import themes as _themes  # noqa: PLC0415
         from epy_slides._revealjs_theme import (  # noqa: PLC0415
@@ -331,10 +333,16 @@ def export_pptx(
         )
         css = reveal_css_for(_themes.get(resolved_theme))
         pngs = render_diagram_pngs(diagrams, diag_tmp, theme_css=css)
-        prepared_source = substitute_diagram_images(source, pngs)
+        prepared_source = substitute_diagram_images(source_body, pngs)
 
     prepared = expand_for_pptx(prepared_source)
     extra_args = ["--slide-level=2"]
+    # Pass front matter so pandoc generates the title slide in the PPTX.
+    # yaml_metadata_block is disabled globally; metadata must be injected.
+    for _key in ("title", "subtitle", "author", "date"):
+        _val = metadata.get(_key)
+        if _val:
+            extra_args.append(f"--metadata={_key}:{_val}")
     if base_dir is not None:
         extra_args.append(f"--resource-path={base_dir}")
     reference = _resolve_reference_pptx(resolved_theme)
