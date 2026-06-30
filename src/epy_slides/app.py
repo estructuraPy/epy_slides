@@ -1188,6 +1188,10 @@ class SlideWindow(QMainWindow):
             target = self._create_tab()
         target.load_file(path)
         self._refresh_tab_title(target)
+        meta = snippets.parse_front_matter(target.text())
+        theme_id = meta.get("theme")
+        if theme_id and theme_id in themes.THEMES:
+            self._apply_theme(theme_id, persist=False)
 
     def _save_current(self) -> bool:
         """Save the current tab, falling back to *Save As* if needed."""
