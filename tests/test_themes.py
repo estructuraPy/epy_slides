@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from epy_editor_kit.themes_base import Theme as BaseTheme
+
 from epy_slides import themes
 from epy_slides.themes import DEFAULT_THEME_ID, THEMES, Theme, get, reload
-from epy_slides.themes_base import Theme as BaseTheme
 
 # ------------------------------------------------------------- Theme dataclass
 

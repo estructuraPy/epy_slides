@@ -8,7 +8,8 @@ non-citation / empty-filter / no-selection paths. All run headlessly.
 
 from __future__ import annotations
 
-from epy_slides.snippets import Label
+from epy_editor_kit.snippets import Label
+
 from epy_slides.xref_dialog import CrossRefDialog
 
 # ------------------------------------------------------- about_dialog branding

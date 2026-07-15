@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import pytest
+from epy_editor_kit.latex_catalog import (
+    CATALOG,
+    LatexEntry,
+    find,
+    total_entries,
+)
 from PySide6.QtWidgets import QApplication
 
 from epy_slides.equation_dialog import EquationDialog
-from epy_slides.latex_catalog import CATALOG, LatexEntry, find, total_entries
 
 _app: QApplication | None = None
 

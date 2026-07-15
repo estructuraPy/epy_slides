@@ -44,6 +44,7 @@ def render_deck_pdf(
     timeout_ms: int = 60000,
 ) -> None:
     """Render slide Markdown ``source`` to a one-slide-per-page PDF."""
+    from epy_editor_kit.snippets import parse_front_matter  # noqa: PLC0415
     from PySide6.QtCore import (  # noqa: PLC0415
         QElapsedTimer,
         QEventLoop,
@@ -58,7 +59,6 @@ def render_deck_pdf(
 
     from epy_slides import _pdf_footer  # noqa: PLC0415
     from epy_slides.renderer import render_revealjs  # noqa: PLC0415
-    from epy_slides.snippets import parse_front_matter  # noqa: PLC0415
     from epy_slides.template import watermark_pdf_params  # noqa: PLC0415
 
     meta = parse_front_matter(source)

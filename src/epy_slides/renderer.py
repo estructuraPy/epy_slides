@@ -21,6 +21,7 @@ from importlib import resources
 from pathlib import Path
 
 import pypandoc
+from epy_editor_kit.snippets import parse_front_matter, strip_front_matter
 
 from epy_slides._media_export import (
     collect_diagrams,
@@ -32,7 +33,6 @@ from epy_slides.slide_md import (
     expand_for_pptx,
     expand_for_revealjs,
 )
-from epy_slides.snippets import parse_front_matter, strip_front_matter
 from epy_slides.template import build_reveal_document
 
 # Citation Style Language: short names users can type in YAML

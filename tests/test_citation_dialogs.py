@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import pytest
+from epy_editor_kit.snippets import Label
 from PySide6.QtWidgets import QApplication
 
 from epy_slides.bib import BibEntry, BibEntryDraft
 from epy_slides.bib_dialog import BibEntryDialog
-from epy_slides.snippets import Label
 from epy_slides.xref_dialog import CrossRefDialog
 
 

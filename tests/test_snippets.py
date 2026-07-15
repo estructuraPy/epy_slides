@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from epy_slides import snippets
-from epy_slides.snippets import (
+from epy_editor_kit import snippets
+from epy_editor_kit.snippets import (
     KIND_DESCRIPTIONS,
     Label,
     find_labels,

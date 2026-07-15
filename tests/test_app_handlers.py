@@ -195,7 +195,8 @@ def test_insert_citation_inserts_key(window, tmp_path, monkeypatch):
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides.snippets import Label
+    from epy_editor_kit.snippets import Label
+
     from epy_slides.xref_dialog import CrossRefDialog
 
     monkeypatch.setattr(
