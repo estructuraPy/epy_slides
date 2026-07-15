@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 
 import pytest
-from epy_editor_kit.themes_base import Theme
 
 from epy_slides import epyson
 from epy_slides.epyson import (
@@ -29,6 +28,7 @@ from epy_slides.epyson import (
     user_theme_ids,
     user_themes_dir,
 )
+from epy_slides.themes_base import Theme
 
 
 @pytest.fixture

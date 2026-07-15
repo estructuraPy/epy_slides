@@ -13,7 +13,6 @@ import shutil
 import sys
 from pathlib import Path
 
-from epy_editor_kit import snippets
 from PySide6.QtCore import QSettings
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QKeySequence
 from PySide6.QtWidgets import (
@@ -30,7 +29,7 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides import _i18n as i18n
-from epy_slides import themes
+from epy_slides import snippets, themes
 from epy_slides._revealjs_theme import reveal_css_for
 from epy_slides.about_dialog import _load_branding_pixmap
 from epy_slides.renderer import CSL_STYLES, export_pptx, render_revealjs
@@ -1330,9 +1329,8 @@ class SlideWindow(QMainWindow):
                 ),
             )
             return
-        from epy_editor_kit.snippets import Label  # noqa: PLC0415
-
         from epy_slides.bib import BibEntry  # noqa: PLC0415
+        from epy_slides.snippets import Label  # noqa: PLC0415
 
         bib_lookup: dict[str, BibEntry] = {
             e.key: e for e in entries

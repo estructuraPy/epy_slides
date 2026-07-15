@@ -37,9 +37,8 @@ from pptx.util import Emu  # noqa: E402
 _WIDESCREEN_W = Emu(12192000)
 _WIDESCREEN_H = Emu(6858000)
 
-from epy_editor_kit.themes_base import Theme  # noqa: E402
-
 from epy_slides import themes  # noqa: E402
+from epy_slides.themes_base import Theme  # noqa: E402
 
 OUT_DIR = ROOT / "src" / "epy_slides" / "assets" / "reference_pptx"
 

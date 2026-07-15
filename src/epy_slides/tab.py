@@ -14,7 +14,6 @@ import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
-from epy_editor_kit import snippets
 from PySide6.QtCore import QMarginsF, QSizeF, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
     QFont,
@@ -34,6 +33,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from epy_slides import snippets
 from epy_slides.checklist_dialog import ChecklistDialog
 from epy_slides.equation_dialog import EquationDialog
 from epy_slides.figure_dialog import FigureDialog
