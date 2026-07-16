@@ -10,11 +10,11 @@ the exported deck carries the same identity as the live preview.
 
 Run from the project root::
 
-    python tools/make_reference_pptx.py
+    python src/epy_slides/_core/_packaging/make_reference_pptx.py
 
-It writes ``src/epy_slides/assets/reference_pptx/<theme>.pptx`` for every
-bundled theme (the build-time dependency ``python-pptx`` is not required at
-runtime — Pandoc consumes the generated files).
+It writes ``src/epy_slides/_config/_assets/reference_pptx/<theme>.pptx`` for
+every bundled theme (the build-time dependency ``python-pptx`` is not
+required at runtime — Pandoc consumes the generated files).
 """
 
 from __future__ import annotations
@@ -22,7 +22,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+# Repo root: this script lives at src/epy_slides/_core/_packaging/, so
+# it takes 4 parents to reach the root (_packaging -> _core -> epy_slides
+# -> src -> root).
+ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "src"))
 
 from lxml import etree  # noqa: E402
@@ -40,7 +43,7 @@ _WIDESCREEN_H = Emu(6858000)
 from epy_slides import themes  # noqa: E402
 from epy_slides.themes_base import Theme  # noqa: E402
 
-OUT_DIR = ROOT / "src" / "epy_slides" / "assets" / "reference_pptx"
+OUT_DIR = ROOT / "src" / "epy_slides" / "_config" / "_assets" / "reference_pptx"
 
 # epyson css var -> theme colour-scheme slot (PowerPoint names).
 _COLOR_MAP = {

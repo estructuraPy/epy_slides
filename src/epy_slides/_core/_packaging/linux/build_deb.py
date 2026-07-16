@@ -11,10 +11,10 @@ A .deb is an ar(1) archive with three members in this exact order:
 The ar format uses fixed 60-byte ASCII headers; see ar(5).
 
 Run from the project root:
-    python installer/linux/build_deb.py
+    python src/epy_slides/_core/_packaging/linux/build_deb.py
 
 Output:
-    installer/dist/epy-slides_<version>_all.deb
+    src/epy_slides/_core/_packaging/dist/epy-slides_<version>_all.deb
 
 The script prints a verification listing of the ar members at the end.
 """
@@ -34,7 +34,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 def _read_pyproject_version() -> str:
     """Single source of truth: read ``version`` from pyproject.toml."""
-    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    pyproject = Path(__file__).resolve().parents[5] / "pyproject.toml"
     try:
         text = pyproject.read_text(encoding="utf-8")
     except OSError:
@@ -70,11 +70,15 @@ DESCRIPTION_LONG = """\
 # refuses direct `pip install`).
 DEPENDS = "python3 (>= 3.10), python3-venv, pandoc"
 
-ROOT = Path(__file__).resolve().parent.parent.parent
-OUT_DIR = ROOT / "installer" / "dist"
+# PKG_ROOT = _core/_packaging/ (this script lives at .../_packaging/linux/).
+PKG_ROOT = Path(__file__).resolve().parent.parent
+# REPO_ROOT = repo root (.../_packaging/linux -> _packaging -> _core ->
+# epy_slides -> src -> root).
+REPO_ROOT = Path(__file__).resolve().parents[5]
+OUT_DIR = PKG_ROOT / "dist"
 
 # Source tree roots
-SRC_PKG = ROOT / "src" / "epy_slides"
+SRC_PKG = REPO_ROOT / "src" / "epy_slides"
 
 # pypandoc location — pure-Python files only (no binaries)
 import pypandoc as _pypandoc
@@ -134,10 +138,18 @@ def _tar_add_dir(tf: tarfile.TarFile, arcname: str,
 
 def _tar_add_tree(tf: tarfile.TarFile, src_dir: Path,
                   dst_prefix: str, skip_pycache: bool = True) -> None:
-    """Recursively add all files from src_dir into dst_prefix/."""
+    """Recursively add all files from src_dir into dst_prefix/.
+
+    ``_core/_packaging`` (this very build tooling, including its gitignored
+    ``dist/`` installer output) lives *inside* ``src/epy_slides`` and must
+    never be shipped as part of the installed package — same rule as the
+    wheel's ``force-exclude`` in ``pyproject.toml``.
+    """
     for path in sorted(src_dir.rglob("*")):
         if skip_pycache and ("__pycache__" in path.parts or
                              path.suffix == ".pyc"):
+            continue
+        if path == PKG_ROOT or PKG_ROOT in path.parents:
             continue
         rel = path.relative_to(src_dir)
         arcname = f"{dst_prefix}/{rel}".replace("\\", "/")
@@ -416,7 +428,7 @@ def _verify_deb(path: Path) -> None:
 
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    png_path = ROOT / "assets_build" / "epy_slides.png"
+    png_path = PKG_ROOT / "assets_build" / "epy_slides.png"
 
     print("Building control.tar.gz ...")
     control_tar = _build_control_tar()

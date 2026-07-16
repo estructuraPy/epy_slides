@@ -2,9 +2,9 @@
 ; Version 0.1.4
 ;
 ; Build from the project root AFTER running `python build.py`:
-;   ISCC.exe installer\windows\epy_slides.iss
+;   ISCC.exe src\epy_slides\_core\_packaging\windows\epy_slides.iss
 ;
-; Output: installer\dist\epy_slides-setup-0.1.4.exe
+; Output: src\epy_slides\_core\_packaging\dist\epy_slides-setup-0.1.4.exe
 ;
 ; Design decisions:
 ;   - PrivilegesRequired=lowest  -> per-user install; no UAC prompt.
@@ -31,10 +31,15 @@
 #define AppURL "https://github.com/estructuraPy/epy_slides"
 #define AppId "{{B2C3D4E5-6F70-4811-9A2B-3C4D5E6F7081}"
 #define AppExeName "epy_slides.exe"
-; Paths are relative to the location of this .iss file (installer\windows\).
-#define DistDir "..\..\dist\epy_slides"
-#define IconFile "..\..\assets_build\epy_slides.ico"
-#define OutputDir "..\..\installer\dist"
+; Paths are relative to the location of this .iss file
+; (src\epy_slides\_core\_packaging\windows\).
+; DistDir reaches the PyInstaller onedir output at the repo-root dist/,
+; produced by build.py (unaffected by the _core/_packaging move).
+#define DistDir "..\..\..\..\..\dist\epy_slides"
+; IconFile and OutputDir stay inside _core/_packaging/, co-located with
+; this script (assets_build/ moved here alongside the installer tooling).
+#define IconFile "..\assets_build\epy_slides.ico"
+#define OutputDir "..\dist"
 
 [Setup]
 AppId={#AppId}

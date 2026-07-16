@@ -6,8 +6,8 @@ epy_slides ships two installer formats:
 
 | Platform | File | Tool |
 |----------|------|------|
-| Windows 10/11 | `installer/dist/epy_slides-setup-0.4.1.exe` | Inno Setup |
-| Ubuntu / Debian | `installer/dist/epy-slides_0.4.1_all.deb` | pure-Python .deb assembler |
+| Windows 10/11 | `src/epy_slides/_core/_packaging/dist/epy_slides-setup-0.4.1.exe` | Inno Setup |
+| Ubuntu / Debian | `src/epy_slides/_core/_packaging/dist/epy-slides_0.4.1_all.deb` | pure-Python .deb assembler |
 
 Both install the application and register it for `.md`, `.markdown`, and `.qmd` files.
 
@@ -18,7 +18,7 @@ Both install the application and register it for `.md`, `.markdown`, and `.qmd` 
 ### Common
 ```
 pip install pillow          # required for icon generation
-python installer/make_icon.py   # generates assets_build/epy_slides.ico + .png
+python src/epy_slides/_core/_packaging/make_icon.py   # generates assets_build/epy_slides.ico + .png
 ```
 
 ### Windows
@@ -38,10 +38,11 @@ python installer/make_icon.py   # generates assets_build/epy_slides.ico + .png
 ### 1. Generate icons (required before any build)
 
 ```bash
-python installer/make_icon.py
+python src/epy_slides/_core/_packaging/make_icon.py
 ```
 
-Produces `assets_build/epy_slides.ico` (16/32/48/256 px) and `assets_build/epy_slides.png` (256 x 256).
+Produces `assets_build/epy_slides.ico` (16/32/48/256 px) and `assets_build/epy_slides.png` (256 x 256) —
+both under `src/epy_slides/_core/_packaging/`.
 
 ---
 
@@ -70,16 +71,16 @@ https://jrsoftware.org/isdl.php
 #### Step 3 — Compile the installer
 
 ```cmd
-"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" installer\windows\epy_slides.iss
+"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" src\epy_slides\_core\_packaging\windows\epy_slides.iss
 ```
 
 or if system-wide:
 
 ```cmd
-"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" installer\windows\epy_slides.iss
+"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" src\epy_slides\_core\_packaging\windows\epy_slides.iss
 ```
 
-Output: `installer/dist/epy_slides-setup-0.4.1.exe`
+Output: `src/epy_slides/_core/_packaging/dist/epy_slides-setup-0.4.1.exe`
 
 #### What the Windows installer does
 
@@ -115,17 +116,17 @@ launches `ms-settings:defaultapps` as a convenience shortcut.
 ### 3. Ubuntu .deb
 
 ```bash
-python installer/linux/build_deb.py
+python src/epy_slides/_core/_packaging/linux/build_deb.py
 ```
 
-Output: `installer/dist/epy-slides_0.4.1_all.deb`
+Output: `src/epy_slides/_core/_packaging/dist/epy-slides_0.4.1_all.deb`
 
 The script is pure Python (stdlib + pypandoc), runs on Windows or Linux.
 
 #### Install on Ubuntu/Debian
 
 ```bash
-sudo dpkg -i installer/dist/epy-slides_0.4.1_all.deb
+sudo dpkg -i src/epy_slides/_core/_packaging/dist/epy-slides_0.4.1_all.deb
 ```
 
 `dpkg -i` is enough — the package's `postinst` pip-installs the Python

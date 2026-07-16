@@ -3,8 +3,8 @@
 Checks:
 - Three branding images are resolvable via importlib.resources and
   return non-empty bytes.
-- The ICO file at assets_build/epy_slides.ico has exactly 4 size entries
-  (parsed from the ICONDIR binary header).
+- The ICO file at src/epy_slides/_core/_packaging/assets_build/epy_slides.ico
+  has exactly 4 size entries (parsed from the ICONDIR binary header).
 - AboutDialog is importable without a QApplication crash, instantiates
   without error, and contains the expected author strings in its labels.
 """
@@ -57,9 +57,13 @@ def test_branding_resource_non_empty(filename: str):
 # ---------------------------------------------------------------------------
 
 def test_ico_has_four_sizes():
-    """assets_build/epy_slides.ico ICONDIR count == 4."""
+    """_core/_packaging/assets_build/epy_slides.ico ICONDIR count == 4."""
     ico_path = (
         Path(__file__).resolve().parent.parent
+        / "src"
+        / "epy_slides"
+        / "_core"
+        / "_packaging"
         / "assets_build"
         / "epy_slides.ico"
     )

@@ -237,4 +237,4 @@ Pisos por semana:      ~4.5       (en el pico del montaje)
 Esta presentación es un ejemplo ilustrativo preparado con asistencia de IA; revise su contenido antes de utilizarlo. Imágenes generadas con LitoClaw, el sistema inteligente creado por ANM Ingeniería.
 :::
 
-[Fuente y ejemplos hermanos en GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/examples/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Puente de Brooklyn](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}
+[Fuente y ejemplos hermanos en GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/tutorials/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Puente de Brooklyn](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}

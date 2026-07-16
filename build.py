@@ -6,7 +6,7 @@ Run from the project root:
 
 This produces the PyInstaller onedir layout under ``dist/epy_slides/``,
 which is the staging folder packaged by the Windows installer
-(``installer/windows/epy_slides.iss``) and the Linux ``.deb`` builder.
+(``src/epy_slides/_core/_packaging/windows/epy_slides.iss``) and the Linux ``.deb`` builder.
 It is an intermediate build artifact, not a distributable app — the
 shipped deliverables are the ``setup.exe`` and the ``.deb``.
 """
@@ -91,7 +91,7 @@ def main() -> int:
         _purge_build_artifacts()
 
     print(f"\nDone. Installer input: {produced}")
-    print("Next: build the installer (installer/windows/epy_slides.iss).")
+    print("Next: build the installer (src/epy_slides/_core/_packaging/windows/epy_slides.iss).")
     return 0
 
 

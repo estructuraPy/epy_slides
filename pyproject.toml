@@ -52,6 +52,16 @@ packages = ["src/epy_slides"]
 # no force-include needed. Re-introducing one would double-add
 # `epy_slides/_config/_assets/__init__.py` and fail metadata generation.
 #
+# _core/_packaging/ is dev-only build/release tooling (icon generation,
+# installer assemblers, screenshot/reference-deck regeneration scripts) plus
+# its gitignored `dist/` build output and the `assets_build/` icon sources —
+# none of it belongs in the distributable wheel. (hatchling 1.30 has no
+# `force-exclude` key — plain `exclude` is what actually filters the
+# `packages` file walk; verified via wheel-content inspection.)
+exclude = [
+    "src/epy_slides/_core/**",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 
@@ -77,6 +87,7 @@ convention = "google"
 # its lines are JS, not Python, and must stay verbatim.
 "src/epy_slides/template.py" = ["E501"]
 # Example scripts favor readability over library docstring/line rules.
-"examples/**/*.py" = ["D", "SIM105", "E501"]
-# Installer build scripts embed shell heredocs and long literal paths.
-"installer/**/*.py" = ["D", "E402", "E501"]
+"tutorials/**/*.py" = ["D", "SIM105", "E501"]
+# Installer/build/dev-tooling scripts embed shell heredocs, long literal
+# paths, and late `sys.path.insert`-gated imports.
+"src/epy_slides/_core/_packaging/**/*.py" = ["D", "E402", "E501"]

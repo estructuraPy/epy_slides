@@ -1,12 +1,13 @@
 """Capture the epy_slides user-manual screenshots.
 
 Renders the real Fluent-styled UI (main window + the dialogs the manual
-walks through) to PNGs under ``src/epy_slides/assets/screenshots/`` so the
-bundled ``welcome.md`` / ``welcome_es.md`` manuals show the actual program.
+walks through) to PNGs under ``src/epy_slides/_config/_assets/screenshots/``
+so the bundled ``welcome.md`` / ``welcome_es.md`` manuals show the actual
+program.
 
 Run it headlessly::
 
-    QT_QPA_PLATFORM=offscreen python tools/capture_screenshots.py
+    QT_QPA_PLATFORM=offscreen python src/epy_slides/_core/_packaging/capture_screenshots.py
 
 It writes both the English files (``editor.png`` …) and the Spanish
 variants (``editor_es.png`` …) by toggling the live UI language.
@@ -27,7 +28,10 @@ os.environ.setdefault(
     "QTWEBENGINE_CHROMIUM_FLAGS", "--no-sandbox --disable-gpu"
 )
 
-ROOT = Path(__file__).resolve().parent.parent
+# Repo root: this script lives at src/epy_slides/_core/_packaging/, so
+# it takes 4 parents to reach the root (_packaging -> _core -> epy_slides
+# -> src -> root).
+ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "src"))
 
 from PySide6.QtCore import (  # noqa: E402
@@ -51,7 +55,7 @@ from epy_slides.table_dialog import TableDialog  # noqa: E402
 from epy_slides.theme_editor_dialog import ThemeEditorDialog  # noqa: E402
 from epy_slides.theme_gallery_dialog import ThemeGalleryDialog  # noqa: E402
 
-OUT = ROOT / "src" / "epy_slides" / "assets" / "screenshots"
+OUT = ROOT / "src" / "epy_slides" / "_config" / "_assets" / "screenshots"
 
 # A compact deck that exercises a layout, a component and a callout so the
 # editor screenshot shows representative Markdown next to its live preview.

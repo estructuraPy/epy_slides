@@ -4,7 +4,7 @@
 from pathlib import Path as _Path
 import pypandoc
 
-_ICON = str(_Path("assets_build/epy_slides.ico"))
+_ICON = str(_Path("src/epy_slides/_core/_packaging/assets_build/epy_slides.ico"))
 from PyInstaller.utils.hooks import (
     collect_data_files,
     collect_dynamic_libs,

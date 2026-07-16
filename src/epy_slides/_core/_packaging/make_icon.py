@@ -8,7 +8,7 @@ Each ICO frame letterboxes the logo onto a square transparent canvas,
 preserving aspect ratio (centered).  epy_slides.png is NOT overwritten.
 
 Run from the project root:
-    python installer/make_icon.py
+    python src/epy_slides/_core/_packaging/make_icon.py
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ except ImportError as exc:
 
 SIZES = [16, 32, 48, 256]
 
-ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "assets_build"
+# assets_build/ is co-located with this script under _core/_packaging/.
+OUT_DIR = Path(__file__).resolve().parent / "assets_build"
 SRC_PNG = OUT_DIR / "epy_slides.png"
 
 

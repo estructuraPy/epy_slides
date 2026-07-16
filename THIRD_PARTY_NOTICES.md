@@ -30,7 +30,8 @@ The following bundled assets are Copyright (c) 2026
 - `src/epy_slides/_config/_assets/themes/*.epyson` — layout theme definitions.
 - `src/epy_slides/_config/_assets/reference_pptx/*.pptx` — PowerPoint reference
   (theme) decks.
-- `assets_build/` — source images for the application icon.
+- `src/epy_slides/_core/_packaging/assets_build/` — source images for the
+  application icon.
 
 These assets are licensed to you **only for use as an integral part of
 unmodified epy_slides distributions**. Extracting, modifying, rebranding,

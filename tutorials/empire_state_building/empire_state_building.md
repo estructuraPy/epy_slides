@@ -244,4 +244,4 @@ Floors per week:  ~4.5       (at peak erection)
 This deck is an illustrative example prepared with the assistance of AI; review its content before relying on it. Images generated with LitoClaw, the intelligent system created by ANM Ingeniería.
 :::
 
-[Source and sibling examples on GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/examples/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Brooklyn Bridge](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}
+[Source and sibling examples on GitHub — [epy_slides · Empire State](https://github.com/estructuraPy/epy_slides/tree/main/tutorials/empire_state_building) · [epy_reports · Newmark](https://github.com/estructuraPy/epy_reports/tree/main/examples/newmark) · [epy_papers · Brooklyn Bridge](https://github.com/estructuraPy/epy_papers/tree/main/examples/brooklyn_bridge)]{.muted}
