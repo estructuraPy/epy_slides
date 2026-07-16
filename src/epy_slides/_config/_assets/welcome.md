@@ -269,7 +269,7 @@ export_pptx(deck, Path("talk.pptx"), theme_id="corporate")
 - The **PDF** export drives Qt WebEngine (reveal's print mode), so it needs
   a `QApplication`
 - The reference script
-  `examples/empire_state_building/render_all_themes.py` renders one deck to
+  `tutorials/empire_state_building/render_all_themes.py` renders one deck to
   **HTML + PPTX + PDF** for every theme — copy it as a starting point
 
 ## Citations

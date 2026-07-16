@@ -20,7 +20,7 @@ from pathlib import Path
 
 from epy_slides.epyson import is_dark
 
-_REVEAL_PKG = "epy_slides.assets.revealjs"
+_REVEAL_PKG = "epy_slides._config._assets.revealjs"
 
 # Aspect ratio → reveal presentation size (px). reveal scales the deck to
 # fit the viewport; these only fix the design proportions and the PDF page.
@@ -70,7 +70,7 @@ window.MathJax = {
 def _load_mathjax_script() -> str:
     """Return the inline MathJax v3 bundle (tex-svg-full, ~2 MB), cached."""
     js = (
-        resources.files("epy_slides.assets")
+        resources.files("epy_slides._config._assets")
         .joinpath("mathjax")
         .joinpath("tex-svg-full.js")
         .read_text(encoding="utf-8")
@@ -294,11 +294,11 @@ def reveal_config(
 
 
 _DIAGRAM_PKG = {
-    "mermaid": [("epy_slides.assets.mermaid", "mermaid.min.js")],
+    "mermaid": [("epy_slides._config._assets.mermaid", "mermaid.min.js")],
     # nomnoml needs its layout dependency (graphre) loaded first.
     "nomnoml": [
-        ("epy_slides.assets.nomnoml", "graphre.js"),
-        ("epy_slides.assets.nomnoml", "nomnoml.js"),
+        ("epy_slides._config._assets.nomnoml", "graphre.js"),
+        ("epy_slides._config._assets.nomnoml", "nomnoml.js"),
     ],
 }
 

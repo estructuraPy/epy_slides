@@ -272,7 +272,7 @@ export_pptx(deck, Path("charla.pptx"), theme_id="corporate")
 - La exportación a **PDF** usa Qt WebEngine (el modo impresión de reveal),
   así que requiere un `QApplication`
 - El script de referencia
-  `examples/empire_state_building/render_all_themes.py` renderiza una
+  `tutorials/empire_state_building/render_all_themes.py` renderiza una
   presentación a **HTML + PPTX + PDF** por cada tema — cópielo como punto
   de partida
 

@@ -47,7 +47,7 @@ def qapp():
 ])
 def test_branding_resource_non_empty(filename: str):
     """Each branding image resolves via importlib.resources."""
-    pkg = importlib.resources.files("epy_slides.assets.branding")
+    pkg = importlib.resources.files("epy_slides._config._assets.branding")
     data = (pkg / filename).read_bytes()
     assert len(data) > 0, f"{filename} is empty"
 

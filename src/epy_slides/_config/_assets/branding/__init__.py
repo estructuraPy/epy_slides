@@ -9,6 +9,6 @@ Use ``importlib.resources.files`` to read these images so they work both
 from a source install and from a frozen PyInstaller build (zip archive)::
 
     from importlib.resources import files
-    pkg = files("epy_slides.assets.branding")
+    pkg = files("epy_slides._config._assets.branding")
     data = (pkg / "epy_slides.png").read_bytes()
 """

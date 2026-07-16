@@ -37,7 +37,7 @@ from epy_slides.template import build_reveal_document
 
 # Citation Style Language: short names users can type in YAML
 # (``citation-style: ieee``) or pick from the References menu,
-# mapped to the bundled .csl file under ``epy_slides/assets/csl/``.
+# mapped to the bundled .csl file under ``epy_slides/_config/_assets/csl/``.
 CSL_STYLES: dict[str, str] = {
     "ieee":      "ieee.csl",
     "apa":       "apa.csl",
@@ -147,7 +147,7 @@ def _resolve_csl(
     key = (csl_value or DEFAULT_CSL_STYLE).strip().lower()
     if key in CSL_STYLES:
         try:
-            anchor = resources.files("epy_slides.assets.csl")
+            anchor = resources.files("epy_slides._config._assets.csl")
             target = anchor.joinpath(CSL_STYLES[key])
             with resources.as_file(target) as path:
                 if Path(path).is_file():
@@ -279,7 +279,7 @@ def _resolve_reference_pptx(theme_id: str) -> Path | None:
     """Resolve a theme id to its bundled ``reference_pptx/<id>.pptx``."""
     try:
         anchor = resources.files(
-            "epy_slides.assets.reference_pptx"
+            "epy_slides._config._assets.reference_pptx"
         ).joinpath(f"{theme_id}.pptx")
         with resources.as_file(anchor) as path:
             if Path(path).is_file():

@@ -15,9 +15,9 @@ datas = []
 datas += collect_data_files("pypandoc", include_py_files=False)
 # epy_slides is built from src/ via pathex (it may not be pip-installed), so
 # collect_data_files cannot resolve it reliably — bundle the assets tree
-# explicitly. Keeping the epy_slides/assets/... layout preserves
+# explicitly. Keeping the epy_slides/_config/_assets/... layout preserves
 # importlib.resources lookups at runtime.
-_ASSETS = _Path("src/epy_slides/assets")
+_ASSETS = _Path("src/epy_slides/_config/_assets")
 datas += [
     (str(p), str(_Path("epy_slides") / p.relative_to("src/epy_slides").parent))
     for p in _ASSETS.rglob("*")
@@ -37,17 +37,18 @@ binaries.append((_pandoc, "pypandoc/files"))
 
 hiddenimports = []
 hiddenimports += collect_submodules("pypandoc")
-# importlib.resources.files("epy_slides.assets.themes") imports these packages
-# dynamically; PyInstaller cannot detect that statically.
+# importlib.resources.files("epy_slides._config._assets.themes") imports
+# these packages dynamically; PyInstaller cannot detect that statically.
 hiddenimports += [
-    "epy_slides.assets",
-    "epy_slides.assets.branding",
-    "epy_slides.assets.themes",
-    "epy_slides.assets.reference_pptx",
-    "epy_slides.assets.mathjax",
-    "epy_slides.assets.revealjs",
-    "epy_slides.assets.mermaid",
-    "epy_slides.assets.nomnoml",
+    "epy_slides._config",
+    "epy_slides._config._assets",
+    "epy_slides._config._assets.branding",
+    "epy_slides._config._assets.themes",
+    "epy_slides._config._assets.reference_pptx",
+    "epy_slides._config._assets.mathjax",
+    "epy_slides._config._assets.revealjs",
+    "epy_slides._config._assets.mermaid",
+    "epy_slides._config._assets.nomnoml",
     # Lazy-imported inside _pdf_footer.add_watermark for the grayscale
     # watermark; PyInstaller may miss the in-function import.
     "PIL",

@@ -25,10 +25,10 @@ The following bundled assets are Copyright (c) 2026
 **Ing. Angel Navarro-Mora M.Sc. / ANM Ingeniería (estructuraPy)** —
 **all rights reserved**:
 
-- `src/epy_slides/assets/branding/` — application logo and the
+- `src/epy_slides/_config/_assets/branding/` — application logo and the
   ANM Ingeniería / estructuraPy brand images.
-- `src/epy_slides/assets/themes/*.epyson` — layout theme definitions.
-- `src/epy_slides/assets/reference_pptx/*.pptx` — PowerPoint reference
+- `src/epy_slides/_config/_assets/themes/*.epyson` — layout theme definitions.
+- `src/epy_slides/_config/_assets/reference_pptx/*.pptx` — PowerPoint reference
   (theme) decks.
 - `assets_build/` — source images for the application icon.
 

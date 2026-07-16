@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 # Anchored to the repo root so the bundled reveal.js dist/
-# (src/epy_slides/assets/revealjs/dist/) is NOT ignored.
+# (src/epy_slides/_config/_assets/revealjs/dist/) is NOT ignored.
 /dist/
 /build/
 *.egg

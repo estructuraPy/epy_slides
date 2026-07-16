@@ -103,7 +103,7 @@ def test_load_manual_text_drops_missing_image(monkeypatch):
 
     def fake_files(package):
         node = real_files(package)
-        if package == "epy_slides.assets":
+        if package == "epy_slides._config._assets":
             return _AlwaysMissing(node)
         return node
 
