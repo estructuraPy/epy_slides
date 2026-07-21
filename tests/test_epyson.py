@@ -11,8 +11,8 @@ import json
 
 import pytest
 
-from epy_slides import epyson
-from epy_slides.epyson import (
+from epy_slides._core import epyson
+from epy_slides._core.epyson import (
     _coerce_hex,
     _contrast_text,
     _font_stack,
@@ -28,7 +28,7 @@ from epy_slides.epyson import (
     user_theme_ids,
     user_themes_dir,
 )
-from epy_slides.themes_base import Theme
+from epy_slides._ui.themes_base import Theme
 
 
 @pytest.fixture

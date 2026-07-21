@@ -16,7 +16,7 @@ pytest.importorskip("pypdf")
 pytest.importorskip("reportlab")
 pytest.importorskip("PIL")
 
-from epy_slides._pdf_footer import (  # noqa: E402
+from epy_slides._core._pdf_footer import (  # noqa: E402
     _page_label,
     _page_stamp,
     _roman,

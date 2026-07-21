@@ -1,4 +1,4 @@
-from epy_slides.slide_md import expand_for_pptx, expand_for_revealjs
+from epy_slides._core.slide_md import expand_for_pptx, expand_for_revealjs
 
 
 def test_layout_directive_adds_class_revealjs():

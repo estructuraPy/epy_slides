@@ -246,9 +246,9 @@ Standard slide layouts with the theme's colours, fonts and speaker notes.
 
 ```python
 from pathlib import Path
-from epy_slides.renderer import render_revealjs, export_pptx
-from epy_slides import themes
-from epy_slides._revealjs_theme import reveal_css_for
+from epy_slides._core.renderer import render_revealjs, export_pptx
+from epy_slides._ui import themes
+from epy_slides._core._revealjs_theme import reveal_css_for
 
 deck = Path("talk.md").read_text(encoding="utf-8")
 css = reveal_css_for(themes.get("corporate"))

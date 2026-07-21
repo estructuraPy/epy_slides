@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from epy_slides.bib import (
+from epy_slides._core.bib import (
     BibEntryDraft,
     append_entry_to_file,
     keys_in_file,

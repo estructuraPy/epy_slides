@@ -3,13 +3,13 @@
 A single source format feeds every output:
 
 * :func:`render_revealjs` — Markdown → reveal.js sections (Pandoc) wrapped
-  in a self-contained deck (:mod:`epy_slides.template`). Used for the live
+  in a self-contained deck (:mod:`epy_slides._core.template`). Used for the live
   preview, the standalone HTML export and the print-to-PDF source.
 * :func:`export_pptx` — Markdown → PowerPoint (Pandoc's ``pptx`` writer)
   with a per-theme reference document.
 
 The conversion is delegated to Pandoc (bundled by ``pypandoc-binary``);
-:mod:`epy_slides.slide_md` adapts the shared source for each writer.
+:mod:`epy_slides._core.slide_md` adapts the shared source for each writer.
 """
 
 from __future__ import annotations
@@ -22,18 +22,18 @@ from pathlib import Path
 
 import pypandoc
 
-from epy_slides._media_export import (
+from epy_slides._core._media_export import (
     collect_diagrams,
     render_diagram_pngs,
     substitute_diagram_images,
 )
-from epy_slides.slide_md import (
+from epy_slides._core.slide_md import (
     diagram_engines,
     expand_for_pptx,
     expand_for_revealjs,
 )
-from epy_slides.snippets import parse_front_matter, strip_front_matter
-from epy_slides.template import build_reveal_document
+from epy_slides._core.snippets import parse_front_matter, strip_front_matter
+from epy_slides._core.template import build_reveal_document
 
 # Citation Style Language: short names users can type in YAML
 # (``citation-style: ieee``) or pick from the References menu,
@@ -323,8 +323,8 @@ def export_pptx(
     diag_tmp: Path | None = None
     diagrams = collect_diagrams(source_body)
     if diagrams:
-        from epy_slides import themes as _themes  # noqa: PLC0415
-        from epy_slides._revealjs_theme import (  # noqa: PLC0415
+        from epy_slides._ui import themes as _themes  # noqa: PLC0415
+        from epy_slides._core._revealjs_theme import (  # noqa: PLC0415
             reveal_css_for,
         )
 

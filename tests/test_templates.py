@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from epy_slides import templates
+from epy_slides._core import templates
 
 
 @pytest.fixture

@@ -16,7 +16,7 @@ import pytest
 pytest.importorskip("pypdf")
 pytest.importorskip("reportlab")
 
-from epy_slides import _export_pdf  # noqa: E402
+from epy_slides._core import _export_pdf  # noqa: E402
 
 
 def _write_real_pdf(path: str) -> None:

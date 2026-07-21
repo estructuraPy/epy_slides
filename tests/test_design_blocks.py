@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from epy_slides import themes
-from epy_slides._design import (
+from epy_slides._ui import themes
+from epy_slides._core._design import (
     DESIGN_BLOCK_LABELS,
     DESIGN_BLOCKS,
     DISCLOSURE_KINDS,

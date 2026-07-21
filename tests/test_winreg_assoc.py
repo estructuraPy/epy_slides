@@ -13,8 +13,8 @@ import sys
 
 import pytest
 
-from epy_slides import winreg_assoc
-from epy_slides.winreg_assoc import (
+from epy_slides._core import winreg_assoc
+from epy_slides._core.winreg_assoc import (
     APP_KEY,
     APP_NAME,
     EXTENSIONS,

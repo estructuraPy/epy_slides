@@ -56,10 +56,10 @@ def render_deck_pdf(
     from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: PLC0415
     from PySide6.QtWidgets import QApplication  # noqa: PLC0415
 
-    from epy_slides import _pdf_footer  # noqa: PLC0415
-    from epy_slides.renderer import render_revealjs  # noqa: PLC0415
-    from epy_slides.snippets import parse_front_matter  # noqa: PLC0415
-    from epy_slides.template import watermark_pdf_params  # noqa: PLC0415
+    from epy_slides._core import _pdf_footer  # noqa: PLC0415
+    from epy_slides._core.renderer import render_revealjs  # noqa: PLC0415
+    from epy_slides._core.snippets import parse_front_matter  # noqa: PLC0415
+    from epy_slides._core.template import watermark_pdf_params  # noqa: PLC0415
 
     meta = parse_front_matter(source)
     aspect = (meta.get("aspect-ratio") or "16:9").strip()

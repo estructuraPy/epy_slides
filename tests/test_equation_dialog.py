@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.equation_dialog import EquationDialog
+from epy_slides._ui.equation_dialog import EquationDialog
 
 _app: QApplication | None = None
 

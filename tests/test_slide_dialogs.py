@@ -1,7 +1,7 @@
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.slide_dialogs import (
+from epy_slides._ui.slide_dialogs import (
     BulletListDialog,
     NewSlideDialog,
     QuoteDialog,

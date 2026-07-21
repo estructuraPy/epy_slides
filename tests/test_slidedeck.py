@@ -97,7 +97,7 @@ def test_to_pdf_delegates_to_render_deck_pdf(qapp, tmp_path, monkeypatch):
         Path(out).write_bytes(b"%PDF-1.4\n")
 
     monkeypatch.setattr(
-        "epy_slides._export_pdf.render_deck_pdf", fake_render
+        "epy_slides._core._export_pdf.render_deck_pdf", fake_render
     )
     out = tmp_path / "deck.pdf"
     result = SlideDeck(_DECK, base_dir=tmp_path, theme="minimal").to_pdf(

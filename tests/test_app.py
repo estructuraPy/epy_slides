@@ -15,7 +15,7 @@ from PySide6.QtCore import QMimeData, QPointF, QSettings, Qt, QUrl
 from PySide6.QtGui import QDropEvent
 
 from epy_slides import app as app_module
-from epy_slides import themes
+from epy_slides._ui import themes
 from epy_slides.app import (
     SUPPORTED_EXTENSIONS,
     SlideWindow,
@@ -25,7 +25,7 @@ from epy_slides.app import (
     _load_welcome,
     main,
 )
-from epy_slides.tab import MarkdownTab
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -266,7 +266,7 @@ def test_refresh_themes_keeps_default(window):
 
 
 def test_set_language_updates_state_and_settings(window):
-    from epy_slides import _i18n as i18n
+    from epy_slides._core import _i18n as i18n
 
     try:
         window._set_language("es")
@@ -280,7 +280,7 @@ def test_set_language_updates_state_and_settings(window):
 def test_window_applies_saved_spanish_language_on_build(qapp):
     # A persisted non-English language must be applied as the window builds
     # (the construction-time set_language branch).
-    from epy_slides import _i18n as i18n
+    from epy_slides._core import _i18n as i18n
 
     settings = QSettings("ANM Ingeniería", "epy_slides")
     settings.setValue("language", "es")
@@ -316,7 +316,7 @@ def test_retranslate_ui_runs(window):
 
 
 def test_apply_template_sets_theme_and_front_matter(window, monkeypatch):
-    from epy_slides import templates
+    from epy_slides._core import templates
 
     monkeypatch.setattr(
         templates,
@@ -506,7 +506,7 @@ def test_main_dispatches_gui(monkeypatch):
 
 
 def test_run_register_reports_changes(monkeypatch, capsys):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(
         winreg_assoc, "register", lambda make_default: ["did A", "did B"]
@@ -520,7 +520,7 @@ def test_run_register_reports_changes(monkeypatch, capsys):
 
 
 def test_run_register_handles_runtime_error(monkeypatch, capsys):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     def boom(make_default):
         raise RuntimeError("not on windows")
@@ -531,7 +531,7 @@ def test_run_register_handles_runtime_error(monkeypatch, capsys):
 
 
 def test_run_unregister_nothing_to_remove(monkeypatch, capsys):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(winreg_assoc, "unregister", lambda: [])
     assert app_module._run_unregister() == 0
@@ -539,7 +539,7 @@ def test_run_unregister_nothing_to_remove(monkeypatch, capsys):
 
 
 def test_run_unregister_reports_changes(monkeypatch, capsys):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(winreg_assoc, "unregister", lambda: ["removed X"])
     assert app_module._run_unregister() == 0
@@ -547,7 +547,7 @@ def test_run_unregister_reports_changes(monkeypatch, capsys):
 
 
 def test_run_unregister_handles_runtime_error(monkeypatch):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     def boom():
         raise RuntimeError("nope")
@@ -557,7 +557,7 @@ def test_run_unregister_handles_runtime_error(monkeypatch):
 
 
 def test_run_set_default_success(monkeypatch):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(
         winreg_assoc, "open_default_apps_settings", lambda: True
@@ -566,7 +566,7 @@ def test_run_set_default_success(monkeypatch):
 
 
 def test_run_set_default_failure(monkeypatch, capsys):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(
         winreg_assoc, "open_default_apps_settings", lambda: False

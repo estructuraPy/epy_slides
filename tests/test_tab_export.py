@@ -14,7 +14,7 @@ import pytest
 pytest.importorskip("pypdf")
 pytest.importorskip("reportlab")
 
-from epy_slides.tab import MarkdownTab  # noqa: E402
+from epy_slides._ui.tab import MarkdownTab  # noqa: E402
 
 
 def _write_real_pdf(path: str) -> None:
@@ -171,7 +171,7 @@ def test_export_pdf_finalize_error_reports_false(
     tab.set_initial_text(_DECK)
     monkeypatch.setattr(tab, "view", _FakeView())
 
-    from epy_slides import _pdf_footer
+    from epy_slides._core import _pdf_footer
 
     def boom(*a, **k):
         raise RuntimeError("metadata stamp failed")
@@ -197,7 +197,7 @@ def test_export_pdf_readiness_times_out_then_prints(
 ):
     # The readiness probe never returns True; the poll loop exhausts its
     # budget and prints anyway (the timeout branch in _wait_for_export_ready).
-    import epy_slides.tab as tab_mod
+    import epy_slides._ui.tab as tab_mod
 
     # Shrink the budget so the (synchronous) poll terminates in a few steps
     # instead of recursing 600 deep.

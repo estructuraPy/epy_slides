@@ -15,11 +15,11 @@ import pytest
 from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QDialog, QMessageBox
 
-from epy_slides import _i18n as i18n
+from epy_slides._core import _i18n as i18n
 from epy_slides import app as app_module
-from epy_slides import themes
+from epy_slides._ui import themes
 from epy_slides.app import SlideWindow
-from epy_slides.tab import MarkdownTab
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -119,7 +119,7 @@ def test_edit_properties_theme_change_repaints(window, monkeypatch):
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides import presentation_properties_dialog as ppd
+    from epy_slides._ui import presentation_properties_dialog as ppd
 
     monkeypatch.setattr(
         ppd.PresentationPropertiesDialog,
@@ -215,7 +215,7 @@ def test_open_design_block_picker_accepted_inserts_block(window, monkeypatch):
     # Accepted dialog with a known kind → _on_active_tab is called with
     # ("insert_design_block", kind); the lazy import inside the handler must
     # execute (lines 691-700 of app.py).
-    from epy_slides.design_block_dialog import DesignBlockDialog
+    from epy_slides._ui.design_block_dialog import DesignBlockDialog
 
     monkeypatch.setattr(
         DesignBlockDialog, "exec",
@@ -237,7 +237,7 @@ def test_open_design_block_picker_accepted_inserts_block(window, monkeypatch):
 
 def test_open_design_block_picker_cancelled_is_noop(window, monkeypatch):
     # Rejected dialog → early return; _on_active_tab must not be called.
-    from epy_slides.design_block_dialog import DesignBlockDialog
+    from epy_slides._ui.design_block_dialog import DesignBlockDialog
 
     monkeypatch.setattr(
         DesignBlockDialog, "exec",

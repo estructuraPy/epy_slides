@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from epy_slides._media_export import (
+from epy_slides._core._media_export import (
     _diagram_page_html,
     collect_diagrams,
     render_diagram_pngs,

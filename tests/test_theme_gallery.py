@@ -1,8 +1,8 @@
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides import themes
-from epy_slides.theme_gallery_dialog import ThemeGalleryDialog
+from epy_slides._ui import themes
+from epy_slides._ui.theme_gallery_dialog import ThemeGalleryDialog
 
 
 @pytest.fixture(scope="module")

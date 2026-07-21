@@ -1,8 +1,8 @@
-from epy_slides import themes
-from epy_slides._revealjs_theme import reveal_css_for
-from epy_slides.epyson import is_dark
-from epy_slides.renderer import render_revealjs
-from epy_slides.template import (
+from epy_slides._ui import themes
+from epy_slides._core._revealjs_theme import reveal_css_for
+from epy_slides._core.epyson import is_dark
+from epy_slides._core.renderer import render_revealjs
+from epy_slides._core.template import (
     DEFAULT_MARGIN,
     _read_margin,
     _watermark_css,

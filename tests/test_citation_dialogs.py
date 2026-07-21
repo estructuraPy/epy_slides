@@ -5,10 +5,10 @@ from __future__ import annotations
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.bib import BibEntry, BibEntryDraft
-from epy_slides.bib_dialog import BibEntryDialog
-from epy_slides.snippets import Label
-from epy_slides.xref_dialog import CrossRefDialog
+from epy_slides._core.bib import BibEntry, BibEntryDraft
+from epy_slides._ui.bib_dialog import BibEntryDialog
+from epy_slides._core.snippets import Label
+from epy_slides._ui.xref_dialog import CrossRefDialog
 
 
 @pytest.fixture(scope="module")
@@ -89,7 +89,7 @@ def test_bib_dialog_autosuggest_skipped_when_user_typed(qapp):
 
 
 def test_bib_dialog_accept_warns_on_missing_fields(qapp, monkeypatch):
-    from epy_slides import bib_dialog
+    from epy_slides._ui import bib_dialog
 
     dlg = BibEntryDialog(default_type="article")
     # Leave required fields blank → the missing-fields warning fires.
@@ -117,7 +117,7 @@ def test_bib_dialog_accept_succeeds_when_complete(qapp, monkeypatch):
 
 
 def test_bib_dialog_accept_duplicate_key_declined(qapp, monkeypatch):
-    from epy_slides import bib_dialog
+    from epy_slides._ui import bib_dialog
 
     dlg = BibEntryDialog(default_type="misc", existing_keys={"dup2020"})
     dlg._user_typed_key = True
@@ -137,7 +137,7 @@ def test_bib_dialog_accept_duplicate_key_declined(qapp, monkeypatch):
 
 
 def test_bib_dialog_accept_duplicate_key_confirmed(qapp, monkeypatch):
-    from epy_slides import bib_dialog
+    from epy_slides._ui import bib_dialog
 
     dlg = BibEntryDialog(default_type="misc", existing_keys={"dup2020"})
     dlg._user_typed_key = True

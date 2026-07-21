@@ -13,9 +13,10 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QDialog, QInputDialog, QMessageBox
 
 from epy_slides import app as app_module
-from epy_slides import templates, themes
+from epy_slides._core import templates
+from epy_slides._ui import themes
 from epy_slides.app import SlideWindow
-from epy_slides.tab import MarkdownTab
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -43,7 +44,7 @@ def window(qapp):
 
 
 def test_open_theme_editor_saves_and_selects(window, monkeypatch):
-    from epy_slides import theme_editor_dialog as ted
+    from epy_slides._ui import theme_editor_dialog as ted
 
     monkeypatch.setattr(
         ted.ThemeEditorDialog, "exec",
@@ -68,7 +69,7 @@ def test_open_theme_editor_saves_and_selects(window, monkeypatch):
 
 
 def test_open_theme_editor_cancelled_is_noop(window, monkeypatch):
-    from epy_slides import theme_editor_dialog as ted
+    from epy_slides._ui import theme_editor_dialog as ted
 
     monkeypatch.setattr(
         ted.ThemeEditorDialog, "exec",
@@ -84,7 +85,7 @@ def test_open_theme_editor_cancelled_is_noop(window, monkeypatch):
 
 
 def test_open_theme_editor_save_error_warns(window, monkeypatch):
-    from epy_slides import theme_editor_dialog as ted
+    from epy_slides._ui import theme_editor_dialog as ted
 
     monkeypatch.setattr(
         ted.ThemeEditorDialog, "exec",
@@ -122,7 +123,7 @@ def test_edit_current_theme_clones_builtin(window, monkeypatch):
 
 
 def test_open_theme_gallery_applies_selection(window, monkeypatch):
-    from epy_slides import theme_gallery_dialog as tgd
+    from epy_slides._ui import theme_gallery_dialog as tgd
 
     monkeypatch.setattr(
         tgd.ThemeGalleryDialog, "exec",
@@ -136,7 +137,7 @@ def test_open_theme_gallery_applies_selection(window, monkeypatch):
 
 
 def test_open_theme_gallery_cancelled_keeps_theme(window, monkeypatch):
-    from epy_slides import theme_gallery_dialog as tgd
+    from epy_slides._ui import theme_gallery_dialog as tgd
 
     before = window._current_theme.id
     monkeypatch.setattr(
@@ -235,7 +236,7 @@ def test_delete_custom_theme_decline_confirm_is_noop(window, monkeypatch):
 
 
 def test_show_about_execs_dialog(window, monkeypatch):
-    from epy_slides import about_dialog
+    from epy_slides._ui import about_dialog
 
     execed = {"n": 0}
     monkeypatch.setattr(
@@ -335,7 +336,7 @@ def test_edit_properties_localizes_logo_asset(window, tmp_path, monkeypatch):
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides import presentation_properties_dialog as ppd
+    from epy_slides._ui import presentation_properties_dialog as ppd
 
     monkeypatch.setattr(
         ppd.PresentationPropertiesDialog, "updates",

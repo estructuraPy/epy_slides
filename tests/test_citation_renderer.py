@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 
-from epy_slides.renderer import (
+from epy_slides._core.renderer import (
     CSL_STYLES,
     _bibliography_args,
     _ensure_refs_slide,

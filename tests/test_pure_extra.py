@@ -8,9 +8,9 @@ branch with a concrete input and asserts the exact result.
 
 from __future__ import annotations
 
-from epy_slides import _previews
-from epy_slides.bib import BibEntry, BibEntryDraft, suggest_key
-from epy_slides.slide_md import (
+from epy_slides._ui import _previews
+from epy_slides._core.bib import BibEntry, BibEntryDraft, suggest_key
+from epy_slides._core.slide_md import (
     _heading_with_layout,
     _stats_to_table,
     expand_for_pptx,

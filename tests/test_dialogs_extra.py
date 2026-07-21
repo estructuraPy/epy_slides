@@ -8,14 +8,14 @@ non-citation / empty-filter / no-selection paths. All run headlessly.
 
 from __future__ import annotations
 
-from epy_slides.snippets import Label
-from epy_slides.xref_dialog import CrossRefDialog
+from epy_slides._core.snippets import Label
+from epy_slides._ui.xref_dialog import CrossRefDialog
 
 # ------------------------------------------------------- about_dialog branding
 
 
 def test_load_branding_pixmap_missing_resource_is_empty(qapp, monkeypatch):
-    from epy_slides import about_dialog
+    from epy_slides._ui import about_dialog
 
     def boom(_package):
         raise FileNotFoundError("no branding")
@@ -31,8 +31,8 @@ def test_load_branding_pixmap_missing_resource_is_empty(qapp, monkeypatch):
 
 
 def test_figure_dialog_browse_sets_path(qapp, monkeypatch):
-    from epy_slides import figure_dialog
-    from epy_slides.figure_dialog import FigureDialog
+    from epy_slides._ui import figure_dialog
+    from epy_slides._ui.figure_dialog import FigureDialog
 
     dlg = FigureDialog()
     monkeypatch.setattr(
@@ -44,8 +44,8 @@ def test_figure_dialog_browse_sets_path(qapp, monkeypatch):
 
 
 def test_figure_dialog_browse_cancelled_keeps_path(qapp, monkeypatch):
-    from epy_slides import figure_dialog
-    from epy_slides.figure_dialog import FigureDialog
+    from epy_slides._ui import figure_dialog
+    from epy_slides._ui.figure_dialog import FigureDialog
 
     dlg = FigureDialog()
     dlg.path_edit.setText("keep.png")
@@ -63,8 +63,8 @@ def test_figure_dialog_browse_cancelled_keeps_path(qapp, monkeypatch):
 def test_presentation_properties_pick_image(qapp, monkeypatch):
     from PySide6.QtWidgets import QLineEdit
 
-    from epy_slides import presentation_properties_dialog as ppd
-    from epy_slides.presentation_properties_dialog import (
+    from epy_slides._ui import presentation_properties_dialog as ppd
+    from epy_slides._ui.presentation_properties_dialog import (
         PresentationPropertiesDialog,
     )
 
@@ -81,8 +81,8 @@ def test_presentation_properties_pick_image(qapp, monkeypatch):
 def test_presentation_properties_pick_image_cancelled(qapp, monkeypatch):
     from PySide6.QtWidgets import QLineEdit
 
-    from epy_slides import presentation_properties_dialog as ppd
-    from epy_slides.presentation_properties_dialog import (
+    from epy_slides._ui import presentation_properties_dialog as ppd
+    from epy_slides._ui.presentation_properties_dialog import (
         PresentationPropertiesDialog,
     )
 
@@ -103,7 +103,7 @@ def test_presentation_properties_pick_image_cancelled(qapp, monkeypatch):
 def test_new_slide_dialog_pick_image(qapp, monkeypatch):
     from PySide6.QtWidgets import QFileDialog
 
-    from epy_slides.slide_dialogs import NewSlideDialog
+    from epy_slides._ui.slide_dialogs import NewSlideDialog
 
     dlg = NewSlideDialog()
     monkeypatch.setattr(
@@ -117,7 +117,7 @@ def test_new_slide_dialog_pick_image(qapp, monkeypatch):
 def test_new_slide_dialog_pick_image_cancelled(qapp, monkeypatch):
     from PySide6.QtWidgets import QFileDialog
 
-    from epy_slides.slide_dialogs import NewSlideDialog
+    from epy_slides._ui.slide_dialogs import NewSlideDialog
 
     dlg = NewSlideDialog()
     dlg._image.setText("keep.png")
@@ -133,7 +133,7 @@ def test_new_slide_dialog_pick_image_cancelled(qapp, monkeypatch):
 
 
 def test_pt_value_invalid_returns_default():
-    from epy_slides.theme_editor_dialog import _pt_value
+    from epy_slides._ui.theme_editor_dialog import _pt_value
 
     # "1.2.3" cleans to "1.2.3" which float() rejects → the 12.0 default.
     assert _pt_value("1.2.3pt") == 12.0
@@ -142,8 +142,8 @@ def test_pt_value_invalid_returns_default():
 def test_color_button_pick_applies_valid_color(qapp, monkeypatch):
     from PySide6.QtGui import QColor
 
-    from epy_slides import theme_editor_dialog as ted
-    from epy_slides.theme_editor_dialog import _ColorButton
+    from epy_slides._ui import theme_editor_dialog as ted
+    from epy_slides._ui.theme_editor_dialog import _ColorButton
 
     btn = _ColorButton("#101010")
     monkeypatch.setattr(
@@ -160,8 +160,8 @@ def test_color_button_pick_applies_valid_color(qapp, monkeypatch):
 def test_color_button_pick_invalid_color_is_noop(qapp, monkeypatch):
     from PySide6.QtGui import QColor
 
-    from epy_slides import theme_editor_dialog as ted
-    from epy_slides.theme_editor_dialog import _ColorButton
+    from epy_slides._ui import theme_editor_dialog as ted
+    from epy_slides._ui.theme_editor_dialog import _ColorButton
 
     btn = _ColorButton("#101010")
     monkeypatch.setattr(
@@ -175,7 +175,7 @@ def test_color_button_pick_invalid_color_is_noop(qapp, monkeypatch):
 def test_theme_editor_on_save_empty_name_warns(qapp, monkeypatch):
     from PySide6.QtWidgets import QMessageBox
 
-    from epy_slides.theme_editor_dialog import ThemeEditorDialog
+    from epy_slides._ui.theme_editor_dialog import ThemeEditorDialog
 
     dlg = ThemeEditorDialog()
     monkeypatch.setattr(dlg, "theme_name", lambda: "")
@@ -192,7 +192,7 @@ def test_theme_editor_on_save_empty_name_warns(qapp, monkeypatch):
 
 
 def test_theme_editor_on_save_valid_name_accepts(qapp, monkeypatch):
-    from epy_slides.theme_editor_dialog import ThemeEditorDialog
+    from epy_slides._ui.theme_editor_dialog import ThemeEditorDialog
 
     dlg = ThemeEditorDialog()
     monkeypatch.setattr(dlg, "theme_name", lambda: "House Style")

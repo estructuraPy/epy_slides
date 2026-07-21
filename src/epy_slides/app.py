@@ -28,12 +28,13 @@ from PySide6.QtWidgets import (
     QToolButton,
 )
 
-from epy_slides import _i18n as i18n
-from epy_slides import snippets, themes
-from epy_slides._revealjs_theme import reveal_css_for
-from epy_slides.about_dialog import _load_branding_pixmap
-from epy_slides.renderer import CSL_STYLES, export_pptx, render_revealjs
-from epy_slides.tab import MarkdownTab
+from epy_slides._core import _i18n as i18n
+from epy_slides._core import snippets
+from epy_slides._ui import themes
+from epy_slides._core._revealjs_theme import reveal_css_for
+from epy_slides._ui.about_dialog import _load_branding_pixmap
+from epy_slides._core.renderer import CSL_STYLES, export_pptx, render_revealjs
+from epy_slides._ui.tab import MarkdownTab
 
 APP_NAME = "epy_slides"
 
@@ -374,7 +375,7 @@ class SlideWindow(QMainWindow):
             self.callout_actions.append(act)
         self.callout_actions[0].setShortcut(QKeySequence("Ctrl+Shift+C"))
 
-        from epy_slides._design import DISCLOSURE_PRESETS  # noqa: PLC0415
+        from epy_slides._core._design import DISCLOSURE_PRESETS  # noqa: PLC0415
         self.disclosure_actions: list[QAction] = []
         for d_kind, (d_label, _d_text) in DISCLOSURE_PRESETS.items():
             d_act = QAction(f"Disclosure: {d_label}", self)
@@ -667,7 +668,7 @@ class SlideWindow(QMainWindow):
 
     def _open_theme_editor(self, edit_id: str | None = None) -> None:
         """Open the theme editor; on save, persist and select the theme."""
-        from epy_slides.theme_editor_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.theme_editor_dialog import (  # noqa: PLC0415
             ThemeEditorDialog,
         )
 
@@ -689,7 +690,7 @@ class SlideWindow(QMainWindow):
 
     def _open_theme_gallery(self) -> None:
         """Open the theme gallery; apply the chosen theme on accept."""
-        from epy_slides.theme_gallery_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.theme_gallery_dialog import (  # noqa: PLC0415
             ThemeGalleryDialog,
         )
 
@@ -702,7 +703,7 @@ class SlideWindow(QMainWindow):
 
     def _open_design_block_picker(self) -> None:
         """Open the design-block picker; insert the chosen block on accept."""
-        from epy_slides.design_block_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.design_block_dialog import (  # noqa: PLC0415
             DesignBlockDialog,
         )
 
@@ -753,7 +754,7 @@ class SlideWindow(QMainWindow):
 
     def _show_about(self) -> None:
         """Open the About dialog modally."""
-        from epy_slides.about_dialog import AboutDialog  # noqa: PLC0415
+        from epy_slides._ui.about_dialog import AboutDialog  # noqa: PLC0415
 
         AboutDialog(self).exec()
 
@@ -781,7 +782,7 @@ class SlideWindow(QMainWindow):
 
     def _populate_apply_template_menu(self) -> None:
         """Rebuild the Apply-template submenu from disk."""
-        from epy_slides import templates  # noqa: PLC0415
+        from epy_slides._core import templates  # noqa: PLC0415
 
         menu = self.apply_template_menu
         menu.clear()
@@ -798,7 +799,7 @@ class SlideWindow(QMainWindow):
 
     def _populate_delete_template_menu(self) -> None:
         """Rebuild the Delete-template submenu from disk."""
-        from epy_slides import templates  # noqa: PLC0415
+        from epy_slides._core import templates  # noqa: PLC0415
 
         menu = self.delete_template_menu
         menu.clear()
@@ -817,7 +818,7 @@ class SlideWindow(QMainWindow):
         """Capture the current appearance and save it under a name."""
         from PySide6.QtWidgets import QInputDialog  # noqa: PLC0415
 
-        from epy_slides import templates  # noqa: PLC0415
+        from epy_slides._core import templates  # noqa: PLC0415
 
         name, ok = QInputDialog.getText(
             self, "Save template", "Template name:"
@@ -849,7 +850,7 @@ class SlideWindow(QMainWindow):
 
     def _apply_template(self, name: str) -> None:
         """Apply a saved template: theme + appearance front-matter keys."""
-        from epy_slides import templates  # noqa: PLC0415
+        from epy_slides._core import templates  # noqa: PLC0415
 
         try:
             tpl = templates.load_template(name)
@@ -880,7 +881,7 @@ class SlideWindow(QMainWindow):
 
     def _delete_template(self, name: str) -> None:
         """Delete a saved template after confirmation."""
-        from epy_slides import templates  # noqa: PLC0415
+        from epy_slides._core import templates  # noqa: PLC0415
 
         choice = QMessageBox.question(
             self, "Delete template", f"Delete template '{name}'?",
@@ -896,7 +897,7 @@ class SlideWindow(QMainWindow):
 
     def _edit_properties(self) -> None:
         """Open the Presentation properties form and write front matter."""
-        from epy_slides.presentation_properties_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.presentation_properties_dialog import (  # noqa: PLC0415
             PresentationPropertiesDialog,
         )
 
@@ -1311,7 +1312,7 @@ class SlideWindow(QMainWindow):
 
     def _insert_citation(self) -> None:
         """Open the citation picker and insert ``[@key]`` at the caret."""
-        from epy_slides.xref_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.xref_dialog import (  # noqa: PLC0415
             CrossRefDialog,
         )
 
@@ -1329,8 +1330,8 @@ class SlideWindow(QMainWindow):
                 ),
             )
             return
-        from epy_slides.bib import BibEntry  # noqa: PLC0415
-        from epy_slides.snippets import Label  # noqa: PLC0415
+        from epy_slides._core.bib import BibEntry  # noqa: PLC0415
+        from epy_slides._core.snippets import Label  # noqa: PLC0415
 
         bib_lookup: dict[str, BibEntry] = {
             e.key: e for e in entries
@@ -1375,11 +1376,11 @@ class SlideWindow(QMainWindow):
 
     def _new_bib_entry(self) -> None:
         """Open the entry form and append the result to the .bib file."""
-        from epy_slides.bib import (  # noqa: PLC0415
+        from epy_slides._core.bib import (  # noqa: PLC0415
             append_entry_to_file,
             keys_in_file,
         )
-        from epy_slides.bib_dialog import (  # noqa: PLC0415
+        from epy_slides._ui.bib_dialog import (  # noqa: PLC0415
             BibEntryDialog,
         )
 
@@ -1442,7 +1443,7 @@ def _run_gui(files: list[str]) -> int:
 
 def _run_register(make_default: bool) -> int:
     """Register the app for ``.md`` / ``.qmd`` on Windows."""
-    from epy_slides import winreg_assoc  # noqa: PLC0415
+    from epy_slides._core import winreg_assoc  # noqa: PLC0415
 
     try:
         changes = winreg_assoc.register(make_default=make_default)
@@ -1462,7 +1463,7 @@ def _run_register(make_default: bool) -> int:
 
 def _run_set_default() -> int:
     """Open Settings → Default apps so the user can pick this app."""
-    from epy_slides import winreg_assoc  # noqa: PLC0415
+    from epy_slides._core import winreg_assoc  # noqa: PLC0415
 
     if not winreg_assoc.open_default_apps_settings():
         print(
@@ -1476,7 +1477,7 @@ def _run_set_default() -> int:
 
 def _run_unregister() -> int:
     """Remove the file-association keys created by ``--register``."""
-    from epy_slides import winreg_assoc  # noqa: PLC0415
+    from epy_slides._core import winreg_assoc  # noqa: PLC0415
 
     try:
         changes = winreg_assoc.unregister()

@@ -12,8 +12,8 @@ from __future__ import annotations
 import pytest
 from PySide6.QtWidgets import QDialog, QFileDialog, QInputDialog
 
-from epy_slides import tab as tab_module
-from epy_slides.tab import MarkdownTab
+from epy_slides._ui import tab as tab_module
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture

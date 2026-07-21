@@ -16,7 +16,7 @@ import pytest
 
 
 def test_load_palettes_missing_file_returns_empty(monkeypatch):
-    from epy_slides import epyson
+    from epy_slides._core import epyson
 
     def boom(_filename):
         raise FileNotFoundError("no colors.epyson")
@@ -26,7 +26,7 @@ def test_load_palettes_missing_file_returns_empty(monkeypatch):
 
 
 def test_load_all_themes_skips_corrupt_bundled_theme(monkeypatch):
-    from epy_slides import epyson
+    from epy_slides._core import epyson
 
     real_loader = epyson.load_layout_theme
     seen: dict = {}
@@ -48,7 +48,7 @@ def test_load_all_themes_skips_corrupt_bundled_theme(monkeypatch):
 def test_load_all_themes_skips_corrupt_user_theme(
     tmp_path, monkeypatch
 ):
-    from epy_slides import epyson
+    from epy_slides._core import epyson
 
     user_dir = tmp_path / "themes"
     user_dir.mkdir()
@@ -64,8 +64,8 @@ def test_apply_palette_font_fallback_and_unknown_role(qapp, monkeypatch):
     # fallback runs) and inject an unknown palette role (so the skip runs).
     from PySide6.QtGui import QFont
 
-    from epy_slides import epyson
-    from epy_slides.epyson import load_layout_theme
+    from epy_slides._core import epyson
+    from epy_slides._core.epyson import load_layout_theme
 
     real_qfont = QFont
 
@@ -95,7 +95,7 @@ def test_apply_palette_font_fallback_and_unknown_role(qapp, monkeypatch):
 def test_translate_widget_translates_plaintextedit_placeholder(qapp):
     from PySide6.QtWidgets import QPlainTextEdit, QVBoxLayout, QWidget
 
-    from epy_slides import _i18n as i18n
+    from epy_slides._core import _i18n as i18n
 
     root = QWidget()
     layout = QVBoxLayout(root)
@@ -124,7 +124,7 @@ def test_extract_anchor_pages_reads_named_destinations(tmp_path):
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas
 
-    from epy_slides._pdf_footer import extract_anchor_pages
+    from epy_slides._core._pdf_footer import extract_anchor_pages
 
     src = tmp_path / "src.pdf"
     pdf = canvas.Canvas(str(src), pagesize=A4)
@@ -152,7 +152,7 @@ def test_extract_anchor_pages_reads_named_destinations(tmp_path):
 
 
 def test_launcher_path_uses_which_when_available(monkeypatch):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(winreg_assoc, "_is_frozen", lambda: False)
     monkeypatch.setattr(
@@ -162,7 +162,7 @@ def test_launcher_path_uses_which_when_available(monkeypatch):
 
 
 def test_icon_source_uses_which_when_available(monkeypatch):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(winreg_assoc, "_is_frozen", lambda: False)
     monkeypatch.setattr(
@@ -172,7 +172,7 @@ def test_icon_source_uses_which_when_available(monkeypatch):
 
 
 def test_open_default_apps_settings_all_uris_fail(monkeypatch):
-    from epy_slides import winreg_assoc
+    from epy_slides._core import winreg_assoc
 
     monkeypatch.setattr(winreg_assoc, "_is_windows", lambda: True)
 

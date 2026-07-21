@@ -16,7 +16,7 @@ from PySide6.QtCore import QSettings
 
 from epy_slides import app as app_module
 from epy_slides.app import SlideWindow, _run_gui
-from epy_slides.tab import MarkdownTab
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)

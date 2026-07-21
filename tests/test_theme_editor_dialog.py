@@ -7,8 +7,8 @@ exercised headlessly.
 
 from __future__ import annotations
 
-from epy_slides import themes
-from epy_slides.theme_editor_dialog import (
+from epy_slides._ui import themes
+from epy_slides._ui.theme_editor_dialog import (
     _CALLOUTS,
     _COLOR_FIELDS,
     ThemeEditorDialog,
@@ -122,7 +122,7 @@ def test_on_base_changed_reloads_colors(qapp):
 
 def test_edit_id_prefills_name(qapp, tmp_path, monkeypatch):
     # Register a temporary user theme then open the editor on it.
-    from epy_slides import epyson
+    from epy_slides._core import epyson
 
     monkeypatch.setattr(epyson, "user_themes_dir", lambda: tmp_path)
     payload = themes.build_epyson({

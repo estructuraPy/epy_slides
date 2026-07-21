@@ -2,7 +2,7 @@
 
 The left pane is a plain-text Markdown editor; the right pane is a live
 reveal.js preview rendered from the same source by
-:func:`epy_slides.renderer.render_revealjs`. Slide and content blocks are
+:func:`epy_slides._core.renderer.render_revealjs`. Slide and content blocks are
 inserted through small dialogs that drop Markdown snippets at the caret.
 """
 
@@ -33,19 +33,19 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from epy_slides import snippets
-from epy_slides.checklist_dialog import ChecklistDialog
-from epy_slides.equation_dialog import EquationDialog
-from epy_slides.figure_dialog import FigureDialog
-from epy_slides.renderer import render_revealjs
-from epy_slides.slide_dialogs import (
+from epy_slides._core import snippets
+from epy_slides._ui.checklist_dialog import ChecklistDialog
+from epy_slides._ui.equation_dialog import EquationDialog
+from epy_slides._ui.figure_dialog import FigureDialog
+from epy_slides._core.renderer import render_revealjs
+from epy_slides._ui.slide_dialogs import (
     BulletListDialog,
     NewSlideDialog,
     QuoteDialog,
     SpeakerNotesDialog,
     TwoColumnDialog,
 )
-from epy_slides.table_dialog import TableDialog
+from epy_slides._ui.table_dialog import TableDialog
 
 RENDER_DEBOUNCE_MS = 250
 POS_POLL_MS = 400
@@ -339,7 +339,7 @@ class MarkdownTab(QWidget):
 
     def bib_entries(self):
         """Return parsed BibEntry list from the linked .bib, or []."""
-        from epy_slides.bib import parse_bib_file  # noqa: PLC0415
+        from epy_slides._core.bib import parse_bib_file  # noqa: PLC0415
 
         bib = self.bib_path()
         if bib is None:
@@ -377,14 +377,14 @@ class MarkdownTab(QWidget):
 
     def insert_design_block(self, kind: str = "stat") -> None:
         """Insert a shared design block (card, big stat, timeline, ...)."""
-        from epy_slides._design import design_block  # noqa: PLC0415
+        from epy_slides._core._design import design_block  # noqa: PLC0415
 
         skeleton, token = design_block(kind)
         self._insert_template(skeleton, token)
 
     def insert_disclosure(self, kind: str = "ai") -> None:
         """Insert a disclosure note (AI use, document integrity, ...)."""
-        from epy_slides._design import disclosure_block  # noqa: PLC0415
+        from epy_slides._core._design import disclosure_block  # noqa: PLC0415
 
         skeleton, token = disclosure_block(kind)
         self._insert_template(skeleton, token)
@@ -549,10 +549,10 @@ class MarkdownTab(QWidget):
             result_ok = ok
             try:
                 if ok:
-                    from epy_slides import _pdf_footer  # noqa: PLC0415
+                    from epy_slides._core import _pdf_footer  # noqa: PLC0415
 
                     if watermark_path is not None:
-                        from epy_slides.template import (  # noqa: PLC0415
+                        from epy_slides._core.template import (  # noqa: PLC0415
                             watermark_pdf_params,
                         )
 

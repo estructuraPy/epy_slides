@@ -27,8 +27,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from epy_slides import _i18n as i18n
-from epy_slides._previews import LAYOUT_THUMB, layout_preview
+from epy_slides._core import _i18n as i18n
+from epy_slides._ui._previews import LAYOUT_THUMB, layout_preview
 
 # (id, label, one-line description) for the New-Slide picker. ``title`` is
 # omitted — the title slide is generated from the presentation properties.

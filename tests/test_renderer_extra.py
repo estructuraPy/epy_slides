@@ -3,8 +3,8 @@ pptx resolution and CSL fallback to a document-relative file."""
 
 from __future__ import annotations
 
-from epy_slides import renderer
-from epy_slides.renderer import (
+from epy_slides._core import renderer
+from epy_slides._core.renderer import (
     _ensure_refs_slide,
     _resolve_csl,
     _resolve_reference_pptx,

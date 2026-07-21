@@ -52,14 +52,19 @@ packages = ["src/epy_slides"]
 # no force-include needed. Re-introducing one would double-add
 # `epy_slides/_config/_assets/__init__.py` and fail metadata generation.
 #
-# _core/_packaging/ is dev-only build/release tooling (icon generation,
-# installer assemblers, screenshot/reference-deck regeneration scripts) plus
-# its gitignored `dist/` build output and the `assets_build/` icon sources —
-# none of it belongs in the distributable wheel. (hatchling 1.30 has no
-# `force-exclude` key — plain `exclude` is what actually filters the
-# `packages` file walk; verified via wheel-content inspection.)
+# _core/ now holds two different things after the flatten-package-root
+# refactor: real runtime logic (renderer.py, template.py, snippets.py, ...)
+# that MUST ship in the wheel, and _core/_packaging/ — dev-only build/release
+# tooling (icon generation, installer assemblers, screenshot/reference-deck
+# regeneration scripts) plus its gitignored `dist/` build output and the
+# `assets_build/` icon sources — none of which belongs in the distributable
+# wheel. The exclude below is therefore scoped to _core/_packaging/ only; a
+# blanket `_core/**` would silently drop the runtime modules from every
+# install. (hatchling 1.30 has no `force-exclude` key — plain `exclude` is
+# what actually filters the `packages` file walk; verified via wheel-content
+# inspection.)
 exclude = [
-    "src/epy_slides/_core/**",
+    "src/epy_slides/_core/_packaging/**",
 ]
 
 [tool.pytest.ini_options]

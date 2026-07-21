@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.table_dialog import TableDialog
+from epy_slides._ui.table_dialog import TableDialog
 
 _app: QApplication | None = None
 

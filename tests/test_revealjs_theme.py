@@ -1,5 +1,5 @@
-from epy_slides import themes
-from epy_slides._revealjs_theme import reveal_css_for
+from epy_slides._ui import themes
+from epy_slides._core._revealjs_theme import reveal_css_for
 
 
 def test_reveal_css_has_core_tokens():

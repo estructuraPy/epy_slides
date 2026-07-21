@@ -2,7 +2,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 
-from epy_slides.renderer import export_pptx
+from epy_slides._core.renderer import export_pptx
 
 _DECK = """---
 title: Deck

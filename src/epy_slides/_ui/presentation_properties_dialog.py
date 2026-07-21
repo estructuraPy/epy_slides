@@ -22,9 +22,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from epy_slides import _i18n as i18n
-from epy_slides import themes
-from epy_slides.template import is_truthy
+from epy_slides._core import _i18n as i18n
+from epy_slides._ui import themes
+from epy_slides._core.template import is_truthy
 
 _ASPECTS = ["16:9", "4:3"]
 _TRANSITIONS = ["none", "fade", "slide", "convex", "concave", "zoom"]

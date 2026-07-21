@@ -6,7 +6,7 @@ instance) must stay usable with no Qt binding installed at all.
 
 Unlike its sibling ``epy_reports`` (where only ``to_pdf`` needs Qt),
 ``epy_slides.to_html`` is NOT Qt-free: the reveal.js render path pulls in
-``epy_slides.epyson`` (theme/color helpers such as ``is_dark()``), which
+``epy_slides._core.epyson`` (theme/color helpers such as ``is_dark()``), which
 imports ``PySide6.QtGui.QColor`` at module level for color math. This test
 locks in that real, current coupling as a documented contract rather than
 asserting a Qt-free path that doesn't exist — if the render path is ever

@@ -1,7 +1,7 @@
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.presentation_properties_dialog import (
+from epy_slides._ui.presentation_properties_dialog import (
     PresentationPropertiesDialog,
 )
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from epy_slides.slide_md import simplify_components_for_export
+from epy_slides._core.slide_md import simplify_components_for_export
 
 STATS = """\
 :::: {.stats}

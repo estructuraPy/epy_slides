@@ -18,7 +18,7 @@ from functools import lru_cache
 from importlib import resources
 from pathlib import Path
 
-from epy_slides.epyson import is_dark
+from epy_slides._core.epyson import is_dark
 
 _REVEAL_PKG = "epy_slides._config._assets.revealjs"
 
@@ -554,7 +554,7 @@ def build_reveal_document(
         metadata: YAML front matter (title slide, aspect ratio,
             transition, footer, logo, slide number).
         theme_css: Reveal theme CSS derived from the active visual theme
-            (see :func:`epy_slides._revealjs_theme.reveal_css_for`).
+            (see :func:`epy_slides._core._revealjs_theme.reveal_css_for`).
         for_export: Tweaks the reveal config for a clean export (no
             controls/progress chrome).
         continuous: Render the deck in reveal's scroll view — one

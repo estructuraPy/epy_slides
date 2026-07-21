@@ -8,7 +8,7 @@ injection in the full document builder.
 
 from __future__ import annotations
 
-from epy_slides.template import (
+from epy_slides._core.template import (
     ASPECT_SIZES,
     DEFAULT_ASPECT,
     build_reveal_document,

@@ -15,8 +15,8 @@ themed.
 
 from __future__ import annotations
 
-from epy_slides._design import design_css
-from epy_slides.themes_base import Theme
+from epy_slides._core._design import design_css
+from epy_slides._ui.themes_base import Theme
 
 CALLOUT_KINDS = ("note", "tip", "warning", "important", "caution")
 

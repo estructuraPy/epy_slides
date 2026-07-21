@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from epy_slides.tab import UNTITLED, MarkdownTab
+from epy_slides._ui.tab import UNTITLED, MarkdownTab
 
 
 @pytest.fixture

@@ -35,18 +35,18 @@ ROOT = Path(__file__).resolve().parent
 # Prefer an installed epy_slides; fall back to the in-repo source tree so the
 # example runs straight from a clone without `pip install -e .`.
 try:
-    from epy_slides import themes
-    from epy_slides._pdf_footer import add_metadata, add_watermark
-    from epy_slides._revealjs_theme import reveal_css_for
-    from epy_slides.renderer import export_pptx, render_revealjs
-    from epy_slides.snippets import parse_front_matter
+    from epy_slides._ui import themes
+    from epy_slides._core._pdf_footer import add_metadata, add_watermark
+    from epy_slides._core._revealjs_theme import reveal_css_for
+    from epy_slides._core.renderer import export_pptx, render_revealjs
+    from epy_slides._core.snippets import parse_front_matter
 except ImportError:
     sys.path.insert(0, str(ROOT.parent.parent / "src"))
-    from epy_slides import themes
-    from epy_slides._pdf_footer import add_metadata, add_watermark
-    from epy_slides._revealjs_theme import reveal_css_for
-    from epy_slides.renderer import export_pptx, render_revealjs
-    from epy_slides.snippets import parse_front_matter
+    from epy_slides._ui import themes
+    from epy_slides._core._pdf_footer import add_metadata, add_watermark
+    from epy_slides._core._revealjs_theme import reveal_css_for
+    from epy_slides._core.renderer import export_pptx, render_revealjs
+    from epy_slides._core.snippets import parse_front_matter
 
 SOURCE = ROOT / "empire_state_building.md"
 OUT_DIR = ROOT / "_render" / "themes"
@@ -171,7 +171,7 @@ class SlideExporter:
             try:
                 watermark = str(self.meta.get("watermark", "") or "").strip()
                 if watermark and (ROOT / watermark).is_file():
-                    from epy_slides.template import (
+                    from epy_slides._core.template import (
                         watermark_pdf_params,
                     )
 

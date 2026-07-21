@@ -18,10 +18,10 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides import app as app_module
-from epy_slides import templates
+from epy_slides._core import templates
 from epy_slides.app import SlideWindow
-from epy_slides.bib import BibEntryDraft
-from epy_slides.tab import MarkdownTab
+from epy_slides._core.bib import BibEntryDraft
+from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -139,7 +139,7 @@ def test_edit_properties_writes_front_matter(window, monkeypatch):
         lambda self: QDialog.DialogCode.Accepted,
     )
 
-    from epy_slides import presentation_properties_dialog as ppd
+    from epy_slides._ui import presentation_properties_dialog as ppd
 
     monkeypatch.setattr(
         ppd.PresentationPropertiesDialog,
@@ -195,8 +195,8 @@ def test_insert_citation_inserts_key(window, tmp_path, monkeypatch):
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides.snippets import Label
-    from epy_slides.xref_dialog import CrossRefDialog
+    from epy_slides._core.snippets import Label
+    from epy_slides._ui.xref_dialog import CrossRefDialog
 
     monkeypatch.setattr(
         CrossRefDialog, "selected_label",
@@ -248,7 +248,7 @@ def test_insert_citation_accepted_without_label_is_noop(
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides.xref_dialog import CrossRefDialog
+    from epy_slides._ui.xref_dialog import CrossRefDialog
 
     monkeypatch.setattr(
         CrossRefDialog, "selected_label", lambda self: None
@@ -343,7 +343,7 @@ def test_new_bib_entry_appends_to_file(window, tmp_path, monkeypatch):
         app_module.QDialog, "exec",
         lambda self: QDialog.DialogCode.Accepted,
     )
-    from epy_slides.bib_dialog import BibEntryDialog
+    from epy_slides._ui.bib_dialog import BibEntryDialog
 
     monkeypatch.setattr(
         BibEntryDialog, "build_draft",

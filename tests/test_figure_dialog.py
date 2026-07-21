@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides.figure_dialog import FigureDialog
+from epy_slides._ui.figure_dialog import FigureDialog
 
 _app: QApplication | None = None
 
