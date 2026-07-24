@@ -390,8 +390,97 @@ window._epy_init_nomnoml = function () {
 """
 
 
-def _diagram_assets(diagrams: frozenset[str]) -> tuple[str, list[str]]:
-    """Return ``(head_html, init_calls)`` for the diagram engines in use."""
+@lru_cache(maxsize=1)
+def _load_plotly_script() -> str:
+    """Return the bundled Plotly.js engine wrapped in ``<script>`` (cached).
+
+    Inlined (like MathJax and the diagram engines) so the preview, PDF and
+    standalone HTML export all render the interactive figures offline.
+    """
+    js = (
+        resources.files("epy_slides._config._assets.plotly")
+        .joinpath("plotly.min.js")
+        .read_text(encoding="utf-8")
+    )
+    return f"<script>{js}</script>"
+
+
+_PLOTLY_CONFIG = """
+<script>
+window._epy_init_plotly = function () {
+  if (!window.Plotly) return Promise.resolve();
+  var cs = getComputedStyle(document.documentElement);
+  function v(n, d) { return (cs.getPropertyValue(n) || d).trim(); }
+  var themeLayout = {
+    paper_bgcolor: v('--epy-bg', '#ffffff'),
+    plot_bgcolor: v('--epy-bg', '#ffffff'),
+    font: {
+      color: v('--epy-fg', '#222222'),
+      family: v('--r-main-font', 'sans-serif')
+    },
+    colorway: [ v('--epy-primary', '#2a76dd'), v('--epy-soft', '#eeeeee') ]
+  };
+  function isPlainObject(x) {
+    return x !== null && typeof x === 'object' && !Array.isArray(x);
+  }
+  // Deep-merge with the AUTHOR's spec winning on every conflicting key; the
+  // theme only fills in what the author left unset.
+  function deepMerge(base, override) {
+    if (!isPlainObject(base)) { return override; }
+    if (!isPlainObject(override)) {
+      return override === undefined ? base : override;
+    }
+    var out = {};
+    Object.keys(base).forEach(function (k) { out[k] = base[k]; });
+    Object.keys(override).forEach(function (k) {
+      out[k] = deepMerge(base[k], override[k]);
+    });
+    return out;
+  }
+  var els = Array.prototype.slice.call(
+    document.querySelectorAll('.epy-plotly')
+  );
+  var tasks = els.map(function (el) {
+    var script = document.querySelector(
+      'script[data-plotly-for="' + el.id + '"]'
+    );
+    if (!script) { return Promise.resolve(); }
+    var spec;
+    try {
+      spec = JSON.parse(script.textContent);
+    } catch (e) {
+      el.textContent = 'plotly: invalid JSON (' + e.message + ')';
+      return Promise.resolve();
+    }
+    var layout = deepMerge(themeLayout, spec.layout || {});
+    var config = Object.assign(
+      { responsive: true, displaylogo: false }, spec.config || {}
+    );
+    return Plotly.newPlot(el, spec.data || [], layout, config);
+  });
+  return Promise.all(tasks);
+};
+// reveal keeps every non-active slide hidden (zero-size), so a figure drawn
+// before its slide is shown sizes to 0. Re-fit every plotly div to its (now
+// visible, reveal-scaled) container on slide change / resize.
+window._epy_resize_plotly = function () {
+  if (!window.Plotly) return;
+  document.querySelectorAll('.epy-plotly').forEach(function (el) {
+    try { Plotly.Plots.resize(el); } catch (e) {}
+  });
+};
+</script>
+"""
+
+
+def _diagram_assets(
+    diagrams: frozenset[str], *, plotly: bool = False
+) -> tuple[str, list[str]]:
+    """Return ``(head_html, init_calls)`` for the engines in use.
+
+    Covers the text-diagram engines (mermaid / nomnoml) and, when
+    ``plotly`` is set, the interactive Plotly.js bundle and its init.
+    """
     head = ""
     inits: list[str] = []
     if "mermaid" in diagrams:
@@ -400,6 +489,9 @@ def _diagram_assets(diagrams: frozenset[str]) -> tuple[str, list[str]]:
     if "nomnoml" in diagrams:
         head += _load_diagram_script("nomnoml") + _NOMNOML_CONFIG
         inits.append("window._epy_init_nomnoml()")
+    if plotly:
+        head += _load_plotly_script() + _PLOTLY_CONFIG
+        inits.append("window._epy_init_plotly()")
     return head, inits
 
 
@@ -542,6 +634,7 @@ def build_reveal_document(
     for_export: bool = False,
     continuous: bool = False,
     diagrams: frozenset[str] = frozenset(),
+    plotly: bool = False,
 ) -> str:
     """Assemble a self-contained reveal.js deck around Pandoc's sections.
 
@@ -562,6 +655,8 @@ def build_reveal_document(
             by the HTML export.
         diagrams: Diagram engines used by the deck (``mermaid`` /
             ``nomnoml``); their bundles and init are injected when present.
+        plotly: When ``True``, inject the interactive Plotly.js bundle and
+            its load-time init (used when the deck carries plotly figures).
 
     Returns:
         A complete, self-contained HTML5 reveal.js document.
@@ -578,7 +673,22 @@ def build_reveal_document(
     reveal_js = _reveal_text("dist", "reveal.js")
     title_slide = _title_slide(meta)
     overlays = _overlays(meta)
-    diagram_head, diagram_inits = _diagram_assets(diagrams)
+    diagram_head, diagram_inits = _diagram_assets(diagrams, plotly=plotly)
+    # When the deck carries interactive Plotly figures, re-fit each one to
+    # its (reveal-scaled, now-visible) container whenever a slide is shown —
+    # a figure drawn while its slide was hidden sizes to zero otherwise.
+    plotly_hook = (
+        (
+            "    deck.on('ready', function () "
+            "{ window._epy_resize_plotly(); });\n"
+            "    deck.on('slidechanged', function () "
+            "{ window._epy_resize_plotly(); });\n"
+            "    deck.on('resize', function () "
+            "{ window._epy_resize_plotly(); });\n"
+        )
+        if plotly
+        else ""
+    )
     init = (
         "<script>\n"
         + _RESTORE_FN
@@ -591,7 +701,8 @@ def build_reveal_document(
         "    deck.on('ready', function () { window._epyAutofit(); });\n"
         "    deck.on('slidechanged', function () { window._epyAutofit(); });\n"
         "    deck.on('resize', function () { window._epyAutofit(); });\n"
-        "    // reveal builds the fixed-size print pages (and pins their\n"
+        + plotly_hook
+        + "    // reveal builds the fixed-size print pages (and pins their\n"
         "    // height) only when exporting; 'pdf-ready' is the moment those\n"
         "    // boxes exist, so this is where overflowing slides must be fit.\n"
         "    deck.on('pdf-ready', function () { window._epyAutofit(); });\n"

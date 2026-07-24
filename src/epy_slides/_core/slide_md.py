@@ -18,6 +18,11 @@ from __future__ import annotations
 
 import re
 
+from epy_slides._core._plotly import (
+    expand_plotly,
+    strip_plotly_for_export,
+)
+
 LAYOUTS: tuple[str, ...] = (
     "title",
     "section",
@@ -133,6 +138,7 @@ def expand_for_revealjs(source: str) -> str:
     are dropped. Everything else passes through untouched.
     """
     source = expand_diagrams(source)
+    source = expand_plotly(source)
     out: list[str] = []
     in_fence = False
     last_heading_idx = -1
@@ -343,6 +349,7 @@ def expand_for_pptx(source: str) -> str:
     blockquotes and design components to native tables/blocks, which the
     pptx writer renders cleanly.
     """
+    source = strip_plotly_for_export(source)
     source = simplify_components_for_export(source)
     lines = source.splitlines()
     out: list[str] = []

@@ -27,6 +27,7 @@ from epy_slides._core._media_export import (
     render_diagram_pngs,
     substitute_diagram_images,
 )
+from epy_slides._core._plotly import uses_plotly
 from epy_slides._core.slide_md import (
     diagram_engines,
     expand_for_pptx,
@@ -272,6 +273,7 @@ def render_revealjs(
         for_export=for_export,
         continuous=continuous,
         diagrams=frozenset(diagram_engines(source)),
+        plotly=uses_plotly(source),
     )
 
 
