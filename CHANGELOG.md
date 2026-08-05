@@ -4,6 +4,19 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.10] — 2026-08-05
+
+### Fixed
+- **Qt startup crash in conda environments (Windows).** The package now
+  pins the System32 ICU at import time (`_pin_system_icu`), preventing
+  `ImportError: DLL load failed ... (WinError 127)` when conda's
+  `Library\bin` ICU shadows the Windows one Qt links against.
+- **Test-suite shutdown crash.** The session teardown now flushes queued
+  `deleteLater()` deletions and destroys leftover widgets and the
+  `QApplication` while the interpreter is healthy; zombie WebEngine
+  previews no longer crash Qt's native teardown (0xC0000005) after all
+  tests pass.
+
 ## [0.1.8] — 2026-06-24
 
 ### Fixed
