@@ -96,6 +96,18 @@ a.binaries = [
     )
 ]
 
+
+# The app is QtWidgets-only: the QML runtime is never loaded. The PySide6
+# wheel's qml/ tree is large and carries build debris
+# (objects-Debug/*.obj) whose deep paths break the installer compile
+# (MAX_PATH). Qt6Qml*.dll stay: they are link-time deps of WebEngine.
+def _not_qml(entry) -> bool:
+    return not entry[0].replace("\\", "/").lower().startswith("pyside6/qml/")
+
+
+a.binaries = [entry for entry in a.binaries if _not_qml(entry)]
+a.datas = [entry for entry in a.datas if _not_qml(entry)]
+
 pyz = PYZ(a.pure)
 
 exe = EXE(
