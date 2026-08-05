@@ -725,6 +725,52 @@ def build_reveal_document(
         "});\n"
         "</script>\n"
     )
+    # In-deck anchor navigation under the <base href>: a plain href="#/2"
+    # or "#slide-id" resolves AGAINST THE BASE (the deck's directory) and
+    # navigates the preview away instead of changing slides. The hook
+    # intercepts anchor-only links and drives the reveal deck directly;
+    # every jump lands in location.hash, so session history walks slide
+    # jumps and Back returns to the slide you left.
+    anchor_nav = (
+        "<script>\n"
+        "(function () {\n"
+        "  function goTo(raw) {\n"
+        "    var deck = window._epyDeck;\n"
+        "    if (!deck) return false;\n"
+        "    if (raw.charAt(0) === '/') {\n"
+        "      var parts = raw.slice(1).split('/');\n"
+        "      deck.slide(parseInt(parts[0], 10) || 0,\n"
+        "                 parseInt(parts[1], 10) || 0);\n"
+        "      return true;\n"
+        "    }\n"
+        "    var el = document.getElementById(raw);\n"
+        "    if (!el) return false;\n"
+        "    var section = el.closest ? el.closest('section') : null;\n"
+        "    if (!section) return false;\n"
+        "    var idx = deck.getIndices(section);\n"
+        "    deck.slide(idx.h, idx.v);\n"
+        "    return true;\n"
+        "  }\n"
+        "  document.addEventListener('click', function (ev) {\n"
+        "    var node = ev.target;\n"
+        "    while (node && node.nodeType === 1 && node.tagName !== 'A') {\n"
+        "      node = node.parentNode;\n"
+        "    }\n"
+        "    if (!node || node.nodeType !== 1) return;\n"
+        "    var href = node.getAttribute('href') || '';\n"
+        "    if (href.charAt(0) !== '#') return;\n"
+        "    ev.preventDefault();\n"
+        "    var raw = decodeURIComponent(href.slice(1));\n"
+        "    if (goTo(raw)) {\n"
+        "      try { location.hash = href; } catch (e) {}\n"
+        "    }\n"
+        "  }, true);\n"
+        "  window.addEventListener('hashchange', function () {\n"
+        "    goTo(decodeURIComponent((location.hash || '#').slice(1)));\n"
+        "  });\n"
+        "})();\n"
+        "</script>\n"
+    )
     return (
         "<!doctype html>\n"
         '<html lang="en">\n'
@@ -753,6 +799,7 @@ def build_reveal_document(
         f"<script>{reveal_js}</script>\n"
         f"{diagram_head}"
         f"{init}"
+        f"{anchor_nav}"
         "</body>\n"
         "</html>\n"
     )

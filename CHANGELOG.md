@@ -4,6 +4,23 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-08-05
+
+### Fixed
+- **External links in the deck.** The deck forces external links to
+  `target="_blank"`, but the preview swallowed those popups entirely —
+  clicking a web link did nothing. They now open in the system browser.
+- **Internal slide links.** With the deck's `<base href>`, an internal
+  link (`#/2` or `#slide-id`) resolved against the base and navigated
+  the preview away. An injected interceptor now drives the reveal deck
+  directly (`Reveal.slide`), for routes and named anchors alike.
+
+### Added
+- **Back/Forward across slide jumps.** Every link jump lands in
+  `location.hash`, so `Alt+Left` / `Alt+Right` (and the context menu)
+  walk the jump history back to the slide you left; re-renders no longer
+  pollute the history.
+
 ## [0.1.10] — 2026-08-05
 
 ### Fixed

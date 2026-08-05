@@ -16,12 +16,16 @@ from pathlib import Path
 
 from PySide6.QtCore import QMarginsF, QSizeF, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
+    QDesktopServices,
     QFont,
     QFontDatabase,
+    QKeySequence,
     QPageLayout,
     QPageSize,
+    QShortcut,
     QTextCursor,
 )
+from PySide6.QtWebEngineCore import QWebEnginePage
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QDialog,
@@ -90,6 +94,30 @@ def next_label_suffix(text: str, kind: str) -> str:
     return str(max(ints) + 1) if ints else "1"
 
 
+class _ExternalOpenPage(QWebEnginePage):
+    """Throwaway page that redirects any load to the system browser.
+
+    The deck forces external links to ``target="_blank"``; a plain
+    ``QWebEngineView`` swallows those unless ``createWindow`` returns a
+    page, so external links silently did nothing. This stand-in receives
+    the popup navigation and hands the URL to the OS instead.
+    """
+
+    def acceptNavigationRequest(  # noqa: N802 (Qt override)
+        self, url: QUrl, _type, _is_main_frame: bool
+    ) -> bool:
+        QDesktopServices.openUrl(url)
+        self.deleteLater()
+        return False
+
+
+class _PreviewView(QWebEngineView):
+    """Preview view: popup links go to the system browser."""
+
+    def createWindow(self, _window_type):  # noqa: N802 (Qt override)
+        return _ExternalOpenPage(self)
+
+
 class MarkdownTab(QWidget):
     """Editor + live reveal.js preview for one slide-deck buffer.
 
@@ -113,7 +141,19 @@ class MarkdownTab(QWidget):
         self.editor = QPlainTextEdit(self)
         self._setup_editor()
 
-        self.view = QWebEngineView(self)
+        self.view = _PreviewView(self)
+        # Render loads must not pollute the session history: Back should
+        # mean "return from a link jump", never "step through old debounce
+        # renders". Loads issued by _render_into_view carry the flag;
+        # navigation loads keep their history.
+        self._expect_render_load = False
+        self.view.loadFinished.connect(self._on_preview_load_finished)
+        back = QShortcut(QKeySequence("Alt+Left"), self.view)
+        back.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        back.activated.connect(self.view.back)
+        forward = QShortcut(QKeySequence("Alt+Right"), self.view)
+        forward.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        forward.activated.connect(self.view.forward)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
         splitter.addWidget(self.editor)
@@ -771,7 +811,14 @@ class MarkdownTab(QWidget):
         url.setQuery(f"r={self._render_seq}")
         if preserve and self._last_pos:
             url.setFragment(self._last_pos)
+        self._expect_render_load = True
         self.view.load(url)
+
+    def _on_preview_load_finished(self, _ok: bool) -> None:
+        """Drop stale history after render loads (keep it for navigation)."""
+        if self._expect_render_load:
+            self._expect_render_load = False
+            self.view.history().clear()
 
     def _poll_position(self) -> None:
         """Cache the slide reveal is showing for the next preview render."""
