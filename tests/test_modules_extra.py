@@ -15,14 +15,22 @@ import pytest
 # ----------------------------------------------------------------- epyson
 
 
-def test_load_palettes_missing_file_returns_empty(monkeypatch):
+def test_load_palettes_missing_file_raises(monkeypatch):
+    """A missing palette catalog surfaces instead of emptying every theme.
+
+    The reads now go through ``_config._loader``, whose contract is
+    fail-loud for bundled assets: silently returning ``{}`` stripped the
+    callout colours off every theme with no signal.
+    """
+    from epy_slides._config import _loader
     from epy_slides._core import epyson
 
     def boom(_filename):
         raise FileNotFoundError("no colors.epyson")
 
-    monkeypatch.setattr(epyson, "_read_json", boom)
-    assert epyson._load_palettes() == {}
+    monkeypatch.setattr(_loader, "read_asset_json", boom)
+    with pytest.raises(FileNotFoundError):
+        epyson._load_palettes()
 
 
 def test_load_all_themes_skips_corrupt_bundled_theme(monkeypatch):

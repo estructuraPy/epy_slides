@@ -31,7 +31,7 @@ os.environ.setdefault(
 # Repo root: this script lives at src/epy_slides/_core/_packaging/, so
 # it takes 4 parents to reach the root (_packaging -> _core -> epy_slides
 # -> src -> root).
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT / "src"))
 
 from PySide6.QtCore import (  # noqa: E402
