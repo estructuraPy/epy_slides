@@ -21,16 +21,16 @@ def _scale_pdf(pdf_path: Path, target_width_in: float) -> None:
     drift is absorbed) keeps the text crisp and gives the deck the larger
     widescreen sheet. The aspect ratio is preserved (one uniform scale).
     """
-    from pypdf import PdfReader, PdfWriter  # noqa: PLC0415
+    from pypdf import PdfWriter  # noqa: PLC0415
 
     target_pt = target_width_in * 72.0
-    reader = PdfReader(str(pdf_path))
-    writer = PdfWriter()
-    for page in reader.pages:
+    # Clone (not reader -> fresh writer): a fresh PdfWriter drops the
+    # document catalog, killing link annotations' named destinations.
+    writer = PdfWriter(clone_from=str(pdf_path))
+    for page in writer.pages:
         width_pt = float(page.mediabox.width)
         if width_pt > 0:
             page.scale_by(target_pt / width_pt)
-        writer.add_page(page)
     with pdf_path.open("wb") as handle:
         writer.write(handle)
 

@@ -4,6 +4,15 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-08-05
+
+### Fixed
+- **PDF links now navigate.** The deck's exported PDF kept its link
+  annotations but internal ones were dead: the widescreen scaling pass
+  and the watermark stamping rebuilt the document through a fresh
+  writer, dropping the named destinations the links point at. Both now
+  clone the document instead, so links in the PDF work.
+
 ## [0.2.0] — 2026-08-05
 
 ### Fixed
