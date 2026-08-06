@@ -10,7 +10,7 @@ the exported deck carries the same identity as the live preview.
 
 Run from the project root::
 
-    python src/epy_slides/_core/_packaging/make_reference_pptx.py
+    python src/epy_slides/_core/_packaging/make_reference_pptx/__init__.py
 
 It writes ``src/epy_slides/_config/_assets/reference_pptx/<theme>.pptx`` for
 every bundled theme (the build-time dependency ``python-pptx`` is not

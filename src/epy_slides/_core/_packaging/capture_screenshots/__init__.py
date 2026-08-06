@@ -7,7 +7,7 @@ program.
 
 Run it headlessly::
 
-    QT_QPA_PLATFORM=offscreen python src/epy_slides/_core/_packaging/capture_screenshots.py
+    QT_QPA_PLATFORM=offscreen python src/epy_slides/_core/_packaging/capture_screenshots/__init__.py
 
 It writes both the English files (``editor.png`` …) and the Spanish
 variants (``editor_es.png`` …) by toggling the live UI language.
