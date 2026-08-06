@@ -52,8 +52,8 @@ _WIDESCREEN_H = Emu(6858000)
 _TITLE_SIZE = 3600
 _BODY_SIZES = [2200, 2000, 1800, 1600, 1600, 1600, 1600, 1600, 1600]
 
-from epy_slides._ui import themes  # noqa: E402
-from epy_slides._ui.themes_base import Theme  # noqa: E402
+from epy_slides._core import themes  # noqa: E402
+from epy_slides._core.themes_base import Theme  # noqa: E402
 
 OUT_DIR = ROOT / "src" / "epy_slides" / "_config" / "_assets" / "reference_pptx"
 

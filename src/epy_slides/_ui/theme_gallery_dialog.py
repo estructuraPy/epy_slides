@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides._core import _i18n as i18n
-from epy_slides._ui import themes
+from epy_slides._core import themes
 from epy_slides._ui._previews import THEME_THUMB, theme_preview
 
 _THEME_ROLE = 0x0100  # Qt.UserRole

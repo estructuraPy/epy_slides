@@ -28,7 +28,7 @@ from epy_slides._core.epyson import (
     user_theme_ids,
     user_themes_dir,
 )
-from epy_slides._ui.themes_base import Theme
+from epy_slides._core.themes_base import Theme
 
 
 @pytest.fixture

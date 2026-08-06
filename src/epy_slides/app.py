@@ -29,11 +29,10 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides._core import _i18n as i18n
-from epy_slides._core import snippets
-from epy_slides._ui import themes
+from epy_slides._core import snippets, themes
 from epy_slides._core._revealjs_theme import reveal_css_for
-from epy_slides._ui.about_dialog import _load_branding_pixmap
 from epy_slides._core.renderer import CSL_STYLES, export_pptx, render_revealjs
+from epy_slides._ui.about_dialog import _load_branding_pixmap
 from epy_slides._ui.tab import MarkdownTab
 
 APP_NAME = "epy_slides"
@@ -375,7 +374,9 @@ class SlideWindow(QMainWindow):
             self.callout_actions.append(act)
         self.callout_actions[0].setShortcut(QKeySequence("Ctrl+Shift+C"))
 
-        from epy_slides._core._design import DISCLOSURE_PRESETS  # noqa: PLC0415
+        from epy_slides._core._design import (
+            DISCLOSURE_PRESETS,  # noqa: PLC0415
+        )
         self.disclosure_actions: list[QAction] = []
         for d_kind, (d_label, _d_text) in DISCLOSURE_PRESETS.items():
             d_act = QAction(f"Disclosure: {d_label}", self)

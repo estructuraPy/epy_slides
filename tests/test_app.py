@@ -15,7 +15,8 @@ from PySide6.QtCore import QMimeData, QPointF, QSettings, Qt, QUrl
 from PySide6.QtGui import QDropEvent
 
 from epy_slides import app as app_module
-from epy_slides._ui import themes
+from epy_slides._core import themes
+from epy_slides._ui.tab import MarkdownTab
 from epy_slides.app import (
     SUPPORTED_EXTENSIONS,
     SlideWindow,
@@ -25,7 +26,6 @@ from epy_slides.app import (
     _load_welcome,
     main,
 )
-from epy_slides._ui.tab import MarkdownTab
 
 
 @pytest.fixture(scope="session", autouse=True)

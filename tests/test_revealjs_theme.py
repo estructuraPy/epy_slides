@@ -1,4 +1,4 @@
-from epy_slides._ui import themes
+from epy_slides._core import themes
 from epy_slides._core._revealjs_theme import reveal_css_for
 
 

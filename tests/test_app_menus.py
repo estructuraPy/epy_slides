@@ -13,10 +13,9 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QDialog, QInputDialog, QMessageBox
 
 from epy_slides import app as app_module
-from epy_slides._core import templates
-from epy_slides._ui import themes
-from epy_slides.app import SlideWindow
+from epy_slides._core import templates, themes
 from epy_slides._ui.tab import MarkdownTab
+from epy_slides.app import SlideWindow
 
 
 @pytest.fixture(scope="session", autouse=True)

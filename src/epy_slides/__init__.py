@@ -80,8 +80,10 @@ class SlideDeck:
 
     def _theme_css(self) -> str:
         """Return the reveal CSS for the active theme."""
-        from epy_slides._ui import themes  # noqa: PLC0415
-        from epy_slides._core._revealjs_theme import reveal_css_for  # noqa: PLC0415
+        from epy_slides._core import themes  # noqa: PLC0415
+        from epy_slides._core._revealjs_theme import (
+            reveal_css_for,  # noqa: PLC0415
+        )
 
         return reveal_css_for(themes.get(self.theme_id))
 
@@ -112,7 +114,9 @@ class SlideDeck:
 
     def to_pdf(self, path: str | Path, *, timeout_ms: int = 60000) -> Path:
         """Write a one-slide-per-page PDF (reveal print; needs PySide6)."""
-        from epy_slides._core._export_pdf import render_deck_pdf  # noqa: PLC0415
+        from epy_slides._core._export_pdf import (
+            render_deck_pdf,  # noqa: PLC0415
+        )
 
         out = Path(path)
         render_deck_pdf(

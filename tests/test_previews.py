@@ -2,7 +2,7 @@ import pytest
 from PySide6.QtCore import QSize
 from PySide6.QtWidgets import QApplication
 
-from epy_slides._ui import themes
+from epy_slides._core import themes
 from epy_slides._ui._previews import (
     LAYOUT_THUMB,
     THEME_THUMB,

@@ -43,8 +43,7 @@ from PySide6.QtCore import (  # noqa: E402
 from PySide6.QtWidgets import QApplication, QDialog  # noqa: E402
 
 from epy_slides._core import _i18n as i18n  # noqa: E402
-from epy_slides._ui import themes  # noqa: E402
-from epy_slides.app import SlideWindow  # noqa: E402
+from epy_slides._core import themes  # noqa: E402
 from epy_slides._ui.equation_dialog import EquationDialog  # noqa: E402
 from epy_slides._ui.figure_dialog import FigureDialog  # noqa: E402
 from epy_slides._ui.presentation_properties_dialog import (  # noqa: E402
@@ -53,7 +52,10 @@ from epy_slides._ui.presentation_properties_dialog import (  # noqa: E402
 from epy_slides._ui.slide_dialogs import NewSlideDialog  # noqa: E402
 from epy_slides._ui.table_dialog import TableDialog  # noqa: E402
 from epy_slides._ui.theme_editor_dialog import ThemeEditorDialog  # noqa: E402
-from epy_slides._ui.theme_gallery_dialog import ThemeGalleryDialog  # noqa: E402
+from epy_slides._ui.theme_gallery_dialog import (
+    ThemeGalleryDialog,  # noqa: E402
+)
+from epy_slides.app import SlideWindow  # noqa: E402
 
 OUT = ROOT / "src" / "epy_slides" / "_config" / "_assets" / "screenshots"
 

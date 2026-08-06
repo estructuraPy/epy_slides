@@ -334,7 +334,7 @@ def export_pptx(
     diag_tmp: Path | None = None
     diagrams = collect_diagrams(source_body)
     if diagrams:
-        from epy_slides._ui import themes as _themes  # noqa: PLC0415
+        from epy_slides._core import themes as _themes  # noqa: PLC0415
         from epy_slides._core._revealjs_theme import (  # noqa: PLC0415
             reveal_css_for,
         )

@@ -17,7 +17,7 @@ from PySide6.QtGui import QColor, QFont, QPalette
 from PySide6.QtWidgets import QApplication
 
 from epy_slides._config import _loader
-from epy_slides._ui.themes_base import Theme
+from epy_slides._core.themes_base import Theme
 
 ASSETS_PACKAGE = "epy_slides._config._assets.themes"
 

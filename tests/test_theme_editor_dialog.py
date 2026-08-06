@@ -7,7 +7,7 @@ exercised headlessly.
 
 from __future__ import annotations
 
-from epy_slides._ui import themes
+from epy_slides._core import themes
 from epy_slides._ui.theme_editor_dialog import (
     _CALLOUTS,
     _COLOR_FIELDS,
