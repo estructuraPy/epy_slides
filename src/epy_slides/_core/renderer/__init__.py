@@ -277,17 +277,26 @@ def render_revealjs(
     )
 
 
-def _resolve_reference_pptx(theme_id: str) -> Path | None:
-    """Resolve a theme id to its bundled ``reference_pptx/<id>.pptx``."""
-    try:
-        anchor = resources.files(
-            "epy_slides._config._assets.reference_pptx"
-        ).joinpath(f"{theme_id}.pptx")
-        with resources.as_file(anchor) as path:
-            if Path(path).is_file():
-                return Path(path)
-    except (FileNotFoundError, ModuleNotFoundError):
-        return None
+def _resolve_reference_pptx(
+    theme_id: str, aspect: str = "16:9"
+) -> Path | None:
+    """Resolve a theme id to its bundled ``reference_pptx`` deck.
+
+    The 16:9 deck is ``<id>.pptx``; a ``4:3`` deck ships as
+    ``<id>_43.pptx`` so the exported presentation carries the slide size
+    the front matter declares instead of always widescreen.
+    """
+    stem = f"{theme_id}_43" if aspect.strip() == "4:3" else theme_id
+    for candidate in (stem, theme_id):
+        try:
+            anchor = resources.files(
+                "epy_slides._config._assets.reference_pptx"
+            ).joinpath(f"{candidate}.pptx")
+            with resources.as_file(anchor) as path:
+                if Path(path).is_file():
+                    return Path(path)
+        except (FileNotFoundError, ModuleNotFoundError):
+            return None
     return None
 
 
@@ -347,7 +356,8 @@ def export_pptx(
             extra_args.append(f"--metadata={_key}:{_val}")
     if base_dir is not None:
         extra_args.append(f"--resource-path={base_dir}")
-    reference = _resolve_reference_pptx(resolved_theme)
+    aspect = (metadata.get("aspect-ratio") or "16:9").strip()
+    reference = _resolve_reference_pptx(resolved_theme, aspect)
     if reference is not None:
         extra_args.append(f"--reference-doc={reference}")
     if (metadata.get("incremental") or "").strip().lower() in {
@@ -366,6 +376,11 @@ def export_pptx(
             outputfile=str(target),
             extra_args=extra_args,
         )
+        # Pandoc emits every placeholder without autofit, so dense slides
+        # overflow their frame; fit the text after the conversion.
+        from epy_slides._core._pptx_polish import polish_pptx  # noqa: PLC0415
+
+        polish_pptx(target)
     finally:
         if diag_tmp is not None:
             shutil.rmtree(diag_tmp, ignore_errors=True)

@@ -4,6 +4,30 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] — 2026-08-05
+
+### Fixed
+- **PowerPoint slides no longer overflow.** Pandoc emits every
+  placeholder without autofit, so dense slides silently spilled past
+  the frame. Exported decks are now post-processed: every content
+  placeholder gets "shrink text on overflow", and when the text
+  measurably exceeds the frame it inherits from the layout/master, a
+  computed `fontScale` is stored so the deck opens already fitting
+  (Office only recalculates autofit on edit, not on open).
+- **PPTX typography matches the live preview.** The reference decks
+  shipped Office's print-era defaults (32/28/24 pt body, 44 pt title),
+  which filled the frame after a few bullets; they now carry the
+  preview's proportions (22/20/18 pt body, 36 pt title), so an exported
+  slide holds comparable content to the on-screen one.
+- The reference-deck generator wrote its output into a ghost
+  `src/src/` tree (stale path from before it became a package);
+  regenerated references now actually ship.
+
+### Added
+- **4:3 PowerPoint export.** A deck with `aspect-ratio: "4:3"` now
+  exports on a true 10 x 7.5 in canvas (a per-theme `_43` reference
+  variant); it always came out 16:9 widescreen before.
+
 ## [0.2.1] — 2026-08-05
 
 ### Fixed

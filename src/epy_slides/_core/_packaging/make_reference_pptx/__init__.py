@@ -22,10 +22,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-# Repo root: this script lives at src/epy_slides/_core/_packaging/, so
-# it takes 4 parents to reach the root (_packaging -> _core -> epy_slides
-# -> src -> root).
-ROOT = Path(__file__).resolve().parents[4]
+# Repo root: this module lives at src/epy_slides/_core/_packaging/
+# make_reference_pptx/__init__.py, so it takes 5 parents to reach the
+# root (make_reference_pptx -> _packaging -> _core -> epy_slides -> src
+# -> root). parents[4] dates from when this was a flat .py and silently
+# wrote the decks into a ghost src/src/ tree.
+ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT / "src"))
 
 from lxml import etree  # noqa: E402
@@ -37,8 +39,18 @@ from pptx.util import Emu  # noqa: E402
 # PowerPoint 16:9 "widescreen" (13.333 x 7.5 in). python-pptx's default
 # template is 4:3 (10 x 7.5 in); the decks are 16:9, so a 4:3 reference makes
 # Pandoc lay 16:9 content into a 4:3 frame and the text shifts / clips.
+# A `<theme>_43.pptx` variant keeps the native 4:3 canvas for decks whose
+# front matter declares `aspect-ratio: 4:3`.
 _WIDESCREEN_W = Emu(12192000)
 _WIDESCREEN_H = Emu(6858000)
+
+# Master text-style sizes (pt*100). python-pptx's template ships Office's
+# print-era defaults (body 32/28/24 pt), which fill the frame after a few
+# bullets and overflow; these track the live reveal.js preview instead
+# (~21 pt body on the 13.33 in canvas), so the exported deck reads like
+# the on-screen one and holds comparable content per slide.
+_TITLE_SIZE = 3600
+_BODY_SIZES = [2200, 2000, 1800, 1600, 1600, 1600, 1600, 1600, 1600]
 
 from epy_slides._ui import themes  # noqa: E402
 from epy_slides._ui.themes_base import Theme  # noqa: E402
@@ -120,19 +132,82 @@ def _widen_placeholders(container, ratio: float) -> None:
             ext.set("cx", str(int(int(ext.get("cx")) * ratio)))
 
 
-def build_reference(theme: Theme, target: Path) -> None:
-    """Write a themed 16:9 reference deck for ``theme`` to ``target``."""
+def _retune_text_styles(master) -> None:
+    """Replace the master's title/body default sizes with preview-like ones."""
+    tx_styles = master._element.find(qn("p:txStyles"))
+    if tx_styles is None:
+        return
+    title_style = tx_styles.find(qn("p:titleStyle"))
+    if title_style is not None:
+        for pr in title_style.iter(qn("a:defRPr")):
+            if pr.get("sz") is not None:
+                pr.set("sz", str(_TITLE_SIZE))
+    body_style = tx_styles.find(qn("p:bodyStyle"))
+    if body_style is not None:
+        for lvl, size in enumerate(_BODY_SIZES, start=1):
+            pr_parent = body_style.find(qn(f"a:lvl{lvl}pPr"))
+            if pr_parent is None:
+                continue
+            pr = pr_parent.find(qn("a:defRPr"))
+            if pr is not None and pr.get("sz") is not None:
+                pr.set("sz", str(size))
+
+
+def _enable_autofit(container) -> None:
+    """Set "shrink text on overflow" on content/title placeholder bodies.
+
+    Pandoc rewrites each slide shape's own ``bodyPr``, so this does not
+    reach generated slides (``_pptx_polish`` handles those at export
+    time) — but decks edited by hand from these masters keep their text
+    inside the frame.
+    """
+    chrome = {"dt", "ftr", "sldNum"}
+    for ph in container.placeholders:
+        ph_el = ph._element.find(
+            f"{qn('p:nvSpPr')}/{qn('p:nvPr')}/{qn('p:ph')}"
+        )
+        if ph_el is not None and (ph_el.get("type") or "body") in chrome:
+            continue
+        body_pr = ph.text_frame._txBody.bodyPr
+        for tag in ("a:normAutofit", "a:spAutoFit", "a:noAutofit"):
+            for old in body_pr.findall(qn(tag)):
+                body_pr.remove(old)
+        etree.SubElement(body_pr, qn("a:normAutofit"))
+
+
+def _drop_stale_size_type(prs) -> None:
+    """Remove ``p:sldSz/@type`` after resizing (stale "screen4x3" label)."""
+    sld_sz = prs._element.find(qn("p:sldSz"))
+    if sld_sz is not None and sld_sz.get("type") is not None:
+        del sld_sz.attrib["type"]
+
+
+def build_reference(
+    theme: Theme, target: Path, *, widescreen: bool = True
+) -> None:
+    """Write a themed reference deck for ``theme`` to ``target``.
+
+    ``widescreen=True`` produces the 16:9 deck (13.333 x 7.5 in);
+    ``False`` keeps the template's native 4:3 canvas (10 x 7.5 in).
+    """
     prs = Presentation()
-    # Switch the default 4:3 canvas to 16:9 widescreen and widen the layout
-    # placeholders to fill it, so Pandoc lays slide content across the full
-    # 16:9 width instead of a 4:3 column.
-    ratio = float(_WIDESCREEN_W) / float(prs.slide_width)
-    prs.slide_width = _WIDESCREEN_W
-    prs.slide_height = _WIDESCREEN_H
+    if widescreen:
+        # Switch the default 4:3 canvas to 16:9 widescreen and widen the
+        # layout placeholders to fill it, so Pandoc lays slide content
+        # across the full 16:9 width instead of a 4:3 column.
+        ratio = float(_WIDESCREEN_W) / float(prs.slide_width)
+        prs.slide_width = _WIDESCREEN_W
+        prs.slide_height = _WIDESCREEN_H
+        for master in prs.slide_masters:
+            _widen_placeholders(master, ratio)
+            for layout in master.slide_layouts:
+                _widen_placeholders(layout, ratio)
+        _drop_stale_size_type(prs)
     for master in prs.slide_masters:
-        _widen_placeholders(master, ratio)
+        _retune_text_styles(master)
+        _enable_autofit(master)
         for layout in master.slide_layouts:
-            _widen_placeholders(layout, ratio)
+            _enable_autofit(layout)
     css = theme.css_vars
     for master in prs.slide_masters:
         theme_part = master.part.part_related_by(RT.THEME)
@@ -167,8 +242,11 @@ def main() -> int:
         )
     for theme_id, theme in themes.THEMES.items():
         target = OUT_DIR / f"{theme_id}.pptx"
-        build_reference(theme, target)
+        build_reference(theme, target, widescreen=True)
         print(f"wrote {target.relative_to(ROOT)}")
+        target_43 = OUT_DIR / f"{theme_id}_43.pptx"
+        build_reference(theme, target_43, widescreen=False)
+        print(f"wrote {target_43.relative_to(ROOT)}")
     return 0
 
 
