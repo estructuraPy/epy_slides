@@ -4,6 +4,26 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] — 2026-08-06
+
+### Fixed
+- **Theme assets are read through one loader.** `_core/epyson` built its
+  own `importlib.resources` lookups; every read now goes through
+  `_config/_loader`, and a missing `colors.epyson` fails loudly instead
+  of returning an empty mapping that silently stripped the callout
+  colours off every theme.
+- The screenshot tool resolved its repo root one level short, so it
+  wrote into a `src/src/` tree that no build ever reads.
+- The `.deb` packager now falls back to the package `__version__` when
+  the project declares a dynamic version, so it cannot ship as 0.0.0.
+- The CI workflow invoked the build tools by their pre-package paths.
+
+### Changed
+- **Internal layout aligned with epy_reports and epy_papers** — same
+  folders and module names across the three apps. The `Theme` model and
+  its catalogue moved to `_core` (neither touches Qt, and `_core` must
+  not import from `_ui`). No public API changed.
+
 ## [0.3.0] — 2026-08-05
 
 ### Fixed

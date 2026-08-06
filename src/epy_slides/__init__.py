@@ -20,7 +20,7 @@ import os
 import sys
 from pathlib import Path
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = ["SlideDeck", "__version__"]
 
