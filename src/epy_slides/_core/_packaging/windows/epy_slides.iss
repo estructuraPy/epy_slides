@@ -39,7 +39,7 @@
 ; IconFile and OutputDir stay inside _core/_packaging/, co-located with
 ; this script (assets_build/ moved here alongside the installer tooling).
 #define IconFile "..\assets_build\epy_slides.ico"
-#define OutputDir "..\dist"
+#define OutputDir "..\..\..\..\..\dist"
 
 [Setup]
 AppId={#AppId}

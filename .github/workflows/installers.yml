@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: epy_slides-windows-installer
-          path: src/epy_slides/_core/_packaging/dist/epy_slides-setup-*.exe
+          path: dist/epy_slides-setup-*.exe
           retention-days: 30
 
   # ---------------------------------------------------------------------------
@@ -79,18 +79,18 @@ jobs:
         run: python src/epy_slides/_core/_packaging/linux/build_deb.py
 
       - name: Validate .deb structure (dpkg-deb)
-        run: dpkg-deb --info src/epy_slides/_core/_packaging/dist/epy-slides_*.deb
+        run: dpkg-deb --info dist/epy-slides_*.deb
 
       - name: Lint .deb (lintian, non-blocking)
         run: |
           sudo apt-get install -y lintian 2>/dev/null || true
-          lintian src/epy_slides/_core/_packaging/dist/epy-slides_*.deb || true
+          lintian dist/epy-slides_*.deb || true
 
       - name: Upload Ubuntu .deb artifact
         uses: actions/upload-artifact@v4
         with:
           name: epy_slides-ubuntu-deb
-          path: src/epy_slides/_core/_packaging/dist/epy-slides_*.deb
+          path: dist/epy-slides_*.deb
           retention-days: 30
 
   # ---------------------------------------------------------------------------
