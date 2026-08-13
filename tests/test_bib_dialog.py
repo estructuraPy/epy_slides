@@ -1,14 +1,18 @@
-"""Dialog tests: BibEntryDialog and CrossRefDialog for epy_slides."""
+"""Tests for epy_slides._ui.bib_dialog.BibEntryDialog.
+
+Mirrors ``src/epy_slides/_ui/bib_dialog.py`` per housekeeper.py's
+``audit_module_mirror`` (module-level tests-mirror DNA). Split out of
+test_citation_dialogs.py (which also covered xref_dialog.CrossRefDialog,
+now in test_xref_dialog.py) so each module has its own matching file.
+"""
 
 from __future__ import annotations
 
 import pytest
 from PySide6.QtWidgets import QApplication
 
-from epy_slides._core.bib import BibEntry, BibEntryDraft
+from epy_slides._core.bib import BibEntryDraft
 from epy_slides._ui.bib_dialog import BibEntryDialog
-from epy_slides._core.snippets import Label
-from epy_slides._ui.xref_dialog import CrossRefDialog
 
 
 @pytest.fixture(scope="module")
@@ -153,57 +157,3 @@ def test_bib_dialog_accept_duplicate_key_confirmed(qapp, monkeypatch):
     monkeypatch.setattr(dlg, "accept", lambda: accepted.update(n=1))
     dlg._accept()
     assert accepted["n"] == 1
-
-
-def test_crossref_dialog_shows_citations(qapp):
-    entries = [
-        BibEntry(
-            key="navarro2020",
-            type="article",
-            author="Navarro, Angel",
-            year="2020",
-            title="Seismic assessment",
-        )
-    ]
-    labels = [Label(kind="cite", name=e.key) for e in entries]
-    bib_lookup = {e.key: e for e in entries}
-    dlg = CrossRefDialog(labels, bib_lookup=bib_lookup)
-    assert dlg.list_widget.count() == 1
-    item_text = dlg.list_widget.item(0).text()
-    assert "navarro2020" in item_text
-
-
-def test_crossref_dialog_filter(qapp):
-    entries = [
-        BibEntry(
-            key="navarro2020", type="article",
-            author="Navarro, Angel", year="2020", title="X",
-        ),
-        BibEntry(
-            key="doe2021", type="book",
-            author="Doe, John", year="2021", title="Y",
-        ),
-    ]
-    labels = [Label(kind="cite", name=e.key) for e in entries]
-    bib_lookup = {e.key: e for e in entries}
-    dlg = CrossRefDialog(labels, bib_lookup=bib_lookup)
-    dlg.filter_edit.setText("navarro")
-    assert dlg.list_widget.count() == 1
-    assert "navarro2020" in dlg.list_widget.item(0).text()
-
-
-def test_crossref_dialog_selected_label(qapp):
-    entries = [
-        BibEntry(
-            key="navarro2020", type="article",
-            author="Navarro, Angel", year="2020", title="X",
-        ),
-    ]
-    labels = [Label(kind="cite", name=e.key) for e in entries]
-    bib_lookup = {e.key: e for e in entries}
-    dlg = CrossRefDialog(labels, bib_lookup=bib_lookup)
-    dlg.list_widget.setCurrentRow(0)
-    label = dlg.selected_label()
-    assert label is not None
-    assert label.name == "navarro2020"
-    assert label.kind == "cite"
