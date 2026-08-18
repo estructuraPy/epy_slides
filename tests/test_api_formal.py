@@ -43,7 +43,9 @@ class TestVersion:
 
     def test_version_parts_are_numeric(self):
         for part in es.__version__.split("."):
-            assert re.match(r"^\d+", part), f"Non-numeric version part: {part!r}"
+            assert re.match(r"^\d+", part), (
+                f"Non-numeric version part: {part!r}"
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -62,7 +64,9 @@ class TestAllContract:
 
     def test_all_symbols_importable(self):
         for name in es.__all__:
-            assert hasattr(es, name), f"__all__ member {name!r} not found on module"
+            assert hasattr(es, name), (
+                f"__all__ member {name!r} not found on module"
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -84,13 +88,17 @@ class TestSlideDeckMethods:
         from epy_slides import SlideDeck
 
         for method in self._REQUIRED_METHODS:
-            assert callable(getattr(SlideDeck, method)), f"{method!r} is not callable"
+            assert callable(getattr(SlideDeck, method)), (
+                f"{method!r} is not callable"
+            )
 
     def test_required_classmethods_present(self):
         from epy_slides import SlideDeck
 
         for method in self._REQUIRED_CLASSMETHODS:
-            assert callable(getattr(SlideDeck, method)), f"SlideDeck.{method!r} is not callable"
+            assert callable(getattr(SlideDeck, method)), (
+                f"SlideDeck.{method!r} is not callable"
+            )
 
 
 class TestSlideDeckInit:

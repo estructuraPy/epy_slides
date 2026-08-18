@@ -22,6 +22,7 @@ dependency.
 
 from __future__ import annotations
 
+import contextlib
 import math
 import re
 import zipfile
@@ -210,12 +211,15 @@ def polish_pptx(path: Path) -> None:
     ET.register_namespace("a", _A)
     ET.register_namespace("p", _P)
     ET.register_namespace(
-        "r", "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+        "r",
+        "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
     )
     with zipfile.ZipFile(path) as zin:
         names = zin.namelist()
         masters = sorted(
-            n for n in names if re.fullmatch(r"ppt/slideMasters/slideMaster\d+\.xml", n)
+            n
+            for n in names
+            if re.fullmatch(r"ppt/slideMasters/slideMaster\d+\.xml", n)
         )
         slides = sorted(
             n for n in names if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)
@@ -229,16 +233,16 @@ def polish_pptx(path: Path) -> None:
         # shadow every other slide's.
         layout_frames: dict[str, dict[tuple[str, str], tuple[int, int]]] = {}
 
-        def _frames_for(slide_name: str) -> dict[tuple[str, str], tuple[int, int]]:
+        def _frames_for(
+            slide_name: str,
+        ) -> dict[tuple[str, str], tuple[int, int]]:
             layout = _slide_layout(zin, slide_name)
             if layout is None:
                 return master_frames
             if layout not in layout_frames:
                 merged = dict(master_frames)
-                try:
+                with contextlib.suppress(KeyError):
                     merged.update(_frames_of(zin.read(layout)))
-                except KeyError:
-                    pass
                 layout_frames[layout] = merged
             return layout_frames[layout]
 
@@ -263,7 +267,9 @@ def polish_pptx(path: Path) -> None:
                 if frame is None:
                     continue
                 level_sizes = styles.get(
-                    "titleStyle" if key[0] in ("title", "ctrTitle") else "bodyStyle",
+                    "titleStyle"
+                    if key[0] in ("title", "ctrTitle")
+                    else "bodyStyle",
                     [1800] * 9,
                 )
                 scale = _estimate_scale(tx_body, frame, level_sizes)

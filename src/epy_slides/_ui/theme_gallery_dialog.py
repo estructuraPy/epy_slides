@@ -1,7 +1,8 @@
 """A gallery dialog that previews every theme as a colour/typography swatch.
 
 Complements the text-only ``View → Theme`` radio menu: the gallery shows each
-theme as a live :func:`epy_slides._ui._previews.theme_preview` swatch so the visual
+theme as a live :func:`epy_slides._ui._previews.theme_preview` swatch so the
+visual
 identity is visible before applying it. Bundled and user-created themes appear
 side by side; custom themes get a swatch automatically from their palette.
 """

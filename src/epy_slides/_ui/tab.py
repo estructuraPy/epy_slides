@@ -38,10 +38,10 @@ from PySide6.QtWidgets import (
 )
 
 from epy_slides._core import snippets
+from epy_slides._core.renderer import render_revealjs
 from epy_slides._ui.checklist_dialog import ChecklistDialog
 from epy_slides._ui.equation_dialog import EquationDialog
 from epy_slides._ui.figure_dialog import FigureDialog
-from epy_slides._core.renderer import render_revealjs
 from epy_slides._ui.slide_dialogs import (
     BulletListDialog,
     NewSlideDialog,

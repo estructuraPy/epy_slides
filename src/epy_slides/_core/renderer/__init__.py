@@ -3,7 +3,8 @@
 A single source format feeds every output:
 
 * :func:`render_revealjs` — Markdown → reveal.js sections (Pandoc) wrapped
-  in a self-contained deck (:mod:`epy_slides._core.template`). Used for the live
+  in a self-contained deck (:mod:`epy_slides._core.template`). Used for the
+  live
   preview, the standalone HTML export and the print-to-PDF source.
 * :func:`export_pptx` — Markdown → PowerPoint (Pandoc's ``pptx`` writer)
   with a per-theme reference document.

@@ -2,7 +2,8 @@
 
 The form edits a small set of inputs — name, a handful of base colors, the
 text/code fonts, the h1-h6 typography scale and the five callout colors —
-and writes an ``.epyson`` payload (via :func:`epy_slides._core.themes.build_epyson`).
+and writes an ``.epyson`` payload (via
+:func:`epy_slides._core.themes.build_epyson`).
 Everything else in the theme (the Qt chrome palette, syntax-token colors,
 contrast text) is derived from these inputs by the theme loader, so a few
 fields produce a fully coherent theme. A live widget preview reflects the

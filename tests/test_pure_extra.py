@@ -8,7 +8,6 @@ branch with a concrete input and asserts the exact result.
 
 from __future__ import annotations
 
-from epy_slides._ui import _previews
 from epy_slides._core.bib import BibEntry, BibEntryDraft, suggest_key
 from epy_slides._core.slide_md import (
     _heading_with_layout,
@@ -16,6 +15,7 @@ from epy_slides._core.slide_md import (
     expand_for_pptx,
     simplify_components_for_export,
 )
+from epy_slides._ui import _previews
 
 # --------------------------------------------------------------------- bib
 
