@@ -25,7 +25,13 @@ except ImportError as exc:
 SIZES = [16, 32, 48, 256]
 
 # assets_build/ is co-located with this script under _core/_packaging/.
-OUT_DIR = Path(__file__).resolve().parent / "assets_build"
+# .parent.parent -- assets_build is a sibling of make_icon under
+# _packaging/, not a child of it. With one .parent this resolved to
+# make_icon/assets_build/, CREATED that directory empty via the
+# mkdir below, and then failed to find the source image in it. The
+# 'Generate icons' step of Build Installers has been red on that.
+ROOT = Path(__file__).resolve().parent.parent
+OUT_DIR = ROOT / "assets_build"
 SRC_PNG = OUT_DIR / "epy_slides.png"
 
 
