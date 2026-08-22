@@ -36,7 +36,12 @@ build = ["pyinstaller>=6.6"]
 # distributed package (not on PyPI). It is detected at runtime when
 # installed; do NOT add it here — a public extra pointing at an
 # unregistered PyPI name is a dependency-confusion vector.
-dev = ["pytest>=8.0", "ruff>=0.11.0"]
+# plotly is a TEST dependency, not a runtime one: _core/_plotly duck-types
+# on a figure's .to_json() and never imports plotly, so the wheel must not
+# carry it. tests/test_plotly.py checks that duck-typed contract against a
+# real plotly figure, and under Rule 8 that test may not skip itself when
+# plotly is absent -- so the test environment always installs it.
+dev = ["pytest>=8.0", "ruff>=0.11.0", "plotly>=5.15"]
 
 [project.gui-scripts]
 epy_slides = "epy_slides.app:main"

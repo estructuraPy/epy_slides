@@ -11,10 +11,7 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("pypdf")
-pytest.importorskip("reportlab")
-
-from epy_slides._ui.tab import MarkdownTab  # noqa: E402
+from epy_slides._ui.tab import MarkdownTab
 
 
 def _write_real_pdf(path: str) -> None:
@@ -137,7 +134,6 @@ def test_export_pdf_copyright_author_only_no_year(tab, tmp_path, monkeypatch):
 
 
 def test_export_pdf_with_watermark(tab, tmp_path, monkeypatch):
-    pytest.importorskip("PIL")
     from PIL import Image
 
     wm = tmp_path / "wm.png"

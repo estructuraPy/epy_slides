@@ -13,10 +13,7 @@ from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("pypdf")
-pytest.importorskip("reportlab")
-
-from epy_slides._core import _export_pdf  # noqa: E402
+from epy_slides._core import _export_pdf
 
 
 def _write_real_pdf(path: str) -> None:
@@ -222,7 +219,6 @@ def test_render_deck_pdf_4x3_aspect_ratio(qapp, patched_qt, tmp_path):
 
 def test_render_deck_pdf_applies_watermark(qapp, patched_qt, tmp_path):
     # A resolvable watermark file drives the add_watermark branch.
-    pytest.importorskip("PIL")
     from PIL import Image
 
     wm = tmp_path / "wm.png"

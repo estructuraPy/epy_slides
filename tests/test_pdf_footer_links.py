@@ -13,12 +13,8 @@ from __future__ import annotations
 
 import pytest
 
-pypdf = pytest.importorskip("pypdf")
-reportlab = pytest.importorskip("reportlab")
-PIL = pytest.importorskip("PIL")
-
-from epy_slides._core._export_pdf import _scale_pdf  # noqa: E402
-from epy_slides._core._pdf_footer import (  # noqa: E402
+from epy_slides._core._export_pdf import _scale_pdf
+from epy_slides._core._pdf_footer import (
     add_footer,
     add_header,
     add_metadata,

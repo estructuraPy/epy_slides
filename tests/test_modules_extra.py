@@ -126,8 +126,6 @@ def test_translate_widget_translates_plaintextedit_placeholder(qapp):
 def test_extract_anchor_pages_reads_named_destinations(tmp_path):
     # Build a PDF that carries a named destination, then assert the helper
     # maps that anchor to its 1-based page (the loop-body branch).
-    pytest.importorskip("pypdf")
-    pytest.importorskip("reportlab")
     from pypdf import PdfReader, PdfWriter
     from reportlab.lib.pagesizes import A4
     from reportlab.pdfgen import canvas

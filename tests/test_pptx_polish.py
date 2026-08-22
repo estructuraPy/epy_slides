@@ -137,3 +137,66 @@ def test_polish_is_noop_on_deck_without_slides(tmp_path):
     polish_pptx(empty)  # must not raise
     with zipfile.ZipFile(empty) as z:
         assert z.namelist() == ["docProps/app.xml"]
+
+
+_MATH_TABLE_DECK = """---
+title: Math-in-table probe
+theme: corporate
+---
+
+## Table with math
+
+| Variable | Símbolo |
+|---|---|
+| Temperatura | $T$ |
+| Humedad relativa | $Hr$ |
+"""
+
+
+def test_math_in_table_cell_gets_declared_namespace(tmp_path):
+    """Pandoc wraps table-cell math in <a14:m> without declaring xmlns:a14;
+    polish must repair the part instead of crashing, and the shipped deck
+    must parse as strict XML."""
+    out = tmp_path / "math_table.pptx"
+    export_pptx(_MATH_TABLE_DECK, out)  # polish runs inside export
+    with zipfile.ZipFile(out) as z:
+        slides = [n for n in z.namelist() if re.match(r"ppt/slides/slide\d+[.]xml$", n)]
+        assert slides
+        for name in slides:
+            data = z.read(name)
+            ET.fromstring(data)  # must not raise: every prefix declared
+            text = data.decode()
+            if "<a14:m>" in text:
+                assert "xmlns:a14=" in text
+
+
+def test_ensure_declared_ns_repairs_and_is_noop_when_clean():
+    from epy_slides._core._pptx_polish import _ensure_declared_ns
+
+    broken = (
+        b'<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+        b"<a14:m>x</a14:m></p:sld>"
+    )
+    repaired, changed = _ensure_declared_ns(broken)
+    assert changed is True
+    ET.fromstring(repaired)
+
+    clean, changed2 = _ensure_declared_ns(repaired)
+    assert changed2 is False
+    assert clean == repaired
+
+
+def test_ensure_declared_ns_ignores_later_inline_declaration():
+    """A later inline xmlns:a14 does NOT cover an earlier <a14:m>: the repair
+    must still declare the prefix on the root."""
+    from epy_slides._core._pptx_polish import _ensure_declared_ns
+
+    broken = (
+        b'<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+        b"<a14:m>x</a14:m>"
+        b'<other xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" />'
+        b"</p:sld>"
+    )
+    repaired, changed = _ensure_declared_ns(broken)
+    assert changed is True
+    ET.fromstring(repaired)

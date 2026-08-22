@@ -3,20 +3,15 @@ header, metadata, anchor extraction, and the page-numbering primitives).
 
 The footer text path itself is covered by ``test_pdf_footer.py``; this file
 exercises the other public ``add_*`` entry points and the pure numbering
-helpers. All required packages are runtime dependencies, so the
-``importorskip`` guards only protect a degraded install, never hide a
-failure on a complete one.
+helpers. ``pypdf``, ``reportlab`` and ``Pillow`` are all declared
+runtime dependencies of this package, so they are imported plainly.
 """
 
 from __future__ import annotations
 
 import pytest
 
-pytest.importorskip("pypdf")
-pytest.importorskip("reportlab")
-pytest.importorskip("PIL")
-
-from epy_slides._core._pdf_footer import (  # noqa: E402
+from epy_slides._core._pdf_footer import (
     _page_label,
     _page_stamp,
     _roman,

@@ -7,7 +7,11 @@ PPTX degrade path (:func:`expand_for_pptx`).
 
 from __future__ import annotations
 
-import pytest
+# plotly is NOT a runtime dependency of epy_slides: _core._plotly
+# duck-types on ``.to_json()`` and never imports it. It IS a declared
+# test dependency (the dev extra), because the contract below is only
+# meaningful against the real library.
+import plotly.graph_objects as go
 
 from epy_slides._core._plotly import (
     figure_to_markdown,
@@ -85,7 +89,6 @@ def test_build_reveal_document_omits_plotly_when_absent():
 
 def test_real_plotly_figure_roundtrips_into_revealjs():
     """A real Plotly figure serializes and expands into a reveal div."""
-    go = pytest.importorskip("plotly.graph_objects")
     fig = go.Figure(go.Scatter(y=[1, 2, 3]))
     out = expand_for_revealjs(figure_to_markdown(fig))
     assert 'class="epy-plotly"' in out
