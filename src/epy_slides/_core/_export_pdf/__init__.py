@@ -8,6 +8,7 @@ is deferred to call time).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 
@@ -33,6 +34,44 @@ def _scale_pdf(pdf_path: Path, target_width_in: float) -> None:
             page.scale_by(target_pt / width_pt)
     with pdf_path.open("wb") as handle:
         writer.write(handle)
+
+
+def _readiness_report(js: Callable[[str], object]) -> str:
+    """Say which readiness signal never came up.
+
+    Reached only on failure, so four extra JS round-trips cost nothing
+    that matters, and the message is the difference between "the deck
+    came out blank" and knowing whether reveal, MathJax, the diagrams
+    or the per-page wrappers were the one still missing.
+    """
+    parts = [
+        f"window.{flag}={js('window.' + flag)!r}"
+        for flag in ("_reveal_done", "_mathjax_done", "_diagrams_done")
+    ]
+    count = js('document.querySelectorAll(".pdf-page").length')
+    parts.append(f"pdf-page count={count!r}")
+    return "deck never became ready to print (" + ", ".join(parts) + ")"
+
+
+def _remove_temp(tmp: Path, pump: Callable[[int], None]) -> None:
+    """Delete the staged HTML, waiting for the engine to release it.
+
+    On Windows the web engine can still hold the file it loaded some
+    hundreds of milliseconds after the view is scheduled for deletion.
+    The unlink then raises WinError 32 from inside a ``finally``, which
+    REPLACES whatever the export was about to report: a real render
+    failure surfaced as a file-locking error. Measured on a 3 MB deck,
+    that is exactly how one blank export was reported.
+
+    Retry briefly, then give up quietly. A leftover temporary file is
+    not worth losing the outcome over.
+    """
+    for _ in range(20):
+        try:
+            tmp.unlink(missing_ok=True)
+            return
+        except OSError:
+            pump(100)
 
 
 def render_deck_pdf(
@@ -117,9 +156,13 @@ def render_deck_pdf(
         url = QUrl.fromLocalFile(str(tmp.resolve()))
         url.setQuery("print-pdf")
         view.load(url)
-        timer = QElapsedTimer()
-        timer.start()
-        while not loaded["ok"] and timer.elapsed() < timeout_ms:
+        # A clock per wait. One shared clock made every later budget the
+        # leftover of the earlier stage, so a slow load bought the
+        # readiness wait nothing -- and what that produces is a blank
+        # deck reported as a success, which is the failure below.
+        load_clock = QElapsedTimer()
+        load_clock.start()
+        while not loaded["ok"] and load_clock.elapsed() < timeout_ms:
             app.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 30)
         # In print-pdf mode the flags flip true as soon as reveal initialises,
         # but the per-page .pdf-page wrappers are built one frame later — wait
@@ -129,8 +172,17 @@ def render_deck_pdf(
             " && window._diagrams_done === true"
             " && document.querySelectorAll('.pdf-page').length > 0"
         )
-        while js(ready_js) is not True and timer.elapsed() < timeout_ms:
+        ready_clock = QElapsedTimer()
+        ready_clock.start()
+        while js(ready_js) is not True and ready_clock.elapsed() < timeout_ms:
             pump(150)
+        # An ASSERTION, not a wait. Measured: with the readiness wait
+        # given no budget, reveal reports nothing, .pdf-page count is 0,
+        # the print goes ahead and Chromium reports SUCCESS -- because
+        # printing nothing is a successful print. The check below cannot
+        # tell that apart, so a one-page blank deck shipped as done.
+        if js(ready_js) is not True:
+            raise RuntimeError(_readiness_report(js))
         pump(200)
 
         def on_printed(_p: str, ok: bool) -> None:
@@ -139,12 +191,17 @@ def render_deck_pdf(
 
         view.page().pdfPrintingFinished.connect(on_printed)
         view.page().printToPdf(str(out_path), layout)
-        while not state["printed"] and timer.elapsed() < timeout_ms + 10000:
+        print_clock = QElapsedTimer()
+        print_clock.start()
+        while (
+            not state["printed"]
+            and print_clock.elapsed() < timeout_ms + 10000
+        ):
             app.processEvents(QEventLoop.ProcessEventsFlag.AllEvents, 30)
     finally:
         view.deleteLater()
         pump(20)
-        tmp.unlink(missing_ok=True)
+        _remove_temp(tmp, pump)
 
     if not (state["ok"] and out_path.exists()):
         raise RuntimeError("PDF export failed (reveal/print did not complete)")

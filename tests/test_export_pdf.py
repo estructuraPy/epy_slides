@@ -308,3 +308,132 @@ def test_render_deck_pdf_constructs_app_when_none(
         _DECK, out, base_dir=tmp_path, theme_css="", timeout_ms=2000
     )
     assert out.is_file()
+
+
+class _NeverReadyPage(_FakePage):
+    """A page whose readiness probe never comes up.
+
+    What the real engine does under load: reveal has not run, so the
+    per-page wrappers do not exist yet and the deck has nothing on it.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.print_calls = 0
+
+    def runJavaScript(self, expr, callback) -> None:  # noqa: N802
+        if "_reveal_done" in expr and "pdf-page" in expr:
+            callback(False)
+        elif "pdf-page" in expr:
+            callback(0)
+        elif "window._" in expr:
+            callback("")
+        else:
+            callback(True)
+
+    def printToPdf(self, path, _layout) -> None:  # noqa: N802
+        self.print_calls += 1
+        super().printToPdf(path, _layout)
+
+
+def _never_ready(monkeypatch) -> _NeverReadyPage:
+    """Wire a view whose deck never becomes printable."""
+    from PySide6 import QtWebEngineWidgets, QtWidgets
+
+    page = _NeverReadyPage()
+
+    class _View(_FakeView):
+        def __init__(self) -> None:
+            super().__init__()
+            self._page = page
+
+    monkeypatch.setattr(
+        QtWebEngineWidgets, "QWebEngineView", lambda *a, **k: _View()
+    )
+    monkeypatch.setattr(
+        QtWidgets.QApplication, "instance", staticmethod(lambda: _FakeApp())
+    )
+    return page
+
+
+def test_a_deck_that_never_becomes_ready_is_never_printed(
+    qapp, monkeypatch, tmp_path
+):
+    # Measured against the real engine before this guard existed: with
+    # the readiness wait given no budget, reveal reported nothing, the
+    # .pdf-page count was 0, the print went ahead anyway and Chromium
+    # reported SUCCESS -- printing nothing IS a successful print. The
+    # exit check could not tell that apart, so a one-page blank deck
+    # shipped as done. The guarantee is that printToPdf is not reached.
+    page = _never_ready(monkeypatch)
+    out = tmp_path / "blank.pdf"
+    with pytest.raises(RuntimeError):
+        _export_pdf.render_deck_pdf(
+            _DECK, out, base_dir=tmp_path, theme_css="", timeout_ms=200
+        )
+    assert page.print_calls == 0, "a deck with no slides was printed"
+    assert not out.exists()
+
+
+def test_the_failure_names_which_signal_was_missing(
+    qapp, monkeypatch, tmp_path
+):
+    # "PDF export failed" does not say whether reveal, MathJax, the
+    # diagrams or the page wrappers were the one still missing, and the
+    # PDF is gone by the time anyone looks.
+    _never_ready(monkeypatch)
+    with pytest.raises(RuntimeError) as raised:
+        _export_pdf.render_deck_pdf(
+            _DECK,
+            tmp_path / "blank.pdf",
+            base_dir=tmp_path,
+            theme_css="",
+            timeout_ms=200,
+        )
+    message = str(raised.value)
+    assert "pdf-page count=0" in message
+    assert "_reveal_done" in message
+
+
+def test_a_ready_deck_is_still_printed(qapp, patched_qt, tmp_path):
+    # The control. Without it, raising unconditionally satisfies both
+    # tests above and retires the export.
+    out = tmp_path / "ready.pdf"
+    _export_pdf.render_deck_pdf(
+        _DECK, out, base_dir=tmp_path, theme_css="", timeout_ms=2000
+    )
+    assert out.is_file()
+
+
+def test_a_held_temporary_file_does_not_replace_the_outcome(
+    qapp, monkeypatch, tmp_path
+):
+    # On Windows the engine can still hold the HTML it loaded when the
+    # unlink runs, and an OSError raised inside a finally REPLACES what
+    # the export was about to report. Measured on a 3 MB deck: a blank
+    # render surfaced as WinError 32, which sends the reader looking for
+    # a file-locking problem that is not the defect.
+    from pathlib import Path as _Path
+
+    _never_ready(monkeypatch)
+
+    def _locked(self, missing_ok=False):
+        raise OSError(32, "held by another process")
+
+    monkeypatch.setattr(_Path, "unlink", _locked)
+    with pytest.raises(RuntimeError) as raised:
+        _export_pdf.render_deck_pdf(
+            _DECK,
+            tmp_path / "blank.pdf",
+            base_dir=tmp_path,
+            theme_css="",
+            timeout_ms=200,
+        )
+    assert "never became ready" in str(raised.value)
+
+
+def test_the_temporary_file_is_removed_when_it_can_be(tmp_path):
+    staged = tmp_path / "deck.tmp.html"
+    staged.write_text("x", encoding="utf-8")
+    _export_pdf._remove_temp(staged, lambda _ms: None)
+    assert not staged.exists()
