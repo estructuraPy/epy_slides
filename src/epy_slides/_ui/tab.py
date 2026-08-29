@@ -589,7 +589,7 @@ class MarkdownTab(QWidget):
             result_ok = ok
             try:
                 if ok:
-                    from epy_slides._core import _pdf_footer  # noqa: PLC0415
+                    import epy_export as _pdf_footer  # noqa: PLC0415
 
                     if watermark_path is not None:
                         from epy_slides._core.template import (  # noqa: PLC0415
@@ -609,6 +609,8 @@ class MarkdownTab(QWidget):
                         subject=meta.get("subtitle", "").strip(),
                         keywords=meta.get("keywords", "").strip(),
                         rights=rights,
+                        creator="epy_slides",
+                        producer="epy_slides — ANM Ingeniería",
                     )
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.move(str(out_pdf), str(target))

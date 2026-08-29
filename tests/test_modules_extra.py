@@ -123,35 +123,11 @@ def test_translate_widget_translates_plaintextedit_placeholder(qapp):
 # -------------------------------------------------------------- pdf_footer
 
 
-def test_extract_anchor_pages_reads_named_destinations(tmp_path):
-    # Build a PDF that carries a named destination, then assert the helper
-    # maps that anchor to its 1-based page (the loop-body branch).
-    from pypdf import PdfReader, PdfWriter
-    from reportlab.lib.pagesizes import A4
-    from reportlab.pdfgen import canvas
-
-    from epy_slides._core._pdf_footer import extract_anchor_pages
-
-    src = tmp_path / "src.pdf"
-    pdf = canvas.Canvas(str(src), pagesize=A4)
-    pdf.drawString(72, 720, "page 1")
-    pdf.showPage()
-    pdf.drawString(72, 720, "page 2")
-    pdf.showPage()
-    pdf.save()
-
-    out = tmp_path / "named.pdf"
-    reader = PdfReader(str(src))
-    writer = PdfWriter()
-    for page in reader.pages:
-        writer.add_page(page)
-    # Add a named destination pointing at the second page.
-    writer.add_named_destination("intro", page_number=1)
-    with out.open("wb") as fh:
-        writer.write(fh)
-
-    anchors = extract_anchor_pages(out)
-    assert anchors.get("intro") == 2
+# extract_anchor_pages moved to epy_export together with the rest of
+# the PDF stamping, and its test moved with it. It had zero callers in
+# this package's src/ -- it was dead code that looked alive because a
+# test covered it. The coverage was not dropped: it is now
+# epy_export/tests/_core/test_pdf_stamp.py.
 
 
 # ---------------------------------------------------------------- winreg

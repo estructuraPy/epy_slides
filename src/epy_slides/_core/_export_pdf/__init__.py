@@ -83,6 +83,10 @@ def render_deck_pdf(
     timeout_ms: int = 60000,
 ) -> None:
     """Render slide Markdown ``source`` to a one-slide-per-page PDF."""
+    # The stamping moved to epy_export, where it lives once instead of
+    # twice. Bound to the old local name: this commit is a MOVE, and a
+    # diff that also renames the call sites hides what else changed.
+    import epy_export as _pdf_footer  # noqa: PLC0415
     from PySide6.QtCore import (  # noqa: PLC0415
         QElapsedTimer,
         QEventLoop,
@@ -95,7 +99,6 @@ def render_deck_pdf(
     from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: PLC0415
     from PySide6.QtWidgets import QApplication  # noqa: PLC0415
 
-    from epy_slides._core import _pdf_footer  # noqa: PLC0415
     from epy_slides._core.renderer import render_revealjs  # noqa: PLC0415
     from epy_slides._core.snippets import parse_front_matter  # noqa: PLC0415
     from epy_slides._core.template import watermark_pdf_params  # noqa: PLC0415
@@ -225,4 +228,6 @@ def render_deck_pdf(
         author=meta.get("author", ""),
         subject=meta.get("subtitle", ""),
         rights=meta.get("copyright", ""),
+        creator="epy_slides",
+        producer="epy_slides — ANM Ingeniería",
     )

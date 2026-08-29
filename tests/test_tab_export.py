@@ -167,12 +167,15 @@ def test_export_pdf_finalize_error_reports_false(
     tab.set_initial_text(_DECK)
     monkeypatch.setattr(tab, "view", _FakeView())
 
-    from epy_slides._core import _pdf_footer
+    # The stamping is epy_export's now, and the tab reaches it there --
+    # so that is where the failure has to be injected. Patching the old
+    # module would pass by patching nothing.
+    import epy_export
 
     def boom(*a, **k):
         raise RuntimeError("metadata stamp failed")
 
-    monkeypatch.setattr(_pdf_footer, "add_metadata", boom)
+    monkeypatch.setattr(epy_export, "add_metadata", boom)
     out = tmp_path / "err.pdf"
     results: list = []
     tab.export_pdf(out, lambda t, ok: results.append(ok))
