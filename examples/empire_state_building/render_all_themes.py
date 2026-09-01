@@ -25,28 +25,41 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QMarginsF, QSizeF, Qt, QTimer, QUrl
-from PySide6.QtGui import QPageLayout, QPageSize
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWidgets import QApplication
-
 ROOT = Path(__file__).resolve().parent
 
 # Prefer an installed epy_slides; fall back to the in-repo source tree so the
 # example runs straight from a clone without `pip install -e .`.
 try:
+    from epy_export import add_metadata, add_watermark
+
     from epy_slides._core import themes
-    from epy_slides._core._pdf_footer import add_metadata, add_watermark
     from epy_slides._core._revealjs_theme import reveal_css_for
     from epy_slides._core.renderer import export_pptx, render_revealjs
     from epy_slides._core.snippets import parse_front_matter
 except ImportError:
     sys.path.insert(0, str(ROOT.parent.parent / "src"))
+    from epy_export import add_metadata, add_watermark
+
     from epy_slides._core import themes
-    from epy_slides._core._pdf_footer import add_metadata, add_watermark
     from epy_slides._core._revealjs_theme import reveal_css_for
     from epy_slides._core.renderer import export_pptx, render_revealjs
     from epy_slides._core.snippets import parse_front_matter
+
+# Qt is imported HERE, after epy_slides, and the order is load-bearing.
+# Importing the package pins the Windows system ICU, and Qt resolves ICU
+# when it loads: with Qt first, the loader binds a conda copy whose
+# exports do not match and every PySide6.Qt* import dies with a DLL
+# error that names nothing at all.
+from PySide6.QtCore import (  # noqa: E402 - see the load-order note above
+    QMarginsF,
+    QSizeF,
+    Qt,
+    QTimer,
+    QUrl,
+)
+from PySide6.QtGui import QPageLayout, QPageSize  # noqa: E402 - as above
+from PySide6.QtWebEngineWidgets import QWebEngineView  # noqa: E402 - as above
+from PySide6.QtWidgets import QApplication  # noqa: E402 - as above
 
 SOURCE = ROOT / "empire_state_building.md"
 OUT_DIR = ROOT / "_render" / "themes"
@@ -186,6 +199,12 @@ class SlideExporter:
                     author=str(self.meta.get("author", "")),
                     subject=str(self.meta.get("subtitle", "")),
                     rights=str(self.meta.get("copyright", "")),
+                    # Required, with no default: a shared engine used
+                    # by four applications will not guess which one
+                    # produced a document. Matches what the library's
+                    # own export path passes.
+                    creator="epy_slides",
+                    producer="epy_slides — ANM Ingeniería",
                 )
             except (OSError, RuntimeError) as exc:
                 print(f"  [{self.theme_id}] overlay error: {exc}")
