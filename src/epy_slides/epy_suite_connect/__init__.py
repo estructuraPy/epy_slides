@@ -4,7 +4,7 @@ epy_slides is the Markdown slide-editor library (live reveal.js preview, PDF /
 HTML / PPTX export). This package is the ONLY cross-suite interconnection
 point for epy_slides.
 
-App-GUI family (shared toolkit with epy_reports / epy_papers / epy_craft). It
+App-GUI family (shared toolkit with epy_reports / epy_papers / epy_draft). It
 currently exposes the suite identity contract (``get_suite_info``) and hosts
 the suite registry manifest.
 
