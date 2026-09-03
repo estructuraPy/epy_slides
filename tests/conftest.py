@@ -38,6 +38,31 @@ def qapp():
     return app
 
 
+@pytest.fixture(autouse=True)
+def _isolated_settings(monkeypatch, tmp_path):
+    """Route ``QSettings(org, app)`` to one INI file per scope, per test.
+
+    The two-argument constructor ignores ``setDefaultFormat`` (Qt
+    documents it) and goes to the registry, so the ``setPath(IniFormat)``
+    fixtures the window tests carried were no-ops that LOOKED like
+    isolation: every run read the developer's real theme and language
+    and wrote them back. Replacing the constructor the window resolves
+    is real isolation, and one file per (organisation, application)
+    pair keeps the scopes as distinct as the registry keeps them.
+    """
+    from PySide6.QtCore import QSettings
+
+    from epy_slides import app as app_module
+
+    def scratch(organisation: str, name: str = "") -> QSettings:
+        return QSettings(
+            str(tmp_path / f"{organisation}__{name}.ini"),
+            QSettings.Format.IniFormat,
+        )
+
+    monkeypatch.setattr(app_module, "QSettings", scratch)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def _qt_session_teardown():
     """Destroy queued/leftover Qt objects before interpreter shutdown."""

@@ -13,7 +13,8 @@ import shutil
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QSettings
+from epy_export import ORGANIZATION
+from PySide6.QtCore import QSettings, QTimer
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
@@ -40,6 +41,11 @@ APP_NAME = "epy_slides"
 SUPPORTED_EXTENSIONS = {".md", ".markdown", ".qmd"}
 
 FILE_FILTER = "Markdown / Quarto (*.md *.markdown *.qmd);;All files (*)"
+
+# Autosave cadence: one repeating timer on the window, not per tab, so
+# an idle app costs one wake-up. Kept next to the family's other
+# cadences (RENDER_DEBOUNCE_MS in _ui/tab.py).
+AUTOSAVE_INTERVAL_MS = 30_000
 
 
 def _load_manual_text(filename: str = "welcome.md") -> str:
@@ -144,12 +150,29 @@ class SlideWindow(QMainWindow):
 
         self.setAcceptDrops(True)
 
-        self._settings = QSettings("ANM Ingeniería", "epy_slides")
+        self._settings = QSettings(ORGANIZATION, "epy_slides")
+        # Autosave never writes on top of an export: every export raises
+        # this counter on entry and lowers it when it ends -- the
+        # asynchronous PDF one in _on_pdf_done, success or failure.
+        self._exports_in_flight = 0
+        self._autosave_timer = QTimer(self)
+        self._autosave_timer.setInterval(AUTOSAVE_INTERVAL_MS)
+        self._autosave_timer.timeout.connect(self._autosave_current)
         saved_theme = str(
             self._settings.value("theme", themes.DEFAULT_THEME_ID)
         )
         self._current_theme: themes.Theme = themes.get(saved_theme)
         self._apply_theme(self._current_theme.id, persist=False)
+
+        # Autosave: off by default, the choice persists. ``setChecked``
+        # does not emit ``triggered``, so restoring it here neither
+        # re-persists the value nor goes through the toggle slot.
+        autosave_on = (
+            str(self._settings.value("autosave", "false")) == "true"
+        )
+        self.act_autosave.setChecked(autosave_on)
+        if autosave_on:
+            self._autosave_timer.start()
 
         self._capture_i18n()
         i18n.on_language_changed(self._retranslate_ui)
@@ -215,6 +238,9 @@ class SlideWindow(QMainWindow):
         self.act_quit = QAction("Quit", self)
         self.act_quit.setShortcut(QKeySequence.StandardKey.Quit)
         self.act_quit.triggered.connect(self.close)
+
+        self.act_autosave = QAction("Autosave", self, checkable=True)
+        self.act_autosave.triggered.connect(self._toggle_autosave)
 
         self.act_manual_en = QAction("User manual (English)", self)
         self.act_manual_en.triggered.connect(
@@ -513,6 +539,8 @@ class SlideWindow(QMainWindow):
         self.language_menu = self.view_menu.addMenu("Language")
         for act in self.lang_group.actions():
             self.language_menu.addAction(act)
+        self.view_menu.addSeparator()
+        self.view_menu.addAction(self.act_autosave)
 
         self.presentation_menu = QMenu("&Presentation", self)
         self.presentation_menu.addAction(self.act_properties)
@@ -988,16 +1016,20 @@ class SlideWindow(QMainWindow):
         # reveal.js slideshow (arrow-key navigation, F for full screen,
         # S for speaker notes), not a continuous scroll page — that
         # continuous mode is epy_reports's job (a web document).
-        html = render_revealjs(
-            text,
-            base_dir=base_dir,
-            title=title,
-            theme_css=reveal_css_for(self._current_theme),
-            for_export=True,
-            continuous=False,
-        )
-        target.write_text(html, encoding="utf-8")
-        self.statusBar().showMessage(f"Saved HTML: {target}", 3000)
+        self._exports_in_flight += 1
+        try:
+            html = render_revealjs(
+                text,
+                base_dir=base_dir,
+                title=title,
+                theme_css=reveal_css_for(self._current_theme),
+                for_export=True,
+                continuous=False,
+            )
+            target.write_text(html, encoding="utf-8")
+            self.statusBar().showMessage(f"Saved HTML: {target}", 3000)
+        finally:
+            self._exports_in_flight -= 1
 
     def _export_pptx(self) -> None:
         """Save the current deck as a PowerPoint (.pptx) file."""
@@ -1019,15 +1051,21 @@ class SlideWindow(QMainWindow):
             target = target.with_suffix(".pptx")
         text = tab.editor.toPlainText()
         base_dir = tab.path.parent if tab.path is not None else None
+        self._exports_in_flight += 1
         try:
-            export_pptx(
-                text, target, base_dir=base_dir,
-                theme_id=self._current_theme.id,
-            )
-        except (OSError, RuntimeError) as exc:
-            QMessageBox.critical(self, "Export PowerPoint failed", str(exc))
-            return
-        self.statusBar().showMessage(f"Exported {target.name}", 5000)
+            try:
+                export_pptx(
+                    text, target, base_dir=base_dir,
+                    theme_id=self._current_theme.id,
+                )
+            except (OSError, RuntimeError) as exc:
+                QMessageBox.critical(
+                    self, "Export PowerPoint failed", str(exc)
+                )
+                return
+            self.statusBar().showMessage(f"Exported {target.name}", 5000)
+        finally:
+            self._exports_in_flight -= 1
 
     def _export_pdf(self) -> None:
         """Export the current deck to a PDF file."""
@@ -1047,18 +1085,31 @@ class SlideWindow(QMainWindow):
         target = Path(filename)
         if target.suffix == "":
             target = target.with_suffix(".pdf")
-        self.statusBar().showMessage("Exporting PDF...", 0)
-        tab.export_pdf(target, self._on_pdf_done)
+        # Raised here and lowered in _on_pdf_done: the export is
+        # asynchronous and the autosave timer can fire while Chromium
+        # prints. Lowered right away only if the hand-off itself fails.
+        self._exports_in_flight += 1
+        started = False
+        try:
+            self.statusBar().showMessage("Exporting PDF...", 0)
+            tab.export_pdf(target, self._on_pdf_done)
+            started = True
+        finally:
+            if not started:
+                self._exports_in_flight -= 1
 
     def _on_pdf_done(self, path: Path, ok: bool) -> None:
         """Report the result of an asynchronous PDF export."""
-        if ok:
-            self.statusBar().showMessage(f"Saved PDF: {path}", 5000)
-        else:
-            self.statusBar().clearMessage()
-            QMessageBox.warning(
-                self, APP_NAME, f"Failed to write PDF:\n{path}"
-            )
+        try:
+            if ok:
+                self.statusBar().showMessage(f"Saved PDF: {path}", 5000)
+            else:
+                self.statusBar().clearMessage()
+                QMessageBox.warning(
+                    self, APP_NAME, f"Failed to write PDF:\n{path}"
+                )
+        finally:
+            self._exports_in_flight -= 1
 
     def _print_document(self) -> None:
         """Open the system print dialog for the current preview."""
@@ -1206,6 +1257,36 @@ class SlideWindow(QMainWindow):
         self._refresh_tab_title(tab)
         self.statusBar().showMessage(f"Saved: {tab.path}", 3000)
         return True
+
+    def _toggle_autosave(self, checked: bool) -> None:
+        """Persist the autosave choice and start or stop its timer."""
+        self._settings.setValue("autosave", "true" if checked else "false")
+        if checked:
+            self._autosave_timer.start()
+        else:
+            self._autosave_timer.stop()
+
+    def _autosave_current(self) -> None:
+        """Write the current tab when autosave is on and it is safe.
+
+        Goes through ``tab.save()`` and never ``_save_current``: a buffer
+        without a path returns ``False`` and nothing happens, whereas the
+        manual path falls back to a modal Save As dialog that would
+        interrupt the person typing.
+        """
+        if not self.act_autosave.isChecked():
+            return
+        if self._exports_in_flight > 0:
+            return
+        tab = self._current_tab()
+        if tab is None or not tab.dirty:
+            return
+        if not tab.save():
+            return
+        self._refresh_tab_title(tab)
+        self.statusBar().showMessage(
+            i18n.tr("Autosaved: {path}").format(path=str(tab.path)), 3000
+        )
 
     def _save_current_as(self) -> bool:
         """Prompt for a target path and write the current tab there."""

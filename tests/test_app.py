@@ -282,7 +282,7 @@ def test_window_applies_saved_spanish_language_on_build(qapp):
     # (the construction-time set_language branch).
     from epy_slides._core import _i18n as i18n
 
-    settings = QSettings("ANM Ingeniería", "epy_slides")
+    settings = app_module.QSettings(app_module.ORGANIZATION, "epy_slides")
     settings.setValue("language", "es")
     settings.sync()
     try:

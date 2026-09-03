@@ -14,6 +14,7 @@ import tempfile
 from collections.abc import Callable
 from pathlib import Path
 
+import epy_export
 from PySide6.QtCore import QMarginsF, QSizeF, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import (
     QDesktopServices,
@@ -243,7 +244,11 @@ class MarkdownTab(QWidget):
         """Save the buffer to its current path (False if no path yet)."""
         if self._path is None:
             return False
-        self._path.write_text(self.editor.toPlainText(), encoding="utf-8")
+        # Atomic: a save that dies mid-write must not truncate the only
+        # copy, and the autosave timer makes that write far more frequent.
+        epy_export.write_text_atomic(
+            self._path, self.editor.toPlainText()
+        )
         self._set_dirty(False)
         return True
 
@@ -552,6 +557,11 @@ class MarkdownTab(QWidget):
                 export finishes (success or failure).
         """
         text = self.editor.toPlainText()
+        # Stop the live-preview debounce so a pending re-render cannot fire
+        # mid-export and load the preview deck into the same view the export
+        # is printing from (which would make printToPdf fail and the file
+        # never be written). It re-arms on the next edit (single-shot).
+        self._render_timer.stop()
         meta = snippets.parse_front_matter(text)
         base_dir = self._path.parent if self._path is not None else None
         title = self._path.name if self._path is not None else UNTITLED

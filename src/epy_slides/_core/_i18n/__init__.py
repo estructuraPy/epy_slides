@@ -49,6 +49,8 @@ _ES: dict[str, str] = {
     "Callout": "Llamado",
     "Indexes": "Índices",
     "Theme": "Tema",
+    "Autosave": "Guardado automático",
+    "Autosaved: {path}": "Guardado automático: {path}",
     "Page size": "Tamaño de página",
     "Citation style": "Estilo de cita",
     "Apply template": "Aplicar plantilla",
