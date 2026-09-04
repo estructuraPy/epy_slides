@@ -50,6 +50,46 @@ _MIN_SCALE = 0.40
 # Placeholder types that never receive autofit (chrome, not content).
 _SKIP_PH_TYPES = {"dt", "ftr", "sldNum"}
 
+# Namespaces Pandoc's pptx writer is known to USE without DECLARING on the
+# slide root. Math inside a table cell, for instance, is wrapped in
+# ``<a14:m>`` while ``xmlns:a14`` is only emitted for math in plain text
+# frames — the resulting part is invalid XML for any strict consumer
+# (PowerPoint included). Declaring the prefix on the root repairs the part.
+_KNOWN_UNDECLARED_NS = {
+    "a14": "http://schemas.microsoft.com/office/drawing/2010/main",
+    "mc": "http://schemas.openxmlformats.org/markup-compatibility/2006",
+}
+
+
+def _ensure_declared_ns(xml: bytes) -> tuple[bytes, bool]:
+    """Declare known-but-missing namespace prefixes on the root element.
+
+    Returns the (possibly repaired) bytes and whether a repair was made, so
+    the caller can write the fixed part back into the package even when no
+    autofit change is needed.
+    """
+    text = xml.decode("utf-8", errors="replace")
+    m = re.search(r"<(\w+:)?sld\b[^>]*>", text)
+    if m is None:
+        return xml, False
+    # Namespace declarations are SCOPED: an inline ``xmlns:a14`` on a later
+    # element does not cover an earlier ``<a14:m>``. Only declarations on the
+    # root element count; redundant inline ones elsewhere are harmless.
+    root_tag = m.group(0)
+    declared_on_root = set(re.findall(r"xmlns:([\w]+)=", root_tag))
+    used = set(re.findall(r"<([A-Za-z][\w]*):", text))
+    missing = [
+        p for p in sorted(used - declared_on_root) if p in _KNOWN_UNDECLARED_NS
+    ]
+    if not missing:
+        return xml, False
+    open_end = m.end() - 1  # position of '>' of the root opening tag
+    decls = "".join(
+        f' xmlns:{p}="{_KNOWN_UNDECLARED_NS[p]}"' for p in missing
+    )
+    repaired = text[:open_end] + decls + text[open_end:]
+    return repaired.encode("utf-8"), True
+
 
 def _q(prefix: str, tag: str) -> str:
     return f"{{{_NS[prefix]}}}{tag}"
@@ -250,8 +290,9 @@ def polish_pptx(path: Path) -> None:
         replacements: dict[str, bytes] = {}
         for slide in slides:
             frames = _frames_for(slide)
-            root = ET.fromstring(zin.read(slide))
-            changed = False
+            slide_xml, ns_repaired = _ensure_declared_ns(zin.read(slide))
+            root = ET.fromstring(slide_xml)
+            changed = ns_repaired
             for sp in root.iter(_q("p", "sp")):
                 key = _ph_key(sp)
                 if key is None or key[0] in _SKIP_PH_TYPES:

@@ -256,6 +256,12 @@ def render_revealjs(
         "--slide-level=2",
         "--syntax-highlighting=tango",
         "--wrap=preserve",
+        # Leave ALL math as TeX for the bundled MathJax runtime. Pandoc's
+        # default HTML math is the legacy italics+unicode rendering, which
+        # cannot represent \frac/\sqrt and falls back to raw TeX with a
+        # "Could not convert TeX math" warning — producing a mix of pandoc-
+        # styled and MathJax-styled equations on the same slide.
+        "--mathjax",
     ]
     extra_args += _bibliography_args(metadata, base_dir)
     body = pypandoc.convert_text(
