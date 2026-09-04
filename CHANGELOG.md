@@ -4,6 +4,45 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] — 2026-09-04
+
+### Added
+- **An autosave the user can turn on or off.** A checkable *Autosave*
+  action in the View menu, off on a fresh install and remembered between
+  sessions. It writes only the current deck, only when it has a path and
+  unsaved changes, and never while an export is running; a deck that has
+  never been saved is skipped rather than raising a Save As dialog on
+  somebody mid-sentence.
+- **Saves are atomic.** Every save, manual or automatic, writes a
+  complete sibling file and renames it into place
+  (`epy_export.write_text_atomic`), so a save that dies mid-write cannot
+  truncate the only copy.
+
+### Fixed
+- **The PDF export did not stop the live preview first.** A pending
+  re-render could load the preview deck into the same view the export
+  was printing from, and `printToPdf` then failed without writing a
+  file. epy_reports had stopped its debounce since the day this was
+  diagnosed there; this app had not.
+- **An HTML export that failed did so in silence.** The render and the
+  write sat inside a `finally` with no `except` and ran from a Qt
+  action, so an exception reached nobody: no message, no file, and a
+  window that looked as if it had worked. Both the HTML and the
+  PowerPoint export now report in the status bar as well as in a dialog.
+- **Fourteen interface strings were English in the Spanish UI** — the
+  Content menu, the reload and unsaved-changes prompts, the PDF status
+  line, both export failures, the manual notice, the design block and
+  new slide dialogs, the theme preview and the editor's placeholder.
+- Two over-long lines in the PowerPoint polish tests, red in the linter
+  since 2026-08-22.
+
+### Changed
+- The settings scope now takes its organisation name from
+  `epy_export.ORGANIZATION`. It was spelled two ways across the family,
+  which on Windows is two registry trees: ePy Studio read one and this
+  editor wrote the other, so the language a reader chose here was never
+  found by the launcher.
+
 ## [0.3.1] — 2026-08-06
 
 ### Fixed
