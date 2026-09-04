@@ -47,6 +47,7 @@ _ES: dict[str, str] = {
     # --- submenu titles ---
     "Heading": "Título",
     "Callout": "Llamado",
+    "Disclosure": "Declaración",
     "Indexes": "Índices",
     "Theme": "Tema",
     "Autosave": "Guardado automático",
@@ -61,7 +62,10 @@ _ES: dict[str, str] = {
     "Save": "Guardar",
     "Save As...": "Guardar como...",
     "Reload": "Recargar",
+    "Discard unsaved changes and reload from disk?":
+        "¿Descartar los cambios sin guardar y recargar desde el disco?",
     "Close Tab": "Cerrar pestaña",
+    "Unsaved changes": "Cambios sin guardar",
     "Quit": "Salir",
     # --- Text menu ---
     "Heading 1": "Título 1",
@@ -141,6 +145,7 @@ _ES: dict[str, str] = {
     # --- Help menu ---
     "User manual (English)": "Manual de usuario (Inglés)",
     "User manual (Spanish)": "Manual de usuario (Español)",
+    "Manual unavailable": "Manual no disponible",
     "About epy_slides…": "Acerca de epy_slides…",
     # --- dialog window titles ---
     "Insert checklist": "Insertar lista de tareas",
@@ -151,6 +156,7 @@ _ES: dict[str, str] = {
     "Insert cross-reference": "Insertar referencia cruzada",
     "New bibliography entry": "Nueva entrada bibliográfica",
     "Export via epy_docs": "Exportar con epy_docs",
+    "Design block": "Bloque de diseño",
     "Document properties": "Propiedades del documento",
     "About epy_slides": "Acerca de epy_slides",
     # --- common dialog labels / buttons ---
@@ -246,6 +252,12 @@ _ES: dict[str, str] = {
     "Figure caption": "Título de la figura",
     "Optional caption…": "Título opcional…",
     "Footnote text": "Texto de la nota",
+    (
+        "Write slides in Markdown. Separate slides with '## '. "
+        "Preview updates on the right."
+    ):
+        "Escriba diapositivas en Markdown. Separe las diapositivas con '## '. "
+        "La vista previa se actualiza a la derecha.",
     "Filter: fig, tbl, eq, sec, or any substring":
         "Filtrar: fig, tbl, eq, sec, o cualquier subcadena",
     "e.g. 1, beam-section": "p. ej. 1, beam-section",
@@ -283,6 +295,10 @@ _ES: dict[str, str] = {
     "Important": "Importante",
     "Caution": "Precaución",
     "Preview": "Vista previa",
+    "Body text with a <a href='#'>link</a> and <code>inline code</code>.":
+        "Texto del cuerpo con un <a href='#'>enlace</a> y "
+        "<code>código en línea</code>.",
+    "Note callout": "Llamado de nota",
     "Pick a color": "Elegir un color",
     "My theme": "Mi tema",
     "Please enter a name for the theme.": "Ingrese un nombre para el tema.",
@@ -299,6 +315,7 @@ _ES: dict[str, str] = {
     "Browse themes…": "Explorar temas…",
     "Themes": "Temas",
     "Choose a theme:": "Elija un tema:",
+    "Choose a design block:": "Elija un bloque de diseño:",
     # --- slides: menus + toolbar ---
     "&Slides": "&Diapositivas",
     "&Content": "&Contenido",
@@ -314,8 +331,12 @@ _ES: dict[str, str] = {
     "Two columns…": "Dos columnas…",
     "Quote…": "Cita…",
     "Speaker notes…": "Notas del orador…",
+    "Design block…": "Bloque de diseño…",
     # --- Export menu (slides) ---
     "Export as PowerPoint...": "Exportar como PowerPoint...",
+    "Exporting PDF...": "Exportando PDF...",
+    "Export HTML failed": "Error al exportar HTML",
+    "Export PowerPoint failed": "Error al exportar PowerPoint",
     # --- Presentation menu ---
     "Presentation properties…": "Propiedades de la presentación…",
     "Presentation properties": "Propiedades de la presentación",
@@ -324,6 +345,7 @@ _ES: dict[str, str] = {
     # --- New slide dialog ---
     "New slide": "Nueva diapositiva",
     "Choose a slide layout:": "Elija un diseño de diapositiva:",
+    "Slide title": "Título de la diapositiva",
     "Image:": "Imagen:",
     "Choose image": "Elegir imagen",
     # layout names + descriptions

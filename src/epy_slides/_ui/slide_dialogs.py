@@ -184,7 +184,7 @@ class NewSlideDialog(QDialog):
 
         form = QFormLayout()
         self._title = QLineEdit(self)
-        self._title.setText("Slide title")
+        self._title.setText(i18n.tr("Slide title"))
         form.addRow("Title:", self._title)
 
         self._image = QLineEdit(self)
@@ -244,7 +244,7 @@ class NewSlideDialog(QDialog):
         """Return the slide skeleton for the chosen layout."""
         layout_id = self.selected_layout()
         skeleton = SLIDE_SKELETONS[layout_id]
-        title = self._title.text().strip() or "Slide title"
+        title = self._title.text().strip() or i18n.tr("Slide title")
         image = self._image.text().strip() or "figures/image.png"
         caption = self._caption.text().strip() or "Caption"
         md = skeleton.replace("TITLE", title)

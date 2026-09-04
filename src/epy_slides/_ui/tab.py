@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from epy_slides._core import _i18n as i18n
 from epy_slides._core import snippets
 from epy_slides._core.renderer import render_revealjs
 from epy_slides._ui.checklist_dialog import ChecklistDialog
@@ -200,8 +201,10 @@ class MarkdownTab(QWidget):
         self.editor.setTabStopDistance(4 * metrics.horizontalAdvance(" "))
         self.editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
         self.editor.setPlaceholderText(
-            "Write slides in Markdown. Separate slides with '## '. "
-            "Preview updates on the right."
+            i18n.tr(
+                "Write slides in Markdown. Separate slides with '## '. "
+                "Preview updates on the right."
+            )
         )
 
     # ------------------------------------------------------------- API

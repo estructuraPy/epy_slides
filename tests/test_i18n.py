@@ -40,6 +40,36 @@ def test_tr_spanish_falls_back_to_source_for_unknown():
     assert i18n.tr("Totally unknown string") == "Totally unknown string"
 
 
+def test_recent_spanish_ui_keys_are_present_and_translated():
+    # tr() falls back to English when a key is missing, so a Spanish
+    # reader would see English in that menu, dialog or status bar and
+    # nothing would report it. A key mapping to itself is the same bug
+    # dressed as a translation, which is why both are checked.
+    keys = (
+        "Design block…",
+        "Disclosure",
+        "Unsaved changes",
+        "Exporting PDF...",
+        "Discard unsaved changes and reload from disk?",
+        "Export HTML failed",
+        "Manual unavailable",
+        "Export PowerPoint failed",
+        "Design block",
+        "Choose a design block:",
+        "Slide title",
+        "Write slides in Markdown. Separate slides with '## '. "
+        "Preview updates on the right.",
+        "Body text with a <a href='#'>link</a> and "
+        "<code>inline code</code>.",
+        "Note callout",
+    )
+    for key in keys:
+        assert key in i18n._ES, f"missing Spanish translation for {key!r}"
+        assert i18n._ES[key] != key, (
+            f"{key!r} maps to itself and is not translated"
+        )
+
+
 def test_set_language_ignores_unknown_code():
     i18n.set_language("en")
     i18n.set_language("fr")

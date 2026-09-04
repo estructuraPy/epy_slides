@@ -1029,7 +1029,7 @@ class SlideWindow(QMainWindow):
             target.write_text(html, encoding="utf-8")
             self.statusBar().showMessage(f"Saved HTML: {target}", 3000)
         except Exception as exc:  # noqa: BLE001 - report failures to the user
-            QMessageBox.critical(self, "Export HTML failed", str(exc))
+            QMessageBox.critical(self, i18n.tr("Export HTML failed"), str(exc))
             self.statusBar().showMessage(
                 f"Export failed: {target.name}", 5000
             )
@@ -1065,7 +1065,7 @@ class SlideWindow(QMainWindow):
                 )
             except (OSError, RuntimeError) as exc:
                 QMessageBox.critical(
-                    self, "Export PowerPoint failed", str(exc)
+                    self, i18n.tr("Export PowerPoint failed"), str(exc)
                 )
                 self.statusBar().showMessage(
                     f"Export failed: {target.name}", 5000
@@ -1099,7 +1099,7 @@ class SlideWindow(QMainWindow):
         self._exports_in_flight += 1
         started = False
         try:
-            self.statusBar().showMessage("Exporting PDF...", 0)
+            self.statusBar().showMessage(i18n.tr("Exporting PDF..."), 0)
             tab.export_pdf(target, self._on_pdf_done)
             started = True
         finally:
@@ -1151,7 +1151,7 @@ class SlideWindow(QMainWindow):
             text = _load_manual_text(filename)
         except (FileNotFoundError, OSError):
             QMessageBox.warning(
-                self, "Manual unavailable",
+                self, i18n.tr("Manual unavailable"),
                 f"Could not load the bundled manual '{filename}'.",
             )
             return
@@ -1322,8 +1322,8 @@ class SlideWindow(QMainWindow):
             return
         if tab.dirty:
             choice = QMessageBox.question(
-                self, "Reload",
-                "Discard unsaved changes and reload from disk?",
+                self, i18n.tr("Reload"),
+                i18n.tr("Discard unsaved changes and reload from disk?"),
                 QMessageBox.StandardButton.Yes
                 | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
@@ -1341,7 +1341,7 @@ class SlideWindow(QMainWindow):
             return True
         name = tab.path.name if tab.path is not None else "untitled.md"
         choice = QMessageBox.question(
-            self, "Unsaved changes",
+            self, i18n.tr("Unsaved changes"),
             f"'{name}' has unsaved changes. Save before closing?",
             QMessageBox.StandardButton.Save
             | QMessageBox.StandardButton.Discard
