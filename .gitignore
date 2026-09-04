@@ -55,3 +55,4 @@ tutorials/**/_render_log.txt
 # keep their runnable demos.
 examples/**/_render/
 examples/**/_render_log.txt
+.deepseek_delegate/

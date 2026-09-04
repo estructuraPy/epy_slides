@@ -160,7 +160,11 @@ def test_math_in_table_cell_gets_declared_namespace(tmp_path):
     out = tmp_path / "math_table.pptx"
     export_pptx(_MATH_TABLE_DECK, out)  # polish runs inside export
     with zipfile.ZipFile(out) as z:
-        slides = [n for n in z.namelist() if re.match(r"ppt/slides/slide\d+[.]xml$", n)]
+        slides = [
+            n
+            for n in z.namelist()
+            if re.match(r"ppt/slides/slide\d+[.]xml$", n)
+        ]
         assert slides
         for name in slides:
             data = z.read(name)
@@ -192,9 +196,11 @@ def test_ensure_declared_ns_ignores_later_inline_declaration():
     from epy_slides._core._pptx_polish import _ensure_declared_ns
 
     broken = (
-        b'<p:sld xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">'
+        b'<p:sld xmlns:p="http://schemas.openxmlformats.org/'
+        b'presentationml/2006/main">'
         b"<a14:m>x</a14:m>"
-        b'<other xmlns:a14="http://schemas.microsoft.com/office/drawing/2010/main" />'
+        b'<other xmlns:a14="http://schemas.microsoft.com/office/'
+        b'drawing/2010/main" />'
         b"</p:sld>"
     )
     repaired, changed = _ensure_declared_ns(broken)

@@ -105,6 +105,85 @@ def test_export_pptx_no_tab_is_noop(window, monkeypatch):
     window._export_pptx()  # must not raise
 
 
+def test_export_html_failure_is_reported_not_swallowed(
+    window, tmp_path, monkeypatch
+):
+    # If this fails, a failed export looks exactly like a successful one.
+    window._current_tab().set_initial_text("## A\n")
+    out = tmp_path / "deck.html"
+    monkeypatch.setattr(
+        app_module.QFileDialog, "getSaveFileName",
+        staticmethod(lambda *a, **k: (str(out), "")),
+    )
+
+    def boom(*a, **k):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(app_module, "render_revealjs", boom)
+    critical = []
+    monkeypatch.setattr(
+        app_module.QMessageBox, "critical",
+        staticmethod(lambda *a, **k: critical.append(a)),
+    )
+    window._export_html()
+    assert len(critical) == 1
+    assert "Export HTML failed" in critical[0][1]
+    assert "failed" in window.statusBar().currentMessage()
+    assert not out.exists()
+    assert window._exports_in_flight == 0
+
+
+def test_export_pptx_failure_reaches_the_status_bar(
+    window, tmp_path, monkeypatch
+):
+    # If this fails, a failed export looks exactly like a successful one.
+    window._current_tab().set_initial_text("## A\n")
+    out = tmp_path / "deck.pptx"
+    monkeypatch.setattr(
+        app_module.QFileDialog, "getSaveFileName",
+        staticmethod(lambda *a, **k: (str(out), "")),
+    )
+
+    def boom(*a, **k):
+        raise OSError("read-only")
+
+    monkeypatch.setattr(app_module, "export_pptx", boom)
+    critical = []
+    monkeypatch.setattr(
+        app_module.QMessageBox, "critical",
+        staticmethod(lambda *a, **k: critical.append(a)),
+    )
+    window._export_pptx()
+    assert len(critical) == 1
+    assert "Export failed" in window.statusBar().currentMessage()
+    assert window._exports_in_flight == 0
+
+
+def test_export_html_success_says_nothing_about_failure(
+    window, tmp_path, monkeypatch
+):
+    # If this fails, a successful export is misreported as a failure.
+    window._current_tab().set_initial_text("## A\n")
+    out = tmp_path / "deck.html"
+    monkeypatch.setattr(
+        app_module.QFileDialog, "getSaveFileName",
+        staticmethod(lambda *a, **k: (str(out), "")),
+    )
+    monkeypatch.setattr(
+        app_module, "render_revealjs",
+        lambda *a, **k: "<html>ok</html>",
+    )
+    critical = []
+    monkeypatch.setattr(
+        app_module.QMessageBox, "critical",
+        staticmethod(lambda *a, **k: critical.append(a)),
+    )
+    window._export_html()
+    assert out.is_file()
+    assert "failed" not in window.statusBar().currentMessage().lower()
+    assert critical == []
+
+
 # --------------------------------------------------------------- export pdf
 
 

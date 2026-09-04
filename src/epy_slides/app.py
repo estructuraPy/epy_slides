@@ -1028,6 +1028,11 @@ class SlideWindow(QMainWindow):
             )
             target.write_text(html, encoding="utf-8")
             self.statusBar().showMessage(f"Saved HTML: {target}", 3000)
+        except Exception as exc:  # noqa: BLE001 - report failures to the user
+            QMessageBox.critical(self, "Export HTML failed", str(exc))
+            self.statusBar().showMessage(
+                f"Export failed: {target.name}", 5000
+            )
         finally:
             self._exports_in_flight -= 1
 
@@ -1061,6 +1066,9 @@ class SlideWindow(QMainWindow):
             except (OSError, RuntimeError) as exc:
                 QMessageBox.critical(
                     self, "Export PowerPoint failed", str(exc)
+                )
+                self.statusBar().showMessage(
+                    f"Export failed: {target.name}", 5000
                 )
                 return
             self.statusBar().showMessage(f"Exported {target.name}", 5000)
