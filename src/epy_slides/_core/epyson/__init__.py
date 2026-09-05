@@ -40,8 +40,8 @@ def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
 
 
-def _coerce_hex(value: str | list[int]) -> str:
-    """Return ``#RRGGBB`` from either a hex string or an ``[r, g, b]`` list."""
+def _coerce_hex(value: str | list[int] | tuple[int, int, int]) -> str:
+    """Return ``#RRGGBB`` from a hex string or an ``[r, g, b]`` triplet."""
     if isinstance(value, str):
         return value if value.startswith("#") else f"#{value}"
     return _rgb_to_hex(value)

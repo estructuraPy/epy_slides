@@ -105,6 +105,8 @@ def test_export_pdf_success_writes_target(tab, tmp_path, monkeypatch):
     from pypdf import PdfReader
 
     meta = PdfReader(str(out)).metadata
+    if meta is None:
+        pytest.fail("Exported PDF has no metadata")
     assert meta.title == "Deck"
     assert meta.author == "ANM"
 

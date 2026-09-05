@@ -403,21 +403,18 @@ def test_confirm_close_dirty_save_choice(window, tmp_path, monkeypatch):
     assert deck.read_text(encoding="utf-8") == "edited"
 
 
-def test_confirm_close_dirty_discard_choice(window):
+def test_confirm_close_dirty_discard_choice(window, monkeypatch):
     tab = window._current_tab()
     tab.set_initial_text("base\n")
     tab.editor.setPlainText("dirty edit")
 
-    import epy_slides.app as appmod
-
-    orig = appmod.QMessageBox.question
-    try:
-        appmod.QMessageBox.question = staticmethod(
+    monkeypatch.setattr(
+        app_module.QMessageBox, "question",
+        staticmethod(
             lambda *a, **k: QMessageBox.StandardButton.Discard
-        )
-        assert window._confirm_close(tab) is True
-    finally:
-        appmod.QMessageBox.question = orig
+        ),
+    )
+    assert window._confirm_close(tab) is True
 
 
 def test_close_event_aborts_when_cancelled(window, monkeypatch):

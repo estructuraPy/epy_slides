@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import pytest
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication
 
 from epy_slides._ui.table_dialog import TableDialog
 
-_app: QApplication | None = None
+_app: QCoreApplication | QApplication | None = None
 
 
 @pytest.fixture(scope="module")

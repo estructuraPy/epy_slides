@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import pytest
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication
 
 from epy_slides._ui.figure_dialog import FigureDialog
 
-_app: QApplication | None = None
+_app: QCoreApplication | QApplication | None = None
 
 
 @pytest.fixture(scope="module")
@@ -51,10 +52,10 @@ def test_reference_id_fallback(qapp):
 
 
 def test_width_default(qapp):
-    """Width defaults to '80%' when field is cleared."""
+    """Width setting defaults to '80%' when field is cleared."""
     dlg = FigureDialog(default_id="1")
     dlg.width_edit.setText("")
-    assert dlg.width == "80%"
+    assert dlg.width_value == "80%"
 
 
 def test_custom_width(qapp):

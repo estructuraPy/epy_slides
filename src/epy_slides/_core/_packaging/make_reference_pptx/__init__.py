@@ -22,6 +22,13 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+# lxml's stubs omit the "etree" submodule, which exists at runtime.
+from lxml import etree  # pyright: ignore[reportAttributeAccessIssue]
+from pptx import Presentation
+from pptx.opc.constants import RELATIONSHIP_TYPE as RT
+from pptx.oxml.ns import qn
+from pptx.util import Emu
+
 # Repo root: this module lives at src/epy_slides/_core/_packaging/
 # make_reference_pptx/__init__.py, so it takes 5 parents to reach the
 # root (make_reference_pptx -> _packaging -> _core -> epy_slides -> src
@@ -29,12 +36,6 @@ from pathlib import Path
 # wrote the decks into a ghost src/src/ tree.
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT / "src"))
-
-from lxml import etree  # noqa: E402
-from pptx import Presentation  # noqa: E402
-from pptx.opc.constants import RELATIONSHIP_TYPE as RT  # noqa: E402
-from pptx.oxml.ns import qn  # noqa: E402
-from pptx.util import Emu  # noqa: E402
 
 # PowerPoint 16:9 "widescreen" (13.333 x 7.5 in). python-pptx's default
 # template is 4:3 (10 x 7.5 in); the decks are 16:9, so a 4:3 reference makes
@@ -126,10 +127,14 @@ def _widen_placeholders(container, ratio: float) -> None:
             continue
         off = xfrm.find(qn("a:off"))
         ext = xfrm.find(qn("a:ext"))
-        if off is not None and off.get("x") is not None:
-            off.set("x", str(int(int(off.get("x")) * ratio)))
-        if ext is not None and ext.get("cx") is not None:
-            ext.set("cx", str(int(int(ext.get("cx")) * ratio)))
+        if off is not None:
+            x_value = off.get("x")
+            if x_value is not None:
+                off.set("x", str(int(int(x_value) * ratio)))
+        if ext is not None:
+            cx_value = ext.get("cx")
+            if cx_value is not None:
+                ext.set("cx", str(int(int(cx_value) * ratio)))
 
 
 def _retune_text_styles(master) -> None:
@@ -195,7 +200,16 @@ def build_reference(
         # Switch the default 4:3 canvas to 16:9 widescreen and widen the
         # layout placeholders to fill it, so Pandoc lays slide content
         # across the full 16:9 width instead of a 4:3 column.
-        ratio = float(_WIDESCREEN_W) / float(prs.slide_width)
+        # A template can leave the canvas size unset; python-pptx
+        # answers None for it, and dividing by that is how the
+        # widescreen pass would have died on somebody's file.
+        current = prs.slide_width
+        if current is None:
+            raise ValueError(
+                "the reference template declares no slide width, "
+                "so it cannot be widened to 16:9."
+            )
+        ratio = float(_WIDESCREEN_W) / float(current)
         prs.slide_width = _WIDESCREEN_W
         prs.slide_height = _WIDESCREEN_H
         for master in prs.slide_masters:

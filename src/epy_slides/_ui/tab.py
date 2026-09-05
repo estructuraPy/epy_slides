@@ -106,9 +106,15 @@ class _ExternalOpenPage(QWebEnginePage):
     """
 
     def acceptNavigationRequest(  # noqa: N802 (Qt override)
-        self, url: QUrl, _type, _is_main_frame: bool
+        self,
+        url: QUrl | str,
+        _type: QWebEnginePage.NavigationType,
+        _is_main_frame: bool,
     ) -> bool:
-        QDesktopServices.openUrl(url)
+        # Qt declares this virtual with a url that may arrive as a
+        # string; narrowing the parameter to QUrl would have refused
+        # exactly the calls the base class promises to make.
+        QDesktopServices.openUrl(QUrl(url) if isinstance(url, str) else url)
         self.deleteLater()
         return False
 
@@ -116,7 +122,15 @@ class _ExternalOpenPage(QWebEnginePage):
 class _PreviewView(QWebEngineView):
     """Preview view: popup links go to the system browser."""
 
-    def createWindow(self, _window_type):  # noqa: N802 (Qt override)
+    # OPEN, and deliberately not silenced away: Qt declares this
+    # virtual on the VIEW as returning a QWebEngineView, and this
+    # returns a page. The documented hook for target="_blank" is
+    # the PAGE's createWindow; moving it there is a behaviour
+    # change in the preview, which is why it is recorded rather
+    # than done in a typing pass. Popup handling has no live test.
+    def createWindow(  # noqa: N802 (Qt override)  # pyright: ignore[reportIncompatibleMethodOverride] - see the note above
+        self, _window_type: QWebEnginePage.WebWindowType
+    ) -> QWebEnginePage:
         return _ExternalOpenPage(self)
 
 
@@ -139,6 +153,7 @@ class MarkdownTab(QWidget):
         self._dirty = False
         self._suppress_change = False
         self._theme_css: str = ""
+        self._preview_tmp_dir: Path | None = None
 
         self.editor = QPlainTextEdit(self)
         self._setup_editor()
@@ -812,11 +827,13 @@ class MarkdownTab(QWidget):
                 f"<b>Render error</b><pre>{msg}</pre>"
                 "</body></html>"
             )
-        if not hasattr(self, "_preview_tmp_dir"):
-            self._preview_tmp_dir = Path(
+        preview_dir = self._preview_tmp_dir
+        if preview_dir is None:
+            preview_dir = Path(
                 tempfile.mkdtemp(prefix="epy_slides_preview_")
             )
-        preview_path = self._preview_tmp_dir / "preview.html"
+            self._preview_tmp_dir = preview_dir
+        preview_path = preview_dir / "preview.html"
         preview_path.write_text(html, encoding="utf-8")
         url = QUrl.fromLocalFile(str(preview_path.resolve()))
         # Load immediately and unconditionally; ``?r=`` forces a real reload
@@ -848,7 +865,7 @@ class MarkdownTab(QWidget):
 
     def cleanup_preview_tmp(self) -> None:
         """Delete the temp dir backing the live preview (call on close)."""
-        tmp = getattr(self, "_preview_tmp_dir", None)
+        tmp = self._preview_tmp_dir
         if tmp is not None:
             shutil.rmtree(tmp, ignore_errors=True)
             self._preview_tmp_dir = None

@@ -29,6 +29,7 @@ def test_popup_links_open_in_system_browser(qapp, monkeypatch):
     """target=_blank navigation is handed to the OS browser."""
     from PySide6.QtCore import QUrl
     from PySide6.QtGui import QDesktopServices
+    from PySide6.QtWebEngineCore import QWebEnginePage
 
     from epy_slides._ui import tab as tab_mod
 
@@ -38,7 +39,9 @@ def test_popup_links_open_in_system_browser(qapp, monkeypatch):
     )
     page = tab_mod._ExternalOpenPage(None)
     accepted = page.acceptNavigationRequest(
-        QUrl("https://example.test/deck"), None, True
+        QUrl("https://example.test/deck"),
+        QWebEnginePage.NavigationType.NavigationTypeLinkClicked,
+        True,
     )
     assert accepted is False
     assert opened == ["https://example.test/deck"]
@@ -46,10 +49,12 @@ def test_popup_links_open_in_system_browser(qapp, monkeypatch):
 
 def test_preview_view_creates_external_page(qapp):
     """createWindow returns the throwaway external-open page."""
+    from PySide6.QtWebEngineCore import QWebEnginePage
+
     from epy_slides._ui import tab as tab_mod
 
     view = tab_mod._PreviewView()
-    page = view.createWindow(None)
+    page = view.createWindow(QWebEnginePage.WebWindowType.WebBrowserTab)
     assert isinstance(page, tab_mod._ExternalOpenPage)
     view.deleteLater()
 

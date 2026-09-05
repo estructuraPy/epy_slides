@@ -96,7 +96,7 @@ class FigureDialog(QDialog):
         return self.caption_edit.text().strip()
 
     @property
-    def width(self) -> str:
+    def width_value(self) -> str:
         """Width string, stripped; falls back to '80%' when empty."""
         value = self.width_edit.text().strip()
         return value if value else "80%"
@@ -118,5 +118,5 @@ class FigureDialog(QDialog):
         pth = self.path or "path/to/image.png"
         return (
             f"![{cap}]({pth})"
-            f"{{#fig-{self.reference_id} width={self.width}}}"
+            f"{{#fig-{self.reference_id} width={self.width_value}}}"
         )

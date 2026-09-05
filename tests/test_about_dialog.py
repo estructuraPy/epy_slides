@@ -16,6 +16,7 @@ import struct
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QApplication, QLabel
 
 from epy_slides._ui.about_dialog import AboutDialog
@@ -24,7 +25,7 @@ from epy_slides._ui.about_dialog import AboutDialog
 # Module-scoped QApplication (required for any QWidget instantiation)
 # ---------------------------------------------------------------------------
 
-_app: QApplication | None = None
+_app: QCoreApplication | QApplication | None = None
 
 
 @pytest.fixture(scope="module")

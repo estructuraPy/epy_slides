@@ -301,14 +301,22 @@ def unregister() -> list[str]:
             with winreg.OpenKey(
                 root, ext_root, 0, winreg.KEY_READ
             ) as k:
-                value, _ = winreg.QueryValueEx(k, None)
+                # None addresses the key's default value; winreg's stubs
+                # type the parameter as str.
+                value, _ = winreg.QueryValueEx(
+                    k, None  # pyright: ignore[reportArgumentType]
+                )
         except (FileNotFoundError, OSError):
             value = None
         if value == PROGID:
             with winreg.OpenKey(
                 root, ext_root, 0, winreg.KEY_SET_VALUE
             ) as k:
-                winreg.DeleteValue(k, None)
+                # None addresses the key's default value; winreg's stubs
+                # type the parameter as str.
+                winreg.DeleteValue(
+                    k, None  # pyright: ignore[reportArgumentType]
+                )
             changes.append(f"Cleared legacy default for {ext}")
 
     return changes

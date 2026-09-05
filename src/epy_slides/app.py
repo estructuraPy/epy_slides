@@ -636,7 +636,7 @@ class SlideWindow(QMainWindow):
         theme = themes.get(theme_id)
         self._current_theme = theme
         app = QApplication.instance()
-        if app is not None:
+        if isinstance(app, QApplication):
             themes.apply_palette(app, theme)
             app.setStyleSheet(themes.qss_for(theme))
 
@@ -1134,7 +1134,9 @@ class SlideWindow(QMainWindow):
         if dialog.exec() != QPrintDialog.DialogCode.Accepted:
             return
         self._active_printer = printer
-        tab.view.page().print(
+        page = tab.view.page()
+        # PySide6 stubs omit QWebEnginePage.print, which exists at runtime.
+        page.print(  # pyright: ignore[reportAttributeAccessIssue]
             printer, lambda _ok: setattr(self, "_active_printer", None)
         )
 

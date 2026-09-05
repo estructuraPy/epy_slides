@@ -41,7 +41,8 @@ def make_window(qapp: Any) -> Iterator[Callable[[], SlideWindow]]:
 
     yield _make
     for win in windows:
-        win._confirm_close = lambda _tab: True
+        _any_win: Any = win
+        _any_win._confirm_close = lambda _tab: True
         for i in range(win.tabs.count()):
             widget = win.tabs.widget(i)
             if isinstance(widget, MarkdownTab):
