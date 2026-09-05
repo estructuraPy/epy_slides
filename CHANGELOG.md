@@ -4,6 +4,19 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] — 2026-09-05
+
+### Fixed
+- Interpolated status messages, menu labels and the window title could
+  never be translated, because an f-string is assembled before `tr()`
+  ever sees it. They carry named fields now, and a gate keeps the next
+  one from slipping in.
+
+### Changed
+- The front-matter parser and the truth test come from `epy_export`
+  instead of being kept here as a second copy of each.
+- The typechecker runs in CI and this tree answers it with zero.
+
 ## [0.4.0] — 2026-09-04
 
 ### Added
