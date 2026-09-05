@@ -164,7 +164,7 @@ def _watermark_css(metadata: dict[str, str], theme_css: str = "") -> str:
     The mark adapts to the deck background luminance so it stays legible on
     light and dark themes alike, and uses ``mix-blend-mode: difference`` on
     full-bleed image slides so it never washes out over a photo. Screen
-    media only: the PDF export stamps its own watermark via ``_pdf_footer``.
+    media only: the PDF export stamps its own watermark via ``epy_export``.
     """
     watermark = (metadata.get("watermark") or "").strip()
     if not watermark:

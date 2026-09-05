@@ -2,7 +2,7 @@
 
 Holds the non-Qt implementation modules — rendering (``renderer.py``,
 ``_revealjs_theme.py``, ``template.py``), export (``_export_pdf.py``,
-``_media_export.py``, ``_pdf_footer.py``), authoring data (``slide_md.py``,
+``_media_export.py``), authoring data (``slide_md.py``,
 ``snippets.py``, ``bib.py``, ``epyson.py``, ``latex_catalog.py``,
 ``templates.py``), i18n (``_i18n.py``) and the Windows file-association
 helper (``winreg_assoc.py``) — plus ``_packaging``, dev-only build/release
