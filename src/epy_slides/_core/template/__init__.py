@@ -18,6 +18,11 @@ from functools import lru_cache
 from importlib import resources
 from pathlib import Path
 
+# Front-matter semantics, which is epy_export's charter. The two
+# copies differed only in how much of the rule their docstring
+# wrote down; the accepted spellings were already the same.
+from epy_export import is_truthy
+
 from epy_slides._core.epyson import is_dark
 
 _REVEAL_PKG = "epy_slides._config._assets.revealjs"
@@ -31,15 +36,6 @@ ASPECT_SIZES: dict[str, tuple[int, int]] = {
 DEFAULT_ASPECT = "16:9"
 
 _TRUTHY_VALUES = {"true", "yes", "1", "on"}
-
-
-def is_truthy(value: str | None) -> bool:
-    """Interpret a YAML-ish scalar string as a boolean."""
-    if value is None:
-        return False
-    return value.strip().lower() in _TRUTHY_VALUES
-
-
 _MATHJAX_CONFIG = """
 <script>
 window.MathJax = {
