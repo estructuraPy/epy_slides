@@ -51,7 +51,40 @@ _ES: dict[str, str] = {
     "Indexes": "Índices",
     "Theme": "Tema",
     "Autosave": "Guardado automático",
+    "Heading {level}": "Título {level}",
+    "Callout: {kind}": "Llamado: {kind}",
+    "Disclosure: {label}": "Declaración: {label}",
+    "{app} — {title}": "{app} — {title}",
     "Autosaved: {path}": "Guardado automático: {path}",
+    # --- status-bar / transient messages ---
+    "Theme: {name}": "Tema: {name}",
+    "Save template": "Guardar plantilla",
+    "Template name:": "Nombre de la plantilla:",
+    "Saved template: {name}": "Plantilla guardada: {name}",
+    "Applied template: {name}": "Plantilla aplicada: {name}",
+    "Delete template '{name}'?":
+        "¿Eliminar la plantilla '{name}'?",
+    "Deleted template: {name}": "Plantilla eliminada: {name}",
+    "Saved: {path}": "Guardado: {path}",
+    "Reloaded: {path}": "Recargado: {path}",
+    "Not a file:\n{path}": "No es un archivo:\n{path}",
+    "Saved HTML: {path}": "HTML guardado: {path}",
+    "Saved PDF: {path}": "PDF guardado: {path}",
+    "Export failed: {name}": "Error al exportar: {name}",
+    "Exported {name}": "Exportado {name}",
+    "Failed to write PDF:\n{path}":
+        "Error al escribir el PDF:\n{path}",
+    "Linked bibliography: {name}":
+        "Bibliografía enlazada: {name}",
+    "Added bibliography entry: @{key}":
+        "Entrada bibliográfica agregada: @{key}",
+    "Citation style: {style}":
+        "Estilo de cita: {style}",
+    "Could not load the bundled manual '{filename}'.":
+        "No se pudo cargar el manual incluido '{filename}'.",
+    "'{name}' has unsaved changes. Save before closing?":
+        "'{name}' tiene cambios sin guardar. "
+        "¿Guardar antes de cerrar?",
     "Page size": "Tamaño de página",
     "Citation style": "Estilo de cita",
     "Apply template": "Aplicar plantilla",

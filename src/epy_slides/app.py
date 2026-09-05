@@ -289,7 +289,10 @@ class SlideWindow(QMainWindow):
         """Create text-formatting actions (headings, bold/italic, ...)."""
         self.heading_actions: list[QAction] = []
         for level in range(1, 7):
-            act = QAction(f"Heading {level}", self)
+            act = QAction(
+                i18n.tr("Heading {level}").format(level=level),
+                self,
+            )
             act.setShortcut(QKeySequence(f"Ctrl+{level}"))
             act.triggered.connect(
                 lambda checked=False, lv=level: self._on_active_tab(
@@ -391,7 +394,12 @@ class SlideWindow(QMainWindow):
         )
         self.callout_actions: list[QAction] = []
         for kind in ("note", "tip", "warning", "important", "caution"):
-            act = QAction(f"Callout: {kind.title()}", self)
+            act = QAction(
+                i18n.tr("Callout: {kind}").format(
+                    kind=kind.title()
+                ),
+                self,
+            )
             act.triggered.connect(
                 lambda checked=False, k=kind: self._on_active_tab(
                     "insert_callout", k
@@ -405,7 +413,12 @@ class SlideWindow(QMainWindow):
         )
         self.disclosure_actions: list[QAction] = []
         for d_kind, (d_label, _d_text) in DISCLOSURE_PRESETS.items():
-            d_act = QAction(f"Disclosure: {d_label}", self)
+            d_act = QAction(
+                i18n.tr("Disclosure: {label}").format(
+                    label=d_label
+                ),
+                self,
+            )
             d_act.triggered.connect(
                 lambda checked=False, k=d_kind: self._on_active_tab(
                     "insert_disclosure", k
@@ -652,7 +665,10 @@ class SlideWindow(QMainWindow):
         if persist:
             self._settings.setValue("theme", theme.id)
             self.statusBar().showMessage(
-                f"Theme: {theme.display_name}", 2000
+                i18n.tr("Theme: {name}").format(
+                    name=i18n.tr(theme.display_name)
+                ),
+                2000,
             )
 
     def _build_theme_actions(self) -> None:
@@ -850,7 +866,9 @@ class SlideWindow(QMainWindow):
         from epy_slides._core import templates  # noqa: PLC0415
 
         name, ok = QInputDialog.getText(
-            self, "Save template", "Template name:"
+            self,
+            i18n.tr("Save template"),
+            i18n.tr("Template name:"),
         )
         if not ok or not name.strip():
             return
@@ -875,7 +893,10 @@ class SlideWindow(QMainWindow):
         except (OSError, ValueError) as exc:
             QMessageBox.warning(self, APP_NAME, str(exc))
             return
-        self.statusBar().showMessage(f"Saved template: {name.strip()}", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Saved template: {name}").format(name=name.strip()),
+            3000,
+        )
 
     def _apply_template(self, name: str) -> None:
         """Apply a saved template: theme + appearance front-matter keys."""
@@ -906,21 +927,28 @@ class SlideWindow(QMainWindow):
             updated = snippets.set_metadata_field(updated, field, str(value))
         if updated != text:
             self._replace_buffer(tab, updated)
-        self.statusBar().showMessage(f"Applied template: {name}", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Applied template: {name}").format(name=name), 3000
+        )
 
     def _delete_template(self, name: str) -> None:
         """Delete a saved template after confirmation."""
         from epy_slides._core import templates  # noqa: PLC0415
 
         choice = QMessageBox.question(
-            self, "Delete template", f"Delete template '{name}'?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            self,
+            i18n.tr("Delete template"),
+            i18n.tr("Delete template '{name}'?").format(name=name),
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
         )
         if choice != QMessageBox.StandardButton.Yes:
             return
         templates.delete_template(name)
-        self.statusBar().showMessage(f"Deleted template: {name}", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Deleted template: {name}").format(name=name), 3000
+        )
 
     # ----------------------------------------------- presentation props
 
@@ -959,7 +987,9 @@ class SlideWindow(QMainWindow):
         )
         if new_theme and new_theme in themes.THEMES:
             self._apply_theme(new_theme)
-        self.statusBar().showMessage("Presentation properties updated", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Presentation properties updated"), 3000
+        )
 
     @staticmethod
     def _replace_buffer(tab: MarkdownTab, new_text: str) -> None:
@@ -1027,11 +1057,15 @@ class SlideWindow(QMainWindow):
                 continuous=False,
             )
             target.write_text(html, encoding="utf-8")
-            self.statusBar().showMessage(f"Saved HTML: {target}", 3000)
+            self.statusBar().showMessage(
+                i18n.tr("Saved HTML: {path}").format(path=str(target)),
+                3000,
+            )
         except Exception as exc:  # noqa: BLE001 - report failures to the user
             QMessageBox.critical(self, i18n.tr("Export HTML failed"), str(exc))
             self.statusBar().showMessage(
-                f"Export failed: {target.name}", 5000
+                i18n.tr("Export failed: {name}").format(name=target.name),
+                5000,
             )
         finally:
             self._exports_in_flight -= 1
@@ -1068,10 +1102,15 @@ class SlideWindow(QMainWindow):
                     self, i18n.tr("Export PowerPoint failed"), str(exc)
                 )
                 self.statusBar().showMessage(
-                    f"Export failed: {target.name}", 5000
+                    i18n.tr("Export failed: {name}").format(
+                        name=target.name
+                    ),
+                    5000,
                 )
                 return
-            self.statusBar().showMessage(f"Exported {target.name}", 5000)
+            self.statusBar().showMessage(
+                i18n.tr("Exported {name}").format(name=target.name), 5000
+            )
         finally:
             self._exports_in_flight -= 1
 
@@ -1110,11 +1149,18 @@ class SlideWindow(QMainWindow):
         """Report the result of an asynchronous PDF export."""
         try:
             if ok:
-                self.statusBar().showMessage(f"Saved PDF: {path}", 5000)
+                self.statusBar().showMessage(
+                    i18n.tr("Saved PDF: {path}").format(path=str(path)),
+                    5000,
+                )
             else:
                 self.statusBar().clearMessage()
                 QMessageBox.warning(
-                    self, APP_NAME, f"Failed to write PDF:\n{path}"
+                    self,
+                    APP_NAME,
+                    i18n.tr("Failed to write PDF:\n{path}").format(
+                        path=str(path)
+                    ),
                 )
         finally:
             self._exports_in_flight -= 1
@@ -1153,8 +1199,11 @@ class SlideWindow(QMainWindow):
             text = _load_manual_text(filename)
         except (FileNotFoundError, OSError):
             QMessageBox.warning(
-                self, i18n.tr("Manual unavailable"),
-                f"Could not load the bundled manual '{filename}'.",
+                self,
+                i18n.tr("Manual unavailable"),
+                i18n.tr(
+                    "Could not load the bundled manual '{filename}'."
+                ).format(filename=filename),
             )
             return
         tab = self._create_tab()
@@ -1189,7 +1238,11 @@ class SlideWindow(QMainWindow):
         if tab is None:
             self.setWindowTitle(APP_NAME)
             return
-        self.setWindowTitle(f"{APP_NAME} — {tab.title()}")
+        self.setWindowTitle(
+            i18n.tr("{app} — {title}").format(
+                app=APP_NAME, title=tab.title()
+            )
+        )
         if tab.path is not None:
             self.statusBar().showMessage(str(tab.path))
         else:
@@ -1229,7 +1282,10 @@ class SlideWindow(QMainWindow):
     def open_path(self, path: Path) -> None:
         """Open ``path`` in a new tab, or focus the existing tab."""
         if not path.is_file():
-            QMessageBox.warning(self, APP_NAME, f"Not a file:\n{path}")
+            QMessageBox.warning(
+                self, APP_NAME,
+                i18n.tr("Not a file:\n{path}").format(path=str(path)),
+            )
             return
         path = path.resolve()
         for i in range(self.tabs.count()):
@@ -1265,7 +1321,9 @@ class SlideWindow(QMainWindow):
             return self._save_current_as()
         tab.save()
         self._refresh_tab_title(tab)
-        self.statusBar().showMessage(f"Saved: {tab.path}", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Saved: {path}").format(path=str(tab.path)), 3000
+        )
         return True
 
     def _toggle_autosave(self, checked: bool) -> None:
@@ -1314,7 +1372,9 @@ class SlideWindow(QMainWindow):
             target = target.with_suffix(".md")
         tab.save_as(target)
         self._refresh_tab_title(tab)
-        self.statusBar().showMessage(f"Saved: {target}", 3000)
+        self.statusBar().showMessage(
+            i18n.tr("Saved: {path}").format(path=str(target)), 3000
+        )
         return True
 
     def _reload_current(self) -> None:
@@ -1333,7 +1393,9 @@ class SlideWindow(QMainWindow):
             if choice != QMessageBox.StandardButton.Yes:
                 return
         tab.reload()
-        self.statusBar().showMessage(f"Reloaded: {tab.path}", 2000)
+        self.statusBar().showMessage(
+            i18n.tr("Reloaded: {path}").format(path=str(tab.path)), 2000
+        )
 
     # ------------------------------------------------ closing logic
 
@@ -1343,8 +1405,11 @@ class SlideWindow(QMainWindow):
             return True
         name = tab.path.name if tab.path is not None else "untitled.md"
         choice = QMessageBox.question(
-            self, i18n.tr("Unsaved changes"),
-            f"'{name}' has unsaved changes. Save before closing?",
+            self,
+            i18n.tr("Unsaved changes"),
+            i18n.tr(
+                "'{name}' has unsaved changes. Save before closing?"
+            ).format(name=name),
             QMessageBox.StandardButton.Save
             | QMessageBox.StandardButton.Discard
             | QMessageBox.StandardButton.Cancel,
@@ -1463,7 +1528,10 @@ class SlideWindow(QMainWindow):
             return
         tab.link_bibliography(Path(filename))
         self.statusBar().showMessage(
-            f"Linked bibliography: {Path(filename).name}", 3000
+            i18n.tr("Linked bibliography: {name}").format(
+                name=Path(filename).name
+            ),
+            3000,
         )
 
     def _new_bib_entry(self) -> None:
@@ -1497,7 +1565,10 @@ class SlideWindow(QMainWindow):
         draft = dialog.build_draft()
         append_entry_to_file(bib_path, draft)
         self.statusBar().showMessage(
-            f"Added bibliography entry: @{draft.key}", 3000
+            i18n.tr("Added bibliography entry: @{key}").format(
+                key=draft.key
+            ),
+            3000,
         )
 
     def _set_csl_style(self, key: str) -> None:
@@ -1514,7 +1585,8 @@ class SlideWindow(QMainWindow):
         if key in self.csl_actions:
             self.csl_actions[key].setChecked(True)
         self.statusBar().showMessage(
-            f"Citation style: {key.upper()}", 2000
+            i18n.tr("Citation style: {style}").format(style=key.upper()),
+            2000,
         )
 
 
