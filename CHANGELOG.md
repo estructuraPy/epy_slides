@@ -4,6 +4,40 @@ All notable changes to `epy_slides` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **A second rendering option: ePy Docs.** *Export ▸ Export via
+  epy_docs…* hands the deck's content to the generic writer and gets a
+  PDF, a Word file or an HTML document back. It sits after a separator
+  because that is the honest place for it: ePy Docs builds reports,
+  papers, books and notebooks, not decks, so what it produces is the
+  handout rather than the presentation.
+
+  The entry is offered only where the engine can be reached, and
+  reachability is asked of `epy_export`, which answers about the
+  MACHINE. Asking whether the engine imports in THIS process is the
+  question with a permanently wrong answer inside a frozen bundle, and
+  it is why the same entry was greyed out for every user of ePy
+  Reports since its first release.
+
+  The window itself is the family's, so it is the same dialog in all
+  three editors, remembered under this application's own registry
+  scope. The deck is handed to the Markdown reader, declared rather
+  than guessed from the suffix: a deck is Markdown with slide syntax,
+  not a Quarto document with executable cells.
+
+  The translations for this dialog had been in this package for some
+  time, for a feature it did not have.
+
+### Fixed
+
+- The `epy_suite_connect` docstring claimed the whole package imports
+  only the standard library. That is true of the module that says it
+  and not of the bridges beside it, and a claim that broad is one
+  somebody eventually trusts.
+
 ## [0.4.1] — 2026-09-05
 
 ### Fixed

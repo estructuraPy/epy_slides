@@ -155,6 +155,13 @@ _ES: dict[str, str] = {
     "Export as DOCX...": "Exportar como DOCX...",
     "Print...": "Imprimir...",
     "Export via epy_docs...": "Exportar con epy_docs...",
+    "Requires the epy-docs package": "Requiere el paquete epy-docs",
+    "The deck must be saved before exporting via epy_docs. Save now?":
+        "La presentacion debe guardarse antes de exportar con "
+        "epy_docs. \u00bfGuardar ahora?",
+    "Exporting via epy_docs...": "Exportando con epy_docs...",
+    "Exported to {path}": "Exportado a {path}",
+    "epy_docs export failed:": "Error al exportar con epy_docs:",
     # --- View menu ---
     "Page view": "Vista de página",
     # theme display names

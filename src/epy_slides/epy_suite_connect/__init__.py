@@ -8,8 +8,12 @@ App-GUI family (shared toolkit with epy_reports / epy_papers / epy_draft). It
 currently exposes the suite identity contract (``get_suite_info``) and hosts
 the suite registry manifest.
 
-Import-clean: only the standard library. It must never import epy_analysis or
-any sibling library.
+This module is import-clean: only the standard library, so importing
+epy_slides never pulls a sibling in. The bridges under ``_adapters``
+are the only modules in epy_slides that may name another ``epy_*``
+package, and they reach the optional engines through ``epy_export``,
+which answers whether one can be reached at all before anything is
+loaded.
 """
 
 from __future__ import annotations
