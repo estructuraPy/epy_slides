@@ -166,6 +166,19 @@ def test_insert_design_block_inserts_skeleton(tab):
     assert tab.text().strip() != ""
 
 
+def test_insert_disclosure_inserts_skeleton(tab):
+    # The inserted text must be the exact skeleton disclosure_block()
+    # produces, with its body text pre-selected for immediate overtyping.
+    from epy_slides._core._design import disclosure_block
+
+    tab.set_initial_text("")
+    tab.insert_disclosure("integrity")
+    skeleton, token = disclosure_block("integrity")
+    assert tab.text() == skeleton
+    assert token in tab.text()
+    assert tab.editor.textCursor().selectedText() == token
+
+
 def test_insert_block_prepends_newline_when_midline(tab):
     # _insert_block adds a leading newline when the caret is not at the start
     # of a line so the block begins on its own line.
@@ -219,6 +232,36 @@ def test_render_scheduled_renders(tab):
     tab.set_initial_text("## A\n")
     tab._last_pos = "epypos=v:1.0"
     tab._render_scheduled()  # must not raise (preserve render)
+
+
+def test_render_now_shows_escaped_render_error_on_failure(tab, monkeypatch):
+    # When render_revealjs raises, _render_now must fall back to an inline
+    # error page whose exception text is HTML-escaped (only & and < are
+    # escaped by the handler, so the message below also proves > is left
+    # alone, matching the real replace("&", ...).replace("<", ...) code).
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("boom <script> & stuff")
+
+    monkeypatch.setattr(tab_module, "render_revealjs", _boom)
+    tab.set_initial_text("## A\n")
+    html = (tab._preview_tmp_dir / "preview.html").read_text(
+        encoding="utf-8"
+    )
+    assert "<b>Render error</b>" in html
+    assert "boom &lt;script> &amp; stuff" in html
+
+
+def test_render_now_normal_render_has_no_error_markup(tab, tmp_path):
+    # Counter-example: a deck that renders successfully must not take the
+    # except branch at all.
+    deck = tmp_path / "deck.md"
+    deck.write_text("## A\n", encoding="utf-8")
+    tab.load_file(deck)
+    html = (tab._preview_tmp_dir / "preview.html").read_text(
+        encoding="utf-8"
+    )
+    assert "Render error" not in html
+    assert "<base href=" in html
 
 
 def test_poll_position_runs_when_page_present(tab, monkeypatch):

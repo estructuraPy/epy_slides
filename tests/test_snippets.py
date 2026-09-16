@@ -10,6 +10,7 @@ from epy_slides._core.snippets import (
     parse_front_matter,
     parse_header_cells,
     set_metadata_field,
+    strip_front_matter,
 )
 
 # --------------------------------------------------------------- find_labels
@@ -119,6 +120,29 @@ def test_parse_front_matter_no_block_returns_empty():
 
 def test_parse_front_matter_unterminated_block_returns_empty():
     assert parse_front_matter("---\ntitle: x\n") == {}
+
+
+# ---------------------------------------------------------- strip_front_matter
+
+
+def test_strip_front_matter_removes_closed_block():
+    text = "---\ntitle: Deck\n---\n\nBody text"
+    # The cut point is right after the closing "---"; the blank line
+    # that conventionally separates front matter from the body is part
+    # of the body's own leading whitespace, not stripped by this call.
+    assert strip_front_matter(text) == "\n\nBody text"
+
+
+def test_strip_front_matter_no_block_returns_unchanged():
+    assert strip_front_matter("No front matter here") == "No front matter here"
+
+
+def test_strip_front_matter_unterminated_block_returns_unchanged():
+    """Counter-example: a block that opens with ``---`` but never closes
+    is not a valid front-matter block, so the text is returned as-is
+    rather than being partially stripped."""
+    text = "---\ntitle: x\nbody without a closing fence"
+    assert strip_front_matter(text) == text
 
 
 # ---------------------------------------------------------- parse_header_cells

@@ -85,6 +85,18 @@ def test_expand_pptx_strips_background_heading_attr():
     assert first.startswith("## Cover")
 
 
+def test_expand_pptx_reinserts_background_image_as_inline():
+    """The pptx writer drops reveal background attrs entirely, so a
+    full-bleed cover's picture would vanish; it is re-added as a plain
+    inline image directly under the heading instead."""
+    src = '## Cover {background-image="figs/cover.png"}\n\nbody\n'
+    out = expand_for_pptx(src)
+    lines = out.splitlines()
+    assert lines[0].startswith("## Cover")
+    assert "background-image" not in lines[0]
+    assert "![](figs/cover.png)" in out
+
+
 def test_simplify_stats_to_table():
     src = (
         "::: {.stats}\n"

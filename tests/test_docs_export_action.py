@@ -157,3 +157,111 @@ def test_success_says_where_the_documents_went(
 ) -> None:
     window._on_docs_done_ok(str(tmp_path / "out"))
     assert "out" in window.statusBar().currentMessage()
+
+
+# ------------------------------------------------- no-tab / save / dismiss
+
+
+def test_no_current_tab_is_a_noop(
+    window, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # With nothing open there is nothing to export; the dialog must never
+    # even be constructed.
+    from epy_slides._ui import docs_export_dialog as ded
+
+    monkeypatch.setattr(window, "_current_tab", lambda: None)
+    opened: list[str] = []
+    monkeypatch.setattr(
+        ded.DocsExportDialog, "exec",
+        lambda self: opened.append("opened") or QDialog.DialogCode.Rejected,
+    )
+    window._export_via_docs()  # must not raise
+    assert opened == []
+
+
+def test_a_failed_save_stops_before_the_dialog(
+    window, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The person agreed to save, but the save itself did not succeed (e.g.
+    # a Save As they then cancelled) — exporting must not proceed on an
+    # unsaved buffer.
+    from PySide6.QtWidgets import QMessageBox
+
+    from epy_slides import app as app_module
+    from epy_slides._ui import docs_export_dialog as ded
+
+    monkeypatch.setattr(
+        app_module.QMessageBox, "question",
+        lambda *a, **k: QMessageBox.StandardButton.Save,
+    )
+    monkeypatch.setattr(window, "_save_current", lambda: False)
+    opened: list[str] = []
+    monkeypatch.setattr(
+        ded.DocsExportDialog, "exec",
+        lambda self: opened.append("opened") or QDialog.DialogCode.Rejected,
+    )
+    window._export_via_docs()
+    assert opened == []
+
+
+def test_a_path_still_missing_after_a_reported_save_is_a_noop(
+    window, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Defensive guard at app.py:1300.
+
+    Reading ``_save_current`` / ``_save_current_as`` (app.py) and
+    ``Tab.save_as`` (_ui/tab.py, 2026-09-15) shows that on any successful
+    save the tab's ``.path`` is set unconditionally before ``True`` is
+    returned, so under the real save flow this branch cannot fire today.
+    It stands as a guard against that invariant changing, so it is
+    exercised the same way the render test above already stubs tab
+    state: by mocking ``_save_current`` itself to report success while
+    the tab's own ``.path`` still reads ``None`` — not by forcing an
+    otherwise-impossible object state.
+    """
+    from PySide6.QtWidgets import QMessageBox
+
+    from epy_slides import app as app_module
+    from epy_slides._ui import docs_export_dialog as ded
+
+    monkeypatch.setattr(
+        app_module.QMessageBox, "question",
+        lambda *a, **k: QMessageBox.StandardButton.Save,
+    )
+    monkeypatch.setattr(window, "_save_current", lambda: True)
+    tab = window._current_tab()
+    assert tab is not None
+    monkeypatch.setattr(type(tab), "path", property(lambda self: None))
+    opened: list[str] = []
+    monkeypatch.setattr(
+        ded.DocsExportDialog, "exec",
+        lambda self: opened.append("opened") or QDialog.DialogCode.Rejected,
+    )
+    window._export_via_docs()
+    assert opened == []
+
+
+def test_the_dialog_dismissed_starts_no_export(
+    window, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # A saved, clean deck skips the save prompt outright; dismissing the
+    # export dialog itself (Cancel/Esc) must still start no worker.
+    from epy_slides._ui import docs_export_dialog as ded
+
+    source = tmp_path / "charla.md"
+    source.write_text("# Titulo\n\nUn parrafo.\n", encoding="utf-8")
+    tab = window._current_tab()
+    assert tab is not None
+    monkeypatch.setattr(type(tab), "path", property(lambda self: source))
+    monkeypatch.setattr(type(tab), "dirty", property(lambda self: False))
+
+    monkeypatch.setattr(
+        ded.DocsExportDialog, "exec",
+        lambda self: QDialog.DialogCode.Rejected,
+    )
+    started: list[str] = []
+    monkeypatch.setattr(
+        ded._RenderWorker, "start", lambda self: started.append("started")
+    )
+    window._export_via_docs()
+    assert started == []

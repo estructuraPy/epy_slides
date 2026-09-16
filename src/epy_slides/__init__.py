@@ -19,6 +19,12 @@ from __future__ import annotations
 from pathlib import Path
 
 __version__ = "0.5.0"
+#: Declared so the cross-suite registry can attribute this library. Without it
+#: `epy_suite_connect.get_suite_info` fell to its own `getattr(..., "")`
+#: default and epy_slides was an entry in the registry with no author, while
+#: epy_steel, epy_concrete, epy_masonry and epy_units all declare one. Same
+#: defect found and fixed in epy_signal on the same pass.
+__author__ = "Ing. Angel Navarro-Mora M.Sc."
 
 __all__ = ["SlideDeck", "__version__"]
 

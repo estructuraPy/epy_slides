@@ -14,7 +14,9 @@ from __future__ import annotations
 import plotly.graph_objects as go
 
 from epy_slides._core._plotly import (
+    expand_plotly,
     figure_to_markdown,
+    has_plotly,
     strip_plotly_for_export,
     uses_plotly,
 )
@@ -58,6 +60,45 @@ def test_strip_plotly_for_export_uses_fallback():
     """The static export helper substitutes the declared fallback image."""
     md = figure_to_markdown(_FakeFig(), fallback="figs/twin.png")
     assert "![](figs/twin.png)" in strip_plotly_for_export(md)
+
+
+def test_strip_plotly_for_export_without_fallback_shows_note():
+    """No declared fallback: the export gets an italic placeholder note
+    instead of a broken image reference."""
+    md = figure_to_markdown(_FakeFig())
+    out = strip_plotly_for_export(md)
+    assert "Interactive figure — see the HTML edition." in out
+    assert "epy-plotly" not in out
+
+
+def test_expand_plotly_static_uses_fallback_image():
+    """A static export target (print/PPTX) swaps the fence for its raster
+    fallback instead of the interactive div/script pair."""
+    md = figure_to_markdown(_FakeFig(), fallback="figs/twin.png")
+    out = expand_plotly(md, static=True)
+    assert out.strip() == "![](figs/twin.png)"
+    assert "epy-plotly" not in out
+
+
+def test_expand_plotly_static_without_fallback_stays_interactive():
+    """Counter-example to the guard above: a fence with NO fallback must
+    still degrade gracefully — it is left interactive (best effort)
+    rather than dropped, even when ``static=True``."""
+    md = figure_to_markdown(_FakeFig())
+    out = expand_plotly(md, static=True)
+    assert 'class="epy-plotly"' in out
+
+
+def test_has_plotly_true_after_expand():
+    """After expansion, a figure's interactive div is detectable."""
+    md = figure_to_markdown(_FakeFig(), fallback="figs/twin.png")
+    out = expand_plotly(md)
+    assert has_plotly(out) is True
+
+
+def test_has_plotly_false_when_absent():
+    """Counter-example: plain markdown with no expanded figure is False."""
+    assert has_plotly("plain markdown, no figures here") is False
 
 
 def test_build_reveal_document_injects_bundle_and_init_when_plotly():

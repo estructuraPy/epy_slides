@@ -93,6 +93,26 @@ def test_icon_source_frozen(monkeypatch):
     assert _icon_source() == '"C:\\frozen\\epy_slides.exe",0'
 
 
+def test_launcher_path_not_frozen_and_not_on_path_falls_back(monkeypatch):
+    """Neither frozen nor installed as a console script: fall back to
+    invoking the module directly with the current interpreter."""
+    monkeypatch.setattr(winreg_assoc, "_is_frozen", lambda: False)
+    monkeypatch.setattr(winreg_assoc.shutil, "which", lambda name: None)
+    assert _launcher_path() == f'"{sys.executable}" -m {APP_NAME}'
+
+
+def test_icon_source_not_frozen_and_not_on_path_falls_back(monkeypatch):
+    """Counter-example to the frozen case above: when the launcher cannot
+    be located at all, the icon still resolves to a real, usable path
+    (pythonw.exe next to the current interpreter) instead of failing."""
+    from pathlib import Path
+
+    monkeypatch.setattr(winreg_assoc, "_is_frozen", lambda: False)
+    monkeypatch.setattr(winreg_assoc.shutil, "which", lambda name: None)
+    expected = f'"{Path(sys.executable).with_name("pythonw.exe")}",0'
+    assert _icon_source() == expected
+
+
 # ------------------------------------------------- open_default_apps_settings
 
 

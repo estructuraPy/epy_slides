@@ -171,6 +171,38 @@ def test_open_path_focuses_existing_tab(window, tmp_path):
     assert window.tabs.count() == count_after_first
 
 
+def test_open_path_with_theme_front_matter_applies_it(window, tmp_path):
+    # The deck's own `theme:` front matter is applied for display, but
+    # must not overwrite the user's saved preference (persist=False).
+    window._settings.setValue("theme", "corporate")
+    deck = tmp_path / "themed.md"
+    deck.write_text(
+        "---\ntheme: minimal\n---\n\n## Slide\n", encoding="utf-8"
+    )
+    window.open_path(deck)
+    assert window._current_theme.id == "minimal"
+    assert window.theme_actions["minimal"].isChecked()
+    assert str(window._settings.value("theme")) == "corporate"
+
+
+def test_open_path_theme_guard_counter_examples(window, tmp_path):
+    # Counter-example: no `theme:` key, and an unknown theme id, must both
+    # leave the current theme untouched.
+    window._apply_theme("scientific", persist=True)
+
+    no_theme = tmp_path / "plain.md"
+    no_theme.write_text("## Slide\n", encoding="utf-8")
+    window.open_path(no_theme)
+    assert window._current_theme.id == "scientific"
+
+    unknown_theme = tmp_path / "bogus.md"
+    unknown_theme.write_text(
+        "---\ntheme: no-such-theme\n---\n\n## Slide\n", encoding="utf-8"
+    )
+    window.open_path(unknown_theme)
+    assert window._current_theme.id == "scientific"
+
+
 def test_open_path_non_file_is_handled(window, tmp_path, monkeypatch):
     missing = tmp_path / "nope.md"
     # open_path warns via a modal QMessageBox for a non-file; stub it so
