@@ -29,14 +29,14 @@ def scratch_settings(tmp_path, monkeypatch):
             real.Format.IniFormat,
         )
 
-    from epy_export._ui import docs_export_dialog as shared
+    from epy_export import docs_export_dialog as shared
 
     monkeypatch.setattr(shared, "QSettings", scratch)
     return scratch
 
 
 def test_it_is_the_family_window(qapp) -> None:
-    from epy_export._ui import docs_export_dialog as shared
+    from epy_export import docs_export_dialog as shared
 
     assert issubclass(ded.DocsExportDialog, shared.DocsExportDialog)
 

@@ -12,8 +12,7 @@ import sys
 from pathlib import Path
 
 import pytest
-from epy_export import APPEARANCES, DOCUMENT_TYPES, RenderOptions
-from epy_export._core import _backends
+from epy_export import APPEARANCES, DOCUMENT_TYPES, RenderOptions, backends
 
 from epy_slides.epy_suite_connect._adapters import docs_bridge
 
@@ -49,14 +48,14 @@ def engine_hidden():
 def test_it_is_reachable_through_the_interpreter_studio_found(
     monkeypatch: pytest.MonkeyPatch, engine_hidden: None
 ) -> None:
-    monkeypatch.setenv(_backends.ENV_DOCS_PYTHON, sys.executable)
+    monkeypatch.setenv(backends.ENV_DOCS_PYTHON, sys.executable)
     assert docs_bridge.epy_docs_available() is True
 
 
 def test_it_is_not_reachable_when_there_is_nothing_to_reach(
     monkeypatch: pytest.MonkeyPatch, engine_hidden: None
 ) -> None:
-    monkeypatch.delenv(_backends.ENV_DOCS_PYTHON, raising=False)
+    monkeypatch.delenv(backends.ENV_DOCS_PYTHON, raising=False)
     assert docs_bridge.epy_docs_available() is False
 
 
@@ -66,7 +65,7 @@ def test_the_vocabularies_come_from_the_family(
     # Listed with no engine at all, because the dialog fills its combos
     # in its CONSTRUCTOR: a window that asked the engine could not be
     # built inside the bundle, where the engine cannot be imported.
-    monkeypatch.delenv(_backends.ENV_DOCS_PYTHON, raising=False)
+    monkeypatch.delenv(backends.ENV_DOCS_PYTHON, raising=False)
     assert docs_bridge.list_layouts() == list(APPEARANCES)
     assert docs_bridge.list_document_types() == list(DOCUMENT_TYPES)
 
@@ -140,7 +139,7 @@ def test_an_absent_engine_says_it_is_an_add_on(
 ) -> None:
     # This engine is not something you install, it is something you buy,
     # and "install it, or choose another engine" is useless to a reader.
-    monkeypatch.delenv(_backends.ENV_DOCS_PYTHON, raising=False)
+    monkeypatch.delenv(backends.ENV_DOCS_PYTHON, raising=False)
     source = tmp_path / "charla.md"
     source.write_text("# T\n", encoding="utf-8")
     with pytest.raises(docs_bridge.BridgeUnavailableError) as raised:
