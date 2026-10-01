@@ -1,7 +1,7 @@
 """Dialog for exporting the current deck through epy_docs.
 
 Thin: the window itself is the family's, in
-``epy_export._ui.docs_export_dialog``. Only the registry scope and the
+``epy_export.docs_export_dialog``. Only the registry scope and the
 translators differ between the three editors, so those are what this
 module supplies.
 """
