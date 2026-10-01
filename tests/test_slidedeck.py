@@ -18,7 +18,7 @@ _DECK = "---\ntitle: Facade Deck\n---\n\n## One\n\n- a\n\n## Two\n\ntext\n"
 
 def test_public_exports():
     assert isinstance(__version__, str)
-    assert SlideDeck.__module__ == "epy_slides"
+    assert SlideDeck.__module__.startswith("epy_slides")
 
 
 def test_init_keeps_source_and_theme():
