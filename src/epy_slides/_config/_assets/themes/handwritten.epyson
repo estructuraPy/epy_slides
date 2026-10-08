@@ -10,29 +10,12 @@
   "font_family_ref": "handwritten",
   "margins": {"top": 1.0, "bottom": 1.0, "left": 1.0, "right": 1.0},
   "font_families": {
-    "handwritten": {
-      "description": "Fuente manuscrita personalizada",
-      "primary": "C2024_anm_font",
-      "fallback": "Segoe Script, Brush Script MT, Comic Sans MS, Trebuchet MS, Arial, sans-serif",
-      "latex_primary": "C2024_anm_font",
-      "font_file_path": "config/assets/fonts/C2024_anm_font.otf"
-    },
-    "mono_code": {
-      "description": "Monospace para código - Source Code Pro",
-      "primary": "Source Code Pro",
-      "fallback": "Consolas, Liberation Mono, FreeMono, monospace",
-      "latex_primary": "Source Code Pro"
-    },
-    "default": {
-      "description": "Fuente por defecto del sistema",
-      "primary": "Calibri",
-      "fallback": "Arial, sans-serif",
-      "latex_primary": "Calibri"
-    }
+    "handwritten": {"description": "Fuente manuscrita personalizada", "primary": "C2024_anm_font", "fallback": "Segoe Script, Brush Script MT, Comic Sans MS, Trebuchet MS, Arial, sans-serif", "latex_primary": "C2024_anm_font", "font_file_path": "config/assets/fonts/C2024_anm_font.otf"},
+    "mono_code": {"description": "Monospace para código - Source Code Pro", "primary": "Source Code Pro", "fallback": "Consolas, Liberation Mono, FreeMono, monospace", "latex_primary": "Source Code Pro"},
+    "default": {"description": "Fuente por defecto del sistema", "primary": "Calibri", "fallback": "Arial, sans-serif", "latex_primary": "Calibri"}
   },
   "typography": {
-    "role_assignments": {"caption": "handwritten", "code": "mono_code", "figures": "handwritten",
-      "footer": "handwritten", "headings": "handwritten", "tables": "handwritten", "text": "handwritten"},
+    "role_assignments": {"caption": "handwritten", "code": "mono_code", "figures": "handwritten", "footer": "handwritten", "headings": "handwritten", "tables": "handwritten", "text": "handwritten"},
     "scales": {
       "caption": {"size": 11.0, "weight": "400"},
       "footer": {"size": 10.0, "weight": "400"},
@@ -59,7 +42,10 @@
     "description": "Paleta grafito/pergamino: tonos grises sobre fondo pergamino",
     "border_color": [169, 169, 169],
     "caption_color": [90, 90, 90],
-    "code": {"background": [240, 240, 235], "text": [50, 50, 50]},
+    "code": {
+      "background": [240, 240, 235],
+      "text": [50, 50, 50]
+    },
     "colors": {
       "primary": [70, 70, 70],
       "secondary": [105, 105, 105],
@@ -69,7 +55,12 @@
       "senary": [50, 50, 50],
       "septenary": [30, 30, 30]
     },
-    "page": {"background": [240, 240, 240], "footer_color": [90, 90, 90], "header_color": [70, 70, 70], "text": [50, 50, 50]},
+    "page": {
+      "background": [240, 240, 240],
+      "footer_color": [90, 90, 90],
+      "header_color": [70, 70, 70],
+      "text": [50, 50, 50]
+    },
     "table": {
       "background": [240, 240, 240],
       "background_text": [50, 50, 50],
@@ -80,7 +71,12 @@
     }
   },
   "callouts": {
-    "format": {"bg_alpha": 0.08, "border": {"style": "solid", "width_px": 1.5}, "line_height": 1.6, "size_scale": 0.98},
+    "format": {
+      "bg_alpha": 0.08,
+      "border": {"style": "solid", "width_px": 1.5},
+      "line_height": 1.6,
+      "size_scale": 0.98
+    },
     "behavior": {
       "callout_format": ":::{.callout-{type}}\n__{title}__\n{content}\n:::",
       "collapse": false,
@@ -117,18 +113,7 @@
     "caption_position": "bottom",
     "header_bold": false,
     "spacing": {"after": "\n\n", "before": "\n\n"},
-    "styling": {
-      "alternating_rows": false,
-      "cell_padding": 0.03,
-      "content_bold": false,
-      "grid_width_px": 0.25,
-      "header_bold": false,
-      "header_wrap_max_chars": 35,
-      "highlight_node_column": true,
-      "line_spacing": 1.3,
-      "right_padding_spaces": 3,
-      "width_in": 7.0
-    },
+    "styling": {"alternating_rows": false, "cell_padding": 0.03, "content_bold": false, "grid_width_px": 0.25, "header_bold": false, "header_wrap_max_chars": 35, "highlight_node_column": true, "line_spacing": 1.3, "right_padding_spaces": 3, "width_in": 7.0},
     "defaults": {
       "alignment": {
         "content": {"horizontal": "right", "vertical": "center"},
@@ -152,11 +137,6 @@
   "citation_style": "ieee",
   "docx_reference": "assets/templates/handwritten.docx",
   "html_theme": "sketchy",
-  "quarto_pdf": {
-    "pdf-engine": "xelatex",
-    "mainfont": "[config/assets/fonts/C2024_anm_font.otf]",
-    "sansfont": "[config/assets/fonts/C2024_anm_font.otf]",
-    "monofont": "Latin Modern Mono"
-  },
+  "quarto_pdf": {"pdf-engine": "xelatex", "mainfont": "[config/assets/fonts/C2024_anm_font.otf]", "sansfont": "[config/assets/fonts/C2024_anm_font.otf]", "monofont": "Latin Modern Mono"},
   "requires_lualatex": true
 }

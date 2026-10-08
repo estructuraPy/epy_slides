@@ -10,16 +10,12 @@
   "font_family_ref": "academic",
   "margins": {"top": 1.2, "bottom": 1.2, "left": 1.2, "right": 1.2},
   "font_families": {
-    "academic": {"description": "Fuente académica", "primary": "Times New Roman",
-      "fallback": "Georgia, Times, serif", "latex_primary": "Times New Roman"},
-    "default": {"description": "Fuente por defecto", "primary": "Calibri",
-      "fallback": "Arial, sans-serif", "latex_primary": "Latin Modern Roman"},
-    "mono_code": {"description": "Monospace código", "primary": "Source Code Pro",
-      "fallback": "Consolas, Liberation Mono, FreeMono, monospace", "latex_primary": "Latin Modern Mono"}
+    "academic": {"description": "Fuente académica", "primary": "Times New Roman", "fallback": "Georgia, Times, serif", "latex_primary": "Times New Roman"},
+    "default": {"description": "Fuente por defecto", "primary": "Calibri", "fallback": "Arial, sans-serif", "latex_primary": "Latin Modern Roman"},
+    "mono_code": {"description": "Monospace código", "primary": "Source Code Pro", "fallback": "Consolas, Liberation Mono, FreeMono, monospace", "latex_primary": "Latin Modern Mono"}
   },
   "typography": {
-    "role_assignments": {"caption": "academic", "code": "mono_code", "figures": "academic",
-      "footer": "academic", "headings": "academic", "tables": "academic", "text": "academic"},
+    "role_assignments": {"caption": "academic", "code": "mono_code", "figures": "academic", "footer": "academic", "headings": "academic", "tables": "academic", "text": "academic"},
     "scales": {
       "caption": {"size": 10.0, "weight": "400"},
       "footer": {"size": 9.0, "weight": "400"},
@@ -46,7 +42,10 @@
     "description": "Paleta institucional: azul oscuro #00243F, verde oliva #576A3D, grises y beige",
     "border_color": [87, 106, 61],
     "caption_color": [0, 36, 63],
-    "code": {"background": [240, 240, 240], "text": [0, 36, 63]},
+    "code": {
+      "background": [240, 240, 240],
+      "text": [0, 36, 63]
+    },
     "colors": {
       "primary": [0, 36, 63],
       "secondary": [87, 106, 61],
@@ -56,7 +55,12 @@
       "senary": [0, 30, 50],
       "septenary": [0, 0, 0]
     },
-    "page": {"background": [255, 255, 255], "footer_color": [87, 106, 61], "header_color": [0, 36, 63], "text": [0, 0, 0]},
+    "page": {
+      "background": [255, 255, 255],
+      "footer_color": [87, 106, 61],
+      "header_color": [0, 36, 63],
+      "text": [0, 0, 0]
+    },
     "table": {
       "background": [255, 255, 255],
       "background_text": [0, 0, 0],
@@ -67,7 +71,12 @@
     }
   },
   "callouts": {
-    "format": {"bg_alpha": 0.1, "border": {"style": "solid", "width_px": 1.0}, "line_height": 1.4, "size_scale": 0.95},
+    "format": {
+      "bg_alpha": 0.1,
+      "border": {"style": "solid", "width_px": 1.0},
+      "line_height": 1.4,
+      "size_scale": 0.95
+    },
     "behavior": {
       "callout_format": ":::{{.callout-{{type}}}}\n## {{title}}\n{{content}}\n:::",
       "collapse": false,
@@ -104,18 +113,7 @@
     "caption_position": "top",
     "header_bold": true,
     "spacing": {"after": "\n\n", "before": "\n\n"},
-    "styling": {
-      "alternating_rows": true,
-      "cell_padding": 0.03,
-      "content_bold": false,
-      "grid_width_px": 0.25,
-      "header_bold": true,
-      "header_wrap_max_chars": 35,
-      "highlight_node_column": true,
-      "line_spacing": 1.3,
-      "right_padding_spaces": 3,
-      "width_in": 7.0
-    },
+    "styling": {"alternating_rows": true, "cell_padding": 0.03, "content_bold": false, "grid_width_px": 0.25, "header_bold": true, "header_wrap_max_chars": 35, "highlight_node_column": true, "line_spacing": 1.3, "right_padding_spaces": 3, "width_in": 7.0},
     "defaults": {
       "alignment": {
         "content": {"horizontal": "right", "vertical": "center"},
