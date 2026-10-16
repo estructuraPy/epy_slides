@@ -1,5 +1,8 @@
 {
   "description": "Layout creativo - Configuración integrada directa",
+  "audit_status": "n_a",
+  "audit_notes": "Theme definition (typography, margins, RGB palette, callout and table styling, citation-style name): house styling, no engineering magnitude. Citation styles are named, not transcribed.",
+  "references": {"entries": []},
   "version": "4.0.0",
   "last_updated": "2025-11-22",
   "chunk_types": {
@@ -40,33 +43,10 @@
     "description": "Paleta creativa anaranjada: fondo anaranjado con colores complementarios atrevidos",
     "border_color": [139, 69, 19],
     "caption_color": [139, 69, 19],
-    "code": {
-      "background": [255, 248, 220],
-      "text": [139, 69, 19]
-    },
-    "colors": {
-      "primary": [255, 140, 0],
-      "secondary": [255, 69, 0],
-      "tertiary": [139, 69, 19],
-      "quaternary": [210, 105, 30],
-      "quinary": [255, 165, 0],
-      "senary": [205, 133, 63],
-      "septenary": [160, 82, 45]
-    },
-    "page": {
-      "background": [255, 248, 220],
-      "footer_color": [139, 69, 19],
-      "header_color": [139, 69, 19],
-      "text": [139, 69, 19]
-    },
-    "table": {
-      "background": [255, 248, 220],
-      "background_text": [139, 69, 19],
-      "header": [255, 69, 0],
-      "header_text": [255, 255, 255],
-      "stripe": [255, 228, 181],
-      "stripe_text": [139, 69, 19]
-    }
+    "code": {"background": [255, 248, 220], "text": [139, 69, 19]},
+    "colors": {"primary": [255, 140, 0], "secondary": [255, 69, 0], "tertiary": [139, 69, 19], "quaternary": [210, 105, 30], "quinary": [255, 165, 0], "senary": [205, 133, 63], "septenary": [160, 82, 45]},
+    "page": {"background": [255, 248, 220], "footer_color": [139, 69, 19], "header_color": [139, 69, 19], "text": [139, 69, 19]},
+    "table": {"background": [255, 248, 220], "background_text": [139, 69, 19], "header": [255, 69, 0], "header_text": [255, 255, 255], "stripe": [255, 228, 181], "stripe_text": [139, 69, 19]}
   },
   "callouts": {
     "format": {
@@ -101,14 +81,7 @@
     "default_width": "6.5in",
     "defaults": {"alt_text": "Image", "width": "7.0in"},
     "include_alt_text": false,
-    "plot_settings": {
-      "bbox_inches": "tight",
-      "dpi": 300,
-      "facecolor": "white",
-      "format": "png",
-      "edgecolor": [210, 105, 30],
-      "linewidth": 2
-    },
+    "plot_settings": {"bbox_inches": "tight", "dpi": 300, "facecolor": "white", "format": "png", "edgecolor": [210, 105, 30], "linewidth": 2},
     "spacing": {"after": "\n\n\n", "before": "\n\n\n"}
   },
   "tables": {
@@ -127,15 +100,7 @@
         "title": {"horizontal": "center"}
       },
       "borders": {"style": "solid", "width_px": 0.25},
-      "category_detection": {
-        "analysis": ["analysis"],
-        "design": ["design"],
-        "dimensions": ["dimensions"],
-        "forces": ["forces"],
-        "general": ["general"],
-        "nodes": ["nodes"],
-        "properties": ["properties"]
-      },
+      "category_detection": {"analysis": ["analysis"], "design": ["design"], "dimensions": ["dimensions"], "forces": ["forces"], "general": ["general"], "nodes": ["nodes"], "properties": ["properties"]},
       "transparency": {"alt_row_alpha": 0.2, "border_alpha": 0.7, "grid_alpha": 0.5, "header_alpha": 0.9}
     }
   },
@@ -145,22 +110,9 @@
       "common_math": {"^n": "ⁿ", "^x": "ˣ", "^y": "ʸ", "^i": "ⁱ", "^j": "ʲ", "^k": "ᵏ", "^+": "⁺", "^-": "⁻", "^=": "⁼"}
     },
     "format_specific": {
-      "matplotlib": {
-        "extends": ["common_numbers", "common_math"],
-        "description": "Matplotlib table rendering with Unicode superscripts"
-      },
-      "html": {
-        "extends": ["common_numbers", "common_math"],
-        "prefix": "<sup>",
-        "suffix": "</sup>",
-        "description": "HTML rendering with sup tags"
-      },
-      "latex": {
-        "extends": ["common_numbers", "common_math"],
-        "prefix": "\\textsuperscript{",
-        "suffix": "}",
-        "description": "LaTeX rendering with textsuperscript command"
-      }
+      "matplotlib": {"extends": ["common_numbers", "common_math"], "description": "Matplotlib table rendering with Unicode superscripts"},
+      "html": {"extends": ["common_numbers", "common_math"], "prefix": "<sup>", "suffix": "</sup>", "description": "HTML rendering with sup tags"},
+      "latex": {"extends": ["common_numbers", "common_math"], "prefix": "\\textsuperscript{", "suffix": "}", "description": "LaTeX rendering with textsuperscript command"}
     },
     "text_wrapping": {"max_width": 80, "ellipsis": "...", "preserve_spaces": true},
     "missing_value_indicators": {"empty": "", "null": "—", "undefined": "N/A"}

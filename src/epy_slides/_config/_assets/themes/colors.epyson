@@ -1,4 +1,9 @@
 {
+  "version": "1.0.0",
+  "description": "Named colour palette shared by every theme and figure style.",
+  "audit_status": "n_a",
+  "audit_notes": "Named colour palettes (RGB triples) shared by the themes: house styling, no engineering magnitude. Identity keys added (the file had none).",
+  "references": {"entries": []},
   "note": "Estructura de colores v3.0 - Paletas de coloración con 6 colores para resaltar elementos",
   "color_palettes": {
     "blues": {

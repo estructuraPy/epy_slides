@@ -1,5 +1,8 @@
 {
   "description": "Layout académico - Configuración integrada directa",
+  "audit_status": "n_a",
+  "audit_notes": "Theme definition (typography, margins, RGB palette, callout and table styling, citation-style name): house styling, no engineering magnitude. Citation styles are named, not transcribed.",
+  "references": {"entries": []},
   "version": "4.0.0",
   "last_updated": "2025-11-22",
   "chunk_types": {
@@ -42,33 +45,10 @@
     "description": "Paleta institucional: azul oscuro #00243F, verde oliva #576A3D, grises y beige",
     "border_color": [87, 106, 61],
     "caption_color": [0, 36, 63],
-    "code": {
-      "background": [240, 240, 240],
-      "text": [0, 36, 63]
-    },
-    "colors": {
-      "primary": [0, 36, 63],
-      "secondary": [87, 106, 61],
-      "tertiary": [192, 171, 135],
-      "quaternary": [208, 209, 209],
-      "quinary": [11, 12, 12],
-      "senary": [0, 30, 50],
-      "septenary": [0, 0, 0]
-    },
-    "page": {
-      "background": [255, 255, 255],
-      "footer_color": [87, 106, 61],
-      "header_color": [0, 36, 63],
-      "text": [0, 0, 0]
-    },
-    "table": {
-      "background": [255, 255, 255],
-      "background_text": [0, 0, 0],
-      "header": [0, 36, 63],
-      "header_text": [255, 255, 255],
-      "stripe": [240, 240, 240],
-      "stripe_text": [0, 0, 0]
-    }
+    "code": {"background": [240, 240, 240], "text": [0, 36, 63]},
+    "colors": {"primary": [0, 36, 63], "secondary": [87, 106, 61], "tertiary": [192, 171, 135], "quaternary": [208, 209, 209], "quinary": [11, 12, 12], "senary": [0, 30, 50], "septenary": [0, 0, 0]},
+    "page": {"background": [255, 255, 255], "footer_color": [87, 106, 61], "header_color": [0, 36, 63], "text": [0, 0, 0]},
+    "table": {"background": [255, 255, 255], "background_text": [0, 0, 0], "header": [0, 36, 63], "header_text": [255, 255, 255], "stripe": [240, 240, 240], "stripe_text": [0, 0, 0]}
   },
   "callouts": {
     "format": {
@@ -122,15 +102,7 @@
         "title": {"horizontal": "center"}
       },
       "borders": {"style": "solid", "width_px": 0.25},
-      "category_detection": {
-        "analysis": ["analysis"],
-        "design": ["design"],
-        "dimensions": ["dimensions"],
-        "forces": ["forces"],
-        "general": ["general"],
-        "nodes": ["nodes"],
-        "properties": ["properties"]
-      },
+      "category_detection": {"analysis": ["analysis"], "design": ["design"], "dimensions": ["dimensions"], "forces": ["forces"], "general": ["general"], "nodes": ["nodes"], "properties": ["properties"]},
       "transparency": {"alt_row_alpha": 0.2, "border_alpha": 0.7, "grid_alpha": 0.5, "header_alpha": 0.9}
     }
   },
