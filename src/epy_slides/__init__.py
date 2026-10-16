@@ -37,4 +37,20 @@ pin_system_icu()
 
 
 
+# --- rendering doors --------------------------------------------------------
+# The course books render their decks by calling the engine directly; these
+# functions lived only behind `_core`. Re-exported so consumers use the public
+# API only.
+from epy_slides._core import themes  # noqa: E402, F401
 from epy_slides._core._deck import SlideDeck  # noqa: E402
+from epy_slides._core._revealjs_theme import reveal_css_for  # noqa: E402, F401
+from epy_slides._core.renderer import (  # noqa: E402
+    export_pptx,  # noqa: F401
+    render_revealjs,  # noqa: F401
+)
+from epy_slides._core.snippets import parse_front_matter  # noqa: E402, F401
+
+for _sym in ("themes", "reveal_css_for", "render_revealjs", "export_pptx",
+             "parse_front_matter"):
+    if _sym not in __all__:
+        __all__.append(_sym)
