@@ -84,7 +84,7 @@ def test_apply_palette_font_fallback_and_unknown_role(qapp, monkeypatch):
             return real_qfont("ArialStub")
         return real_qfont(*args)
 
-    monkeypatch.setattr(epyson, "QFont", fake_qfont)
+    monkeypatch.setattr("PySide6.QtGui.QFont", fake_qfont)
 
     theme = load_layout_theme("corporate.epyson")
     # Add a bogus role name that QPalette.ColorRole does not define.

@@ -13,9 +13,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-from PySide6.QtGui import QColor, QFont, QPalette
-from PySide6.QtWidgets import QApplication
-
 from epy_slides._config import _loader
 from epy_slides._core.themes_base import Theme
 
@@ -482,8 +479,10 @@ def load_all_themes() -> dict[str, Theme]:
 
 # ----------------------------------------------------- application
 
-def apply_palette(app: QApplication, theme: Theme) -> None:
+def apply_palette(app: Any, theme: Theme) -> None:
     """Apply ``theme.qt_palette`` to the running Qt application."""
+    from PySide6.QtGui import QColor, QFont, QPalette  # noqa: PLC0415
+
     app.setStyle("Fusion")
     # Fluent-style typography: a clean system sans for the chrome. The
     # editor keeps its own monospace font (set explicitly per widget).

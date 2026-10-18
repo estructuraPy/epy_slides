@@ -1678,6 +1678,9 @@ class SlideWindow(QMainWindow):
 def _run_gui(files: list[str]) -> int:
     """Boot the Qt application and open ``files`` in tabs."""
     app = QApplication(sys.argv)
+    from epy_export import apply_theme  # noqa: PLC0415
+
+    apply_theme(app)
     logo_pix = _load_branding_pixmap("epy_slides.png")
     if not logo_pix.isNull():
         app.setWindowIcon(QIcon(logo_pix))

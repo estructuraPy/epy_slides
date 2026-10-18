@@ -54,7 +54,15 @@ class TestVersion:
 
 
 class TestAllContract:
-    _EXPECTED = ["SlideDeck", "__version__"]
+    _EXPECTED = [
+        "SlideDeck",
+        "export_pptx",
+        "parse_front_matter",
+        "render_revealjs",
+        "reveal_css_for",
+        "themes",
+        "__version__",
+    ]
 
     def test_all_exists(self):
         assert hasattr(es, "__all__")

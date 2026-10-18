@@ -329,6 +329,9 @@ def test_run_gui_boots_and_opens_files(monkeypatch, tmp_path):
         def setWindowIcon(self, *_a):  # noqa: N802
             pass
 
+        def setStyleSheet(self, *_a):  # noqa: N802
+            pass
+
         def exec(self):  # noqa: A003
             return 0
 
@@ -360,6 +363,9 @@ def test_run_gui_sets_window_icon_when_logo_present(monkeypatch):
 
         def setWindowIcon(self, *_a):  # noqa: N802
             icon_set["n"] += 1
+
+        def setStyleSheet(self, *_a):  # noqa: N802
+            pass
 
         def exec(self):  # noqa: A003
             return 3
