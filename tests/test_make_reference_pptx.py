@@ -12,9 +12,10 @@ from __future__ import annotations
 
 import runpy
 from pathlib import Path
+from typing import Any, cast
 
+import lxml.etree as etree
 import pytest
-from lxml import etree
 from pptx import Presentation
 from pptx.opc.constants import RELATIONSHIP_TYPE as RT
 from pptx.oxml.ns import qn
@@ -199,7 +200,7 @@ def test_set_font_family_without_latin_is_noop():
 def test_widen_placeholders_scales_explicit_xfrm_on_master():
     prs = Presentation()
     master = prs.slide_masters[0]
-    ratio = float(mrp._WIDESCREEN_W) / float(prs.slide_width)
+    ratio = float(mrp._WIDESCREEN_W) / float(cast("int", prs.slide_width))
 
     before = {}
     for ph in master.placeholders:
@@ -334,7 +335,7 @@ def test_enable_autofit_replaces_existing_and_skips_chrome():
     # Seed the body placeholder (idx 1) with a *different* autofit tag
     # to prove the function replaces it rather than merely appending.
     body_ph = master.placeholders[1]
-    body_pr = body_ph.text_frame._txBody.bodyPr
+    body_pr = cast("Any", body_ph).text_frame._txBody.bodyPr
     for old in body_pr.findall(qn("a:normAutofit")):
         body_pr.remove(old)
     etree.SubElement(body_pr, qn("a:noAutofit"))
@@ -342,12 +343,12 @@ def test_enable_autofit_replaces_existing_and_skips_chrome():
     mrp._enable_autofit(master)
 
     for idx in (0, 1):  # title, body: not chrome, must get normAutofit
-        bp = master.placeholders[idx].text_frame._txBody.bodyPr
+        bp = cast("Any", master.placeholders[idx]).text_frame._txBody.bodyPr
         tags = [etree.QName(c).localname for c in bp]
         assert tags == ["normAutofit"]
 
     for idx in (2, 3, 4):  # dt, ftr, sldNum: chrome, must be untouched
-        bp = master.placeholders[idx].text_frame._txBody.bodyPr
+        bp = cast("Any", master.placeholders[idx]).text_frame._txBody.bodyPr
         assert list(bp) == []
 
 
@@ -420,11 +421,13 @@ def test_build_reference_widescreen_applies_theme(tmp_path):
         assert pr.get("sz") == str(size)
 
     title_ph = master.placeholders[0]
-    body_pr = title_ph.text_frame._txBody.bodyPr
+    body_pr = cast("Any", title_ph).text_frame._txBody.bodyPr
     assert body_pr.find(qn("a:normAutofit")) is not None
 
     default_prs = Presentation()
-    ratio = float(mrp._WIDESCREEN_W) / float(default_prs.slide_width)
+    ratio = float(mrp._WIDESCREEN_W) / float(
+        cast("int", default_prs.slide_width)
+    )
     default_title = default_prs.slide_masters[0].placeholders[0]
     orig_off = default_title._element.spPr.find(qn("a:xfrm")).find(
         qn("a:off")

@@ -439,6 +439,7 @@ def test_apply_autofit_creates_body_pr_when_absent():
         "<p:txBody><a:p/></p:txBody></p:sp>"
     )
     tx_body = sp.find(f"{{{_P}}}txBody")
+    assert tx_body is not None
     assert tx_body.find(f"{{{_A}}}bodyPr") is None
 
     _apply_autofit(sp, 0.5)
@@ -460,6 +461,7 @@ def test_apply_autofit_reuses_existing_body_pr():
         "<p:txBody><a:bodyPr/><a:p/></p:txBody></p:sp>"
     )
     tx_body = sp.find(f"{{{_P}}}txBody")
+    assert tx_body is not None
     original_body_pr = tx_body.find(f"{{{_A}}}bodyPr")
 
     _apply_autofit(sp, 1.0)
@@ -485,7 +487,9 @@ def test_apply_autofit_replaces_stale_autofit_children():
     _apply_autofit(sp, 1.0)
 
     tx_body = sp.find(f"{{{_P}}}txBody")
+    assert tx_body is not None
     body_pr = tx_body.find(f"{{{_A}}}bodyPr")
+    assert body_pr is not None
     autofits = body_pr.findall(f"{{{_A}}}normAutofit")
     assert len(autofits) == 1
     assert autofits[0].get("fontScale") is None

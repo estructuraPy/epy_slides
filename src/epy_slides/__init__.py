@@ -16,6 +16,8 @@ importable, scriptable entry point and pulls in Qt only for ``to_pdf``.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 __version__ = "0.5.0"
 #: Declared so the cross-suite registry can attribute this library. Without it
 #: `epy_suite_connect.get_suite_info` fell to its own `getattr(..., "")`
@@ -24,7 +26,6 @@ __version__ = "0.5.0"
 #: defect found and fixed in epy_signal on the same pass.
 __author__ = "Ing. Angel Navarro-Mora M.Sc."
 
-__all__ = ["SlideDeck", "__version__"]
 
 
 # The ICU pin lived here, in epy_reports and in epy_papers, and this
@@ -49,10 +50,19 @@ from epy_slides._core.renderer import (  # noqa: E402
 )
 from epy_slides._core.snippets import parse_front_matter  # noqa: E402, F401
 
-for _sym in ("themes", "reveal_css_for", "render_revealjs", "export_pptx",
-             "parse_front_matter"):
-    if _sym not in __all__:
-        __all__.append(_sym)
+if TYPE_CHECKING:
+    from epy_slides._core import themes  # noqa: F401
+
+
+__all__ = [
+    "SlideDeck",
+    "__version__",
+    "export_pptx",
+    "parse_front_matter",
+    "render_revealjs",
+    "reveal_css_for",
+    "themes",
+]
 
 
 def __getattr__(name: str) -> object:

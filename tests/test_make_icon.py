@@ -13,6 +13,7 @@ import shutil
 import struct
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 import pytest
 from PIL import Image
@@ -110,7 +111,7 @@ def test_write_ico_produces_a_valid_multi_size_ico(tmp_path):
     assert sorted(reopened.info["sizes"]) == sorted(
         (size, size) for size in SIZES
     )
-    assert len(reopened.ico.entry) == len(SIZES)
+    assert len(cast("Any", reopened).ico.entry) == len(SIZES)
 
 
 def test_verify_ico_returns_the_frame_count_from_a_real_file(tmp_path):

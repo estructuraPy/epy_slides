@@ -75,7 +75,7 @@ _COLOR_MAP = {
 }
 
 
-def _hex(value: str, default: str = "000000") -> str:
+def _hex(value: str | None, default: str = "000000") -> str:
     """Return a 6-digit RRGGBB hex (no ``#``) from a css colour value."""
     value = (value or "").strip().lstrip("#")
     return value.upper() if len(value) == 6 else default
