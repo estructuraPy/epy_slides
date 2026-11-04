@@ -125,7 +125,17 @@ def reveal_css_for(theme: Theme) -> str:
    the PDF: cap the height and let object-fit preserve the aspect ratio even
    when an explicit width would otherwise make the image too tall. */
 .reveal .slides section img {{
-  max-width: 100%; max-height: 62vh; object-fit: contain;
+  max-width: 100%; max-height: 68vh; object-fit: contain;
+}}
+/* Una lamina con su leyenda ocupa la diapositiva: la imagen manda y la
+   leyenda se acomoda debajo, asi el detalle constructivo se lee. */
+.reveal .slides section.slide-image-caption img {{ max-height: 72vh; }}
+/* En el PDF la seccion de impresion fija una altura y recorta: la imagen del
+   layout image-caption tiene que llenar ese alto, no quedarse en su tamano
+   natural. */
+html.print-pdf .reveal .slides .pdf-page > section.slide-image-caption img {{
+  max-height: 78vh !important; height: 78vh !important; width: auto !important;
+  object-fit: contain !important;
 }}
 .reveal .slides section .slide-image-left img,
 .reveal .slides section .slide-image-right img {{ max-height: 70vh; }}
