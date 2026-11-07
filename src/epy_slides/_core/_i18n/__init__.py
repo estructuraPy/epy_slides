@@ -23,6 +23,31 @@ _observers: list[Callable[[], None]] = []
 # Keys MUST match the source strings exactly (including the trailing
 # "..." vs the "…" ellipsis character and the Qt "&" menu accelerators).
 _ES: dict[str, str] = {
+    "Hide guide": "Ocultar guia",
+    "Step by step": "Paso a paso",
+    "GUIDED WORKFLOW": "FLUJO GUIADO",
+    "Step {current} of {total}": "Paso {current} de {total}",
+    "Back": "Atras",
+    "Next: {step}": "Siguiente: {step}",
+    "End of the guide": "Fin de la guia",
+    "Start": "Inicio",
+    "Write": "Escribir",
+    "Design": "Disenar",
+    "Present": "Presentar",
+    "Review": "Revisar",
+    "Follow the deck from source to export.":
+        "Siga la presentacion desde el origen hasta la exportacion.",
+    "Create or open a deck; the editor and slide preview sit together.":
+        "Cree o abra una presentacion; el editor y la vista previa "
+        "estan juntos.",
+    "Write the slides; separate them with '## '.":
+        "Escriba las diapositivas; separelas con '## '.",
+    "Choose the theme and the design blocks.":
+        "Elija el tema y los bloques de diseno.",
+    "Review the slide order and the full-screen preview.":
+        "Revise el orden y la vista previa en pantalla completa.",
+    "Export the deck to PDF, PowerPoint or HTML.":
+        "Exporte la presentacion a PDF, PowerPoint o HTML.",
     # --- top-level menus (with & accelerator) ---
     "&File": "&Archivo",
     "&Text": "&Texto",

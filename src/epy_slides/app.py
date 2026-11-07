@@ -14,11 +14,12 @@ import sys
 from pathlib import Path
 
 from epy_export import ORGANIZATION
-from PySide6.QtCore import QSettings, QTimer
+from PySide6.QtCore import QSettings, Qt, QTimer
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
+    QDockWidget,
     QFileDialog,
     QMainWindow,
     QMenu,
@@ -49,6 +50,18 @@ FILE_FILTER = "Markdown / Quarto (*.md *.markdown *.qmd);;All files (*)"
 # an idle app costs one wake-up. Kept next to the family's other
 # cadences (RENDER_DEBOUNCE_MS in _ui/tab.py).
 AUTOSAVE_INTERVAL_MS = 30_000
+
+_GUIDE_STEPS = (
+    (
+        "Document",
+        "Create or open a deck; the editor and slide preview sit together.",
+    ),
+    ("Write", "Write the slides; separate them with '## '."),
+    ("Design", "Choose the theme and the design blocks."),
+    ("Present", "Review the slide order and the full-screen preview."),
+    ("Export", "Export the deck to PDF, PowerPoint or HTML."),
+)
+_GUIDE_STAGES = ((0, "Start"), (1, "Write"), (2, "Design"), (4, "Export"))
 
 
 def _load_manual_text(filename: str = "welcome.md") -> str:
@@ -140,6 +153,31 @@ class SlideWindow(QMainWindow):
         self.tabs.tabCloseRequested.connect(self._close_tab_at)
         self.tabs.currentChanged.connect(self._on_current_changed)
         self.setCentralWidget(self.tabs)
+
+        from epy_export._ui.workflow_guide import WorkflowGuide
+
+        self.guide = WorkflowGuide(
+            _GUIDE_STEPS,
+            _GUIDE_STAGES,
+            self._go_to_guide_step,
+            translate=i18n.tr,
+            on_language_changed=i18n.on_language_changed,
+            subtitle="Follow the deck from source to export.",
+        )
+        guide_dock = QDockWidget()
+        guide_dock.setWindowTitle(i18n.tr("Step by step"))
+        i18n.on_language_changed(
+            lambda: guide_dock.setWindowTitle(
+                i18n.tr("Step by step")
+            )
+        )
+        guide_dock.setObjectName("guide")
+        guide_dock.setMinimumWidth(330)
+        guide_dock.setWidget(self.guide)
+        self.guide_dock = guide_dock
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, guide_dock)
+        self.guide.collapse_requested.connect(guide_dock.hide)
+
         self.setStatusBar(QStatusBar(self))
 
         self._build_actions()
@@ -564,6 +602,9 @@ class SlideWindow(QMainWindow):
         self.export_menu.addAction(self.act_docs_export)
 
         self.view_menu = QMenu("&View", self)
+        self.guide_action = self.guide_dock.toggleViewAction()
+        self.guide_action.setText(i18n.tr("Step by step"))
+        self.view_menu.addAction(self.guide_action)
         self.theme_sub = self.view_menu.addMenu("Theme")
         self._populate_theme_menu()
         self.view_menu.addSeparator()
@@ -1343,6 +1384,34 @@ class SlideWindow(QMainWindow):
         self._update_window_title()
 
     # ------------------------------------------------- file actions
+
+    def _go_to_guide_step(self, index: int) -> None:
+        """Run the action named by one guide step."""
+        if index == 0:
+            self._new_tab()
+        elif index == 1:
+            self._focus_active_editor()
+        elif index == 2:
+            self._open_theme_gallery()
+        elif index == 3:
+            self._focus_active_preview()
+        elif index == 4:
+            self._export_pdf()
+        self.guide.set_current(index)
+
+    def _focus_active_editor(self) -> None:
+        """Put the caret in the active deck's editor."""
+        tab = self.tabs.currentWidget()
+        editor = getattr(tab, "editor", None)
+        if editor is not None:
+            editor.setFocus()
+
+    def _focus_active_preview(self) -> None:
+        """Focus the active deck's rendered preview."""
+        tab = self.tabs.currentWidget()
+        view = getattr(tab, "view", None)
+        if view is not None:
+            view.setFocus()
 
     def _new_tab(self) -> MarkdownTab:
         """Create an empty untitled tab and focus it."""
