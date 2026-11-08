@@ -13,7 +13,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from epy_export import ORGANIZATION
+from epy_export import ORGANIZATION, apply_chrome
 from PySide6.QtCore import QSettings, Qt, QTimer
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QKeySequence
 from PySide6.QtWidgets import (
@@ -200,7 +200,8 @@ class SlideWindow(QMainWindow):
         self._autosave_timer.setInterval(AUTOSAVE_INTERVAL_MS)
         self._autosave_timer.timeout.connect(self._autosave_current)
         saved_theme = str(
-            self._settings.value("theme", themes.DEFAULT_THEME_ID)
+            self._settings.value("theme_default", "")
+            or self._settings.value("theme", themes.DEFAULT_THEME_ID)
         )
         self._current_theme: themes.Theme = themes.get(saved_theme)
         self._apply_theme(self._current_theme.id, persist=False)
@@ -227,6 +228,7 @@ class SlideWindow(QMainWindow):
             self.setWindowIcon(QIcon(logo_pix))
 
         self._open_welcome_tab()
+        self._build_assistant()
 
     # ------------------------------------------------- actions/menus
 
@@ -317,6 +319,10 @@ class SlideWindow(QMainWindow):
         self.act_edit_theme.triggered.connect(self._edit_current_theme)
         self.act_delete_theme = QAction("Delete custom theme…", self)
         self.act_delete_theme.triggered.connect(self._delete_custom_theme)
+        self.act_default_theme = QAction(
+            "Use current theme as default", self
+        )
+        self.act_default_theme.triggered.connect(self._set_default_theme)
         self.act_theme_gallery = QAction("Browse themes…", self)
         self.act_theme_gallery.triggered.connect(self._open_theme_gallery)
 
@@ -711,6 +717,7 @@ class SlideWindow(QMainWindow):
         if isinstance(app, QApplication):
             themes.apply_palette(app, theme)
             app.setStyleSheet(themes.qss_for(theme))
+            apply_chrome(app)
 
         css = reveal_css_for(theme)
         for i in range(self.tabs.count()):
@@ -755,6 +762,7 @@ class SlideWindow(QMainWindow):
         self.theme_sub.addAction(self.act_new_theme)
         self.theme_sub.addAction(self.act_edit_theme)
         self.theme_sub.addAction(self.act_delete_theme)
+        self.theme_sub.addAction(self.act_default_theme)
 
     def _refresh_themes(self, select_id: str | None = None) -> None:
         """Reload bundled + user themes and rebuild the Theme submenu."""
@@ -791,6 +799,10 @@ class SlideWindow(QMainWindow):
             i18n.tr("Theme saved: {name}").format(name=dialog.theme_name()),
             3000,
         )
+
+    def _set_default_theme(self) -> None:
+        """Remember the active theme as the startup default."""
+        self._settings.setValue("theme_default", self._current_theme.id)
 
     def _open_theme_gallery(self) -> None:
         """Open the theme gallery; apply the chosen theme on accept."""
@@ -1374,6 +1386,72 @@ class SlideWindow(QMainWindow):
             i18n.tr("epy_docs export failed:") + "\n\n" + message,
         )
 
+
+    def _build_assistant(self) -> None:
+        """Add the shared assistant beside the step guide."""
+        from epy_slides.epy_studio_connect.assistant import (
+            available,
+            create_panel,
+        )
+
+        if not available():
+            return
+        try:
+            panel = create_panel(
+                app_id="epy_slides",
+                profile="You edit a slide deck source. Keep one idea per "
+                "slide, preserve the deck's structure, and return Markdown "
+                "that can replace the current slide or selection.",
+                context_provider=self._assistant_context,
+                apply_callback=self._assistant_apply,
+                language=i18n.current_language(),
+            )
+        except Exception:  # noqa: BLE001 - an optional capability
+            return
+        dock = QDockWidget(i18n.tr("Assistant"), self)
+        dock.setObjectName("assistant")
+        dock.setMinimumWidth(330)
+        dock.setWidget(panel)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        self.tabifyDockWidget(self.guide_dock, dock)
+        self.guide_dock.raise_()
+        self.assistant = panel
+        self.assistant_dock = dock
+        if hasattr(self, "view_menu"):
+            action = dock.toggleViewAction()
+            action.setText("Assistant")
+            self.view_menu.addAction(action)
+
+    def _assistant_context(self) -> dict[str, object]:
+        """Return the active document context for the assistant."""
+        tab = self._current_tab()
+        if tab is None:
+            return {
+                "title": "",
+                "document": "",
+                "selection": "",
+                "language": i18n.current_language(),
+            }
+        cursor = tab.editor.textCursor()
+        return {
+            "title": tab.title(),
+            "document": tab.editor.toPlainText(),
+            "selection": cursor.selectedText().replace("\u2029", "\n"),
+            "language": i18n.current_language(),
+            "notes": str(tab.path) if tab.path is not None else "",
+        }
+
+    def _assistant_apply(self, text: str) -> bool:
+        """Replace the selection, or insert at the caret, with the proposal."""
+        tab = self._current_tab()
+        if tab is None:
+            return False
+        cursor = tab.editor.textCursor()
+        cursor.insertText(text)
+        tab.editor.setTextCursor(cursor)
+        tab.editor.setFocus()
+        return True
+
     def _current_tab(self) -> MarkdownTab | None:
         """Return the currently visible tab, if any."""
         widget = self.tabs.currentWidget()
@@ -1754,6 +1832,28 @@ def _run_gui(files: list[str]) -> int:
     if not logo_pix.isNull():
         app.setWindowIcon(QIcon(logo_pix))
     window = SlideWindow()
+    from epy_export._ui.app_header import install_header  # noqa: PLC0415
+
+    def _studio() -> None:
+        try:
+            from epy_slides.epy_studio_connect import open_app  # noqa: PLC0415
+            open_app("epy_studio")
+        except Exception:  # noqa: BLE001 - the door is optional
+            pass
+
+    install_header(
+        window,
+        title="ePy Slides",
+        subtitle="Presentations from one Markdown source.",
+        logo_path=Path(__file__).resolve().parent
+        / "_config"
+        / "_assets"
+        / "branding"
+        / "epy_slides.png",
+        guide_dock=getattr(window, "guide_dock", None),
+        assistant_dock=getattr(window, "assistant_dock", None),
+        on_studio=_studio,
+    )
     window.show()
     for raw in files:
         candidate = Path(raw)

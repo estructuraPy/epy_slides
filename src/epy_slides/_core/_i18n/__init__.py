@@ -484,6 +484,11 @@ _ES: dict[str, str] = {
     "Diagram": "Diagrama",
     "Diagram: Mermaid": "Diagrama: Mermaid",
     "Diagram: nomnoml (UML)": "Diagrama: nomnoml (UML)",
+
+    "Use current theme as default":
+        "Usar el tema actual como predeterminado",
+
+    "Assistant": "Asistente",
 }
 
 
