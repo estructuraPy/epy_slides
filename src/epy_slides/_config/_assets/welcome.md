@@ -28,7 +28,7 @@ Everything in this manual is itself an epy_slides deck. Open it from
 ## The editor at a glance
 <!-- layout: image-caption -->
 
-![The Markdown editor (left) and the live deck preview (right)](__SHOT_EDITOR__){width=78%}
+![The Markdown editor (left) and the live deck preview (right)](__SHOT_EDITOR__){width=100%}
 
 ## The toolbar, left to right
 <!-- layout: cards -->
@@ -64,7 +64,7 @@ You never leave Markdown. Every menu just drops the right text at the cursor.
 ## The New Slide dialog
 <!-- layout: image-caption -->
 
-![Slides ▸ New slide — every layout shows a small preview; pick one, type a title, optionally add an image](__SHOT_NEW_SLIDE__){width=42%}
+![Slides ▸ New slide — every layout shows a small preview; pick one, type a title, optionally add an image](__SHOT_NEW_SLIDE__){width=70%}
 
 ## The layouts you can pick
 <!-- layout: cards -->

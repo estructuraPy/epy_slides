@@ -371,13 +371,14 @@ def test_open_manual_unavailable_warns(window, monkeypatch):
     assert warned["n"] == 1
 
 
-def test_open_manual_loads_into_tab(window, monkeypatch):
+def test_open_manual_loads_into_its_single_tab(window, monkeypatch):
     monkeypatch.setattr(
         app_module, "_load_manual_text", lambda filename: "## Manual\n"
     )
     before = window.tabs.count()
     window._open_manual("welcome.md")
-    assert window.tabs.count() == before + 1
+    assert window.tabs.count() == before
+    assert window._current_tab() is window._manual_tab
 
 
 # --------------------------------------------------------------- close logic

@@ -24,6 +24,8 @@ from pathlib import Path
 # as .notdef tofu. ``WA_DontShowOnScreen`` (set in ``grab_widget``) keeps the
 # windows off the desktop while still laying them out for ``grab()``.
 os.environ.setdefault("QTWEBENGINE_DISABLE_SANDBOX", "1")
+os.environ.setdefault("QT_ENABLE_HIGHDPI_SCALING", "1")
+os.environ.setdefault("QT_SCALE_FACTOR", "2")
 os.environ.setdefault(
     "QTWEBENGINE_CHROMIUM_FLAGS", "--no-sandbox --disable-gpu"
 )
@@ -33,6 +35,10 @@ os.environ.setdefault(
 # -> src -> root).
 ROOT = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(ROOT / "src"))
+
+from epy_export._core._runtime import pin_system_icu  # noqa: E402
+
+pin_system_icu()
 
 from PySide6.QtCore import (  # noqa: E402
     QElapsedTimer,

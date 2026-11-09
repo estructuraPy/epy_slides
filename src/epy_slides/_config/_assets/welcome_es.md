@@ -28,7 +28,7 @@ cuando quiera desde *Ayuda ▸ Manual de usuario*.
 ## El editor de un vistazo
 <!-- layout: image-caption -->
 
-![El editor Markdown (izquierda) y la vista previa en vivo (derecha)](__SHOT_EDITOR__){width=78%}
+![El editor Markdown (izquierda) y la vista previa en vivo (derecha)](__SHOT_EDITOR__){width=100%}
 
 ## La barra de herramientas, de izquierda a derecha
 <!-- layout: cards -->
@@ -63,7 +63,7 @@ Nunca sale de Markdown. Cada menú solo deja el texto correcto en el cursor.
 ## El diálogo Nueva diapositiva
 <!-- layout: image-caption -->
 
-![Diapositivas ▸ Nueva diapositiva — cada layout muestra una vista previa; elija uno, escriba un título, agregue una imagen](__SHOT_NEW_SLIDE__){width=42%}
+![Diapositivas ▸ Nueva diapositiva — cada layout muestra una vista previa; elija uno, escriba un título, agregue una imagen](__SHOT_NEW_SLIDE__){width=70%}
 
 ## Los layouts que puede elegir
 <!-- layout: cards -->
