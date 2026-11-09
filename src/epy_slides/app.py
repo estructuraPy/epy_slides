@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import importlib.resources
+import os
 import re
 import shutil
 import sys
@@ -121,6 +122,24 @@ def _load_manual_text(filename: str = "welcome.md") -> str:
             )
             text = text.replace(placeholder, "")
     return text
+
+
+def demo_deck_path() -> Path:
+    """Materialize the bundled demo deck and return its writable path."""
+    name = "demo_es.md" if i18n.current_language() == "es" else "demo.md"
+    base = os.environ.get("LOCALAPPDATA")
+    root = Path(base) if base else Path.home() / "AppData" / "Local"
+    target = root / "ePy Suite" / "demo" / "epy_slides" / name
+    if target.is_file():
+        return target
+    text = (
+        importlib.resources.files("epy_slides._config._assets")
+        .joinpath(name)
+        .read_text(encoding="utf-8")
+    )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(text, encoding="utf-8")
+    return target
 
 
 def _load_welcome() -> str:
@@ -306,6 +325,9 @@ class SlideWindow(QMainWindow):
         self.act_manual_es.triggered.connect(
             lambda: self._open_manual("welcome_es.md")
         )
+
+        self.act_demo = QAction("Open demo project", self)
+        self.act_demo.triggered.connect(self._open_demo_project)
 
         self.act_about = QAction("About epy_slides…", self)
         self.act_about.triggered.connect(self._show_about)
@@ -626,6 +648,8 @@ class SlideWindow(QMainWindow):
         self._build_templates_menu()
 
         self.help_menu = QMenu("&Help", self)
+        self.help_menu.addAction(self.act_demo)
+        self.help_menu.addSeparator()
         self.help_menu.addAction(self.act_manual_en)
         self.help_menu.addAction(self.act_manual_es)
         self.help_menu.addSeparator()
@@ -1264,6 +1288,19 @@ class SlideWindow(QMainWindow):
         tab = self._create_tab()
         tab.set_initial_text(_load_welcome(), path=None)
         self._manual_tab = tab
+
+    def _open_demo_project(self) -> None:
+        """Open the bundled worked example as an editable deck."""
+        try:
+            self.open_path(demo_deck_path())
+        except (FileNotFoundError, OSError) as exc:
+            QMessageBox.warning(
+                self,
+                i18n.tr("Demo unavailable"),
+                i18n.tr(
+                    "Could not load the bundled demo: {why}"
+                ).format(why=exc),
+            )
 
     def _open_manual(self, filename: str) -> None:
         """Open a bundled manual deck (Help menu) in a new tab."""

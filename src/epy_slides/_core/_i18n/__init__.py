@@ -210,6 +210,10 @@ _ES: dict[str, str] = {
     # --- Help menu ---
     "User manual (English)": "Manual de usuario (Inglés)",
     "User manual (Spanish)": "Manual de usuario (Español)",
+    "Open demo project": "Abrir proyecto de demostración",
+    "Demo unavailable": "Demostración no disponible",
+    "Could not load the bundled demo: {why}":
+        "No se pudo cargar la demostración incluida: {why}",
     "Manual unavailable": "Manual no disponible",
     "About epy_slides…": "Acerca de epy_slides…",
     # --- dialog window titles ---
