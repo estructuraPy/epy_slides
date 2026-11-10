@@ -648,10 +648,9 @@ class SlideWindow(QMainWindow):
         self._build_templates_menu()
 
         self.help_menu = QMenu("&Help", self)
-        self.help_menu.addAction(self.act_demo)
-        self.help_menu.addSeparator()
         self.help_menu.addAction(self.act_manual_en)
         self.help_menu.addAction(self.act_manual_es)
+        self.help_menu.addAction(self.act_demo)
         self.help_menu.addSeparator()
         self.help_menu.addAction(self.act_about)
 
@@ -724,6 +723,13 @@ class SlideWindow(QMainWindow):
         """Persist the chosen UI language and relabel the UI live."""
         self._settings.setValue("language", code)
         i18n.set_language(code)
+        header = getattr(self, "header", None)
+        if header is not None:
+            header.set_language(code)
+            header.set_texts(
+                "ePy Slides",
+                i18n.tr("Presentations from one Markdown source."),
+            )
 
     def _sync_language_menu(self) -> None:
         """Tick the radio item matching the active language."""
@@ -1557,6 +1563,15 @@ class SlideWindow(QMainWindow):
             self.open_path(Path(filename))
 
     def open_path(self, path: Path) -> None:
+        """Open a Markdown document, or the Markdown inside a .zepy package."""
+        if path.suffix.lower() == ".zepy":
+            try:
+                from epy_export import zepy  # noqa: PLC0415
+
+                path = zepy.first_markdown(path)
+            except (OSError, ValueError) as exc:
+                QMessageBox.warning(self, APP_NAME, str(exc))
+                return
         """Open ``path`` in a new tab, or focus the existing tab."""
         if not path.is_file():
             QMessageBox.warning(
@@ -1886,10 +1901,10 @@ def _run_gui(files: list[str]) -> int:
         except Exception:  # noqa: BLE001 - the door is optional
             pass
 
-    install_header(
+    window.header = install_header(
         window,
         title="ePy Slides",
-        subtitle="Presentations from one Markdown source.",
+        subtitle=i18n.tr("Presentations from one Markdown source."),
         logo_path=Path(__file__).resolve().parent
         / "_config"
         / "_assets"
@@ -1898,6 +1913,7 @@ def _run_gui(files: list[str]) -> int:
         guide_dock=getattr(window, "guide_dock", None),
         assistant_dock=getattr(window, "assistant_dock", None),
         on_studio=_studio,
+        language=i18n.current_language(),
     )
     window.show()
     for raw in files:

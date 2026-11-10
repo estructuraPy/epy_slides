@@ -23,6 +23,9 @@ _observers: list[Callable[[], None]] = []
 # Keys MUST match the source strings exactly (including the trailing
 # "..." vs the "…" ellipsis character and the Qt "&" menu accelerators).
 _ES: dict[str, str] = {
+    "Presentations from one Markdown source.":
+        "Presentaciones desde una sola fuente Markdown.",
+    "app.subtitle": "Presentaciones desde una sola fuente Markdown.",
     "Hide guide": "Ocultar guia",
     "Step by step": "Paso a paso",
     "GUIDED WORKFLOW": "FLUJO GUIADO",
