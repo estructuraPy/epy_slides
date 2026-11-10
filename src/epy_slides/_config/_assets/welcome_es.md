@@ -13,6 +13,15 @@ footer: epy_slides — Manual de usuario
 ## Bienvenido a epy_slides
 <!-- layout: section -->
 
+## Manual, recorrido y demo
+<!-- layout: title-content -->
+
+Esta presentación es el recorrido. *Ayuda -> Abrir proyecto de
+demostración* abre el mismo flujo como `demo_es.md` en español o
+`demo.md` en inglés, según el idioma de la interfaz. El demo tiene una
+diapositiva de estado con estadísticas, una de hitos y una de decisión;
+úselo para probar el editor mientras lee este manual.
+
 ## Qué construye aquí
 <!-- layout: title-content -->
 

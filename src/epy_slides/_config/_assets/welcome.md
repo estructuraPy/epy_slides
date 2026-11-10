@@ -13,6 +13,15 @@ footer: epy_slides — User manual
 ## Welcome to epy_slides
 <!-- layout: section -->
 
+## Manual, tour and demo
+<!-- layout: title-content -->
+
+This deck is the tour. *Help -> Open demo project* opens the same
+workflow as `demo.md` in English or `demo_es.md` in Spanish, following
+the interface language. The demo has a status slide with statistics, a
+milestones slide and a decision slide; use it to try the editor while
+you read this manual.
+
 ## What you build here
 <!-- layout: title-content -->
 
