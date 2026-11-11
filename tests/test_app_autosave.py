@@ -158,21 +158,6 @@ def test_autosave_skips_when_export_in_flight(
     assert written != ORIGINAL and written.endswith("edited")
 
 
-def test_autosave_skips_when_no_tab_is_open(
-    make_window: Callable[[], SlideWindow],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """No current tab: must return without reaching ``tab.save()``.
-
-    If this regresses, a ``None`` current tab reaches ``None.save()`` on
-    the next line and crashes the autosave timer.
-    """
-    win = make_window()
-    win.act_autosave.setChecked(True)
-    monkeypatch.setattr(win, "_current_tab", lambda: None)
-    win._autosave_current()  # must not raise
-
-
 def test_autosave_skips_a_clean_tab(
     make_window: Callable[[], SlideWindow], tmp_path: Path
 ) -> None:

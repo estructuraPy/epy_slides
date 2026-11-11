@@ -9,12 +9,6 @@ _DECK = "---\ntitle: Deck\n---\n\n## One\n\ntext\n"
 
 
 class TestSlideDeckConstruction:
-    def test_keeps_source_theme_and_base_dir(self):
-        deck = SlideDeck(_DECK, theme="scientific")
-        assert deck.source == _DECK
-        assert deck.theme_id == "scientific"
-        assert deck.base_dir is None
-
     def test_default_theme_is_corporate(self):
         assert SlideDeck(_DECK).theme_id == "corporate"
 

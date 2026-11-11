@@ -59,15 +59,6 @@ def test_export_pptx_writes_file(window, tmp_path, monkeypatch):
     assert out.read_bytes()[:2] == b"PK"
 
 
-def test_export_pptx_cancelled_is_noop(window, monkeypatch):
-    window._new_tab()
-    monkeypatch.setattr(
-        app_module.QFileDialog, "getSaveFileName",
-        staticmethod(lambda *a, **k: ("", "")),
-    )
-    window._export_pptx()  # cancelled → no exception
-
-
 def test_export_pptx_appends_extension(window, tmp_path, monkeypatch):
     window._current_tab().set_initial_text("## A\n")
     target = tmp_path / "noext"

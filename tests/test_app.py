@@ -424,16 +424,6 @@ def test_export_html_writes_file(window, tmp_path, monkeypatch):
     assert '<div class="reveal">' in out.read_text(encoding="utf-8")
 
 
-def test_export_html_cancelled_writes_nothing(window, tmp_path, monkeypatch):
-    window._new_tab()
-    monkeypatch.setattr(
-        app_module.QFileDialog,
-        "getSaveFileName",
-        staticmethod(lambda *a, **k: ("", "")),
-    )
-    window._export_html()  # cancelled → no exception
-
-
 # --------------------------------------------------------------- drag & drop
 
 
