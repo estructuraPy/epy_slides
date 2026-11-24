@@ -10,11 +10,14 @@ and the argument parser / CLI dispatch.
 
 from __future__ import annotations
 
+import importlib.resources
+
 import pytest
 from PySide6.QtCore import QMimeData, QPointF, QSettings, Qt, QUrl
 from PySide6.QtGui import QDropEvent
 
 from epy_slides import app as app_module
+from epy_slides._core import _i18n as i18n
 from epy_slides._core import themes
 from epy_slides._ui.tab import MarkdownTab
 from epy_slides.app import (
@@ -662,3 +665,248 @@ def test_the_guide_is_on_the_right_and_can_be_hidden(window) -> None:
     assert not window.guide_dock.isVisible()
     window.guide_action.trigger()
     assert window.guide_dock.isVisible()
+
+
+# ------------------------------------------- demo deck materialization
+
+
+@pytest.mark.parametrize(
+    ("language", "name"),
+    [("en", "demo.md"), ("es", "demo_es.md")],
+)
+def test_demo_deck_path_materializes_the_bundled_demo(
+    tmp_path, monkeypatch, language, name
+):
+    """The demo is written once under LOCALAPPDATA and reused afterwards."""
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    monkeypatch.setattr(i18n, "current_language", lambda: language)
+    path = app_module.demo_deck_path()
+    expected = tmp_path / "ePy Suite" / "demo" / "epy_slides" / name
+    assert path == expected
+    assert path.is_file()
+    bundled = (
+        importlib.resources.files("epy_slides._config._assets")
+        .joinpath(name)
+        .read_text(encoding="utf-8")
+    )
+    assert path.read_text(encoding="utf-8") == bundled
+    path.write_text("edited", encoding="utf-8")
+    assert app_module.demo_deck_path() == path
+    assert path.read_text(encoding="utf-8") == "edited"
+
+
+def test_open_demo_project_opens_the_materialized_deck(
+    window, tmp_path, monkeypatch
+):
+    """The demo action loads the writable copy into a tab."""
+    deck = tmp_path / "demo.md"
+    deck.write_text("# Demo\n", encoding="utf-8")
+    monkeypatch.setattr(app_module, "demo_deck_path", lambda: deck)
+    window._open_demo_project()
+    tab = window._current_tab()
+    assert tab is not None
+    assert tab.path is not None
+    assert tab.path.resolve() == deck.resolve()
+
+
+def test_open_demo_project_warns_when_the_demo_is_unavailable(
+    window, monkeypatch
+):
+    """A missing demo warns and adds no tab."""
+    def _unavailable():
+        raise FileNotFoundError("gone")
+
+    monkeypatch.setattr(app_module, "demo_deck_path", _unavailable)
+    warned = {"n": 0}
+    monkeypatch.setattr(
+        app_module.QMessageBox,
+        "warning",
+        staticmethod(lambda *a, **k: warned.update(n=warned["n"] + 1)),
+    )
+    before = window.tabs.count()
+    window._open_demo_project()
+    assert warned["n"] == 1
+    assert window.tabs.count() == before
+
+
+def test_open_updates_opens_the_release_page(window, monkeypatch):
+    """Check for updates delegates to epy_export's release opener."""
+    calls = []
+    monkeypatch.setattr(
+        "epy_export.open_releases",
+        lambda app_id, parent: calls.append((app_id, parent)),
+    )
+    window._open_updates()
+    assert calls == [("epy_slides", window)]
+
+
+def test_set_default_theme_remembers_the_current_theme(window):
+    """The default-theme action persists the active theme id."""
+    window._set_default_theme()
+    assert window._settings.value("theme_default") == (
+        window._current_theme.id
+    )
+
+
+# ------------------------------------------- header language switch
+
+
+def test_set_language_updates_an_installed_header(window):
+    """When the header exists, a language switch relabels it too."""
+    class _Header:
+        def __init__(self):
+            self.calls = []
+
+        def set_language(self, code):
+            self.calls.append(("language", code))
+
+        def set_texts(self, title, subtitle):
+            self.calls.append(("texts", title, subtitle))
+
+    header = _Header()
+    window.header = header
+    try:
+        window._set_language("es")
+        assert header.calls[0] == ("language", "es")
+        kind, title, subtitle = header.calls[1]
+        assert kind == "texts"
+        assert title == "ePy Slides"
+        assert subtitle == i18n.tr(
+            "Presentations from one Markdown source."
+        )
+    finally:
+        window._set_language("en")
+
+
+# ------------------------------------------- manual tab creation
+
+
+def test_open_manual_creates_a_new_tab_when_the_manual_is_gone(
+    window, monkeypatch
+):
+    """With no manual tab left, the manual opens in a fresh tab."""
+    monkeypatch.setattr(
+        app_module, "_load_manual_text", lambda filename: "## Manual\n"
+    )
+    monkeypatch.setattr(window, "_manual_tab", None)
+    window._open_manual("welcome.md")
+    assert window.tabs.count() == 2
+    tab = window._current_tab()
+    assert tab is window._manual_tab
+    assert tab.path is None
+    assert tab.text() == "## Manual\n"
+
+
+# ------------------------------------------- assistant door and callbacks
+
+
+def test_build_assistant_does_nothing_when_unavailable(
+    window, monkeypatch
+):
+    """No epy_draft panel means no dock and no panel construction."""
+    from epy_slides.epy_studio_connect import assistant as assistant_mod
+
+    monkeypatch.setattr(assistant_mod, "available", lambda: False)
+    monkeypatch.setattr(
+        assistant_mod,
+        "create_panel",
+        lambda **kwargs: pytest.fail("create_panel must not be reached"),
+    )
+    window._build_assistant()  # must return before building the dock
+
+
+def test_build_assistant_swallows_a_panel_construction_error(
+    window, monkeypatch
+):
+    """A broken panel constructor is an optional capability, not a crash."""
+    from epy_slides.epy_studio_connect import assistant as assistant_mod
+
+    def _broken_panel(**kwargs):
+        raise RuntimeError("assistant exploded")
+
+    monkeypatch.setattr(assistant_mod, "available", lambda: True)
+    monkeypatch.setattr(assistant_mod, "create_panel", _broken_panel)
+    window._build_assistant()  # must not raise
+
+
+def test_assistant_context_is_empty_without_a_tab(window, monkeypatch):
+    """With every tab closed the context carries empty document fields."""
+    monkeypatch.setattr(window, "_current_tab", lambda: None)
+    assert window._assistant_context() == {
+        "title": "",
+        "document": "",
+        "selection": "",
+        "language": i18n.current_language(),
+    }
+
+
+def test_assistant_context_reports_the_active_document(window, tmp_path):
+    """The context carries the title, text, selection and path of the tab."""
+    deck = tmp_path / "deck.md"
+    deck.write_text("Hello world\n", encoding="utf-8")
+    window.open_path(deck)
+    tab = window._current_tab()
+    cursor = tab.editor.textCursor()
+    cursor.select(cursor.SelectionType.Document)
+    tab.editor.setTextCursor(cursor)
+    context = window._assistant_context()
+    assert context["title"] == tab.title()
+    assert context["document"] == "Hello world\n"
+    assert "Hello world" in context["selection"]
+    assert "\u2029" not in context["selection"]
+    assert context["notes"] == str(tab.path)
+
+
+def test_assistant_apply_refuses_without_a_tab(window, monkeypatch):
+    """The apply callback reports failure when no tab is open."""
+    monkeypatch.setattr(window, "_current_tab", lambda: None)
+    assert window._assistant_apply("proposal") is False
+
+
+def test_assistant_apply_inserts_at_the_caret(window):
+    """The apply callback inserts the proposal into the active buffer."""
+    tab = window._new_tab()
+    assert window._assistant_apply("Proposed text.") is True
+    assert tab.editor.toPlainText() == "Proposed text."
+
+
+# ------------------------------------------- open_path: .zepy packages
+
+
+def test_open_path_reads_the_markdown_inside_a_zepy_package(
+    window, tmp_path
+):
+    """A .zepy is resolved to its Markdown document before opening."""
+    from epy_export import zepy
+
+    source = tmp_path / "deck_source"
+    source.mkdir()
+    inner = source / "deck.md"
+    inner.write_text("# Inside\n", encoding="utf-8")
+    package = zepy.pack(source, tmp_path / "bundle.zepy")
+    window.open_path(package)
+    tab = window._current_tab()
+    assert tab is not None
+    assert tab.path is not None
+    assert tab.path.resolve() == (
+        tmp_path / "bundle" / "deck.md"
+    ).resolve()
+    assert tab.text() == "# Inside\n"
+
+
+def test_open_path_warns_when_a_zepy_package_is_broken(
+    window, tmp_path, monkeypatch
+):
+    """A package without a readable manifest warns and adds no tab."""
+    package = tmp_path / "broken.zepy"
+    package.write_bytes(b"broken")
+    warned = {"n": 0}
+    monkeypatch.setattr(
+        app_module.QMessageBox,
+        "warning",
+        staticmethod(lambda *a, **k: warned.update(n=warned["n"] + 1)),
+    )
+    before = window.tabs.count()
+    window.open_path(package)
+    assert warned["n"] == 1
+    assert window.tabs.count() == before

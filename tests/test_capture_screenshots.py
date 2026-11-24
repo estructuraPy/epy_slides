@@ -86,15 +86,17 @@ def test_pump_zero_ms_returns_without_spinning(qapp):
 def test_grab_widget_writes_a_real_png_at_widget_size(qapp, tmp_path):
     widget = QWidget()
     try:
-        widget.resize(120, 80)
+        widget.setFixedSize(120, 80)
         path = tmp_path / "nested" / "widget.png"
         cs.grab_widget(qapp, widget, path, settle=10)
 
         assert path.exists()
         assert path.stat().st_size > 0
+        dpr = widget.devicePixelRatioF()
+        expected = (round(120 * dpr), round(80 * dpr))
         with Image.open(path) as img:
             assert img.format == "PNG"
-            assert img.size == (120, 80)
+            assert img.size == expected
     finally:
         widget.deleteLater()
 
@@ -104,14 +106,16 @@ def test_grab_widget_prints_name_dimensions_and_byte_size(
 ):
     widget = QWidget()
     try:
-        widget.resize(64, 48)
+        widget.setFixedSize(64, 48)
         path = tmp_path / "widget.png"
         cs.grab_widget(qapp, widget, path, settle=10)
 
         out = capsys.readouterr().out
         size = path.stat().st_size
+        with Image.open(path) as img:
+            dimensions = f"{img.width}x{img.height}"
         assert "widget.png" in out
-        assert "64x48" in out
+        assert dimensions in out
         assert f"{size:,} B" in out
     finally:
         widget.deleteLater()

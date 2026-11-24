@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 #: Declared so the cross-suite registry can attribute this library. Without it
 #: `epy_suite_connect.get_suite_info` fell to its own `getattr(..., "")`
 #: default and epy_slides was an entry in the registry with no author, while

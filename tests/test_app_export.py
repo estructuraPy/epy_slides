@@ -96,6 +96,32 @@ def test_export_pptx_no_tab_is_noop(window, monkeypatch):
     window._export_pptx()  # must not raise
 
 
+def test_export_pptx_cancelled_writes_nothing(window, tmp_path, monkeypatch):
+    deck = tmp_path / "deck.md"
+    deck.write_text("## A\n", encoding="utf-8")
+    window.open_path(deck)
+    monkeypatch.setattr(
+        app_module.QFileDialog, "getSaveFileName",
+        staticmethod(lambda *a, **k: ("", "")),
+    )
+    window._export_pptx()
+    assert not (tmp_path / "deck.pptx").exists()
+    assert window._exports_in_flight == 0
+
+
+def test_export_html_cancelled_writes_nothing(window, tmp_path, monkeypatch):
+    deck = tmp_path / "deck.md"
+    deck.write_text("## A\n", encoding="utf-8")
+    window.open_path(deck)
+    monkeypatch.setattr(
+        app_module.QFileDialog, "getSaveFileName",
+        staticmethod(lambda *a, **k: ("", "")),
+    )
+    window._export_html()
+    assert not (tmp_path / "deck.html").exists()
+    assert window._exports_in_flight == 0
+
+
 def test_export_html_failure_is_reported_not_swallowed(
     window, tmp_path, monkeypatch
 ):
@@ -374,6 +400,64 @@ def test_run_gui_sets_window_icon_when_logo_present(monkeypatch):
     monkeypatch.setattr(app_module, "QIcon", lambda *a, **k: object())
     assert _run_gui([]) == 3
     assert icon_set["n"] == 1
+
+
+def test_run_gui_studio_door_swallows_its_own_failure(monkeypatch):
+    """The header's Studio callback opens Studio and never crashes when
+    epy_studio is missing."""
+    captured = {}
+
+    class _FakeApp:
+        def __init__(self, argv):
+            pass
+
+        def setWindowIcon(self, icon):  # noqa: N802 - Qt API name
+            pass
+
+        def setStyleSheet(self, sheet):  # noqa: N802 - Qt API name
+            pass
+
+        def exec(self):  # noqa: A003
+            return 0
+
+    class _FakeWindow:
+        def show(self):
+            pass
+
+        def open_path(self, path):
+            pass
+
+    def _fake_install_header(parent, **kwargs):
+        captured["on_studio"] = kwargs["on_studio"]
+        return object()
+
+    monkeypatch.setattr(app_module, "QApplication", _FakeApp)
+    monkeypatch.setattr(app_module, "SlideWindow", _FakeWindow)
+    monkeypatch.setattr(
+        app_module, "_load_branding_pixmap", lambda name: _NullPixmap()
+    )
+    monkeypatch.setattr(
+        "epy_export._ui.app_header.install_header",
+        _fake_install_header,
+    )
+    import epy_slides.epy_studio_connect as studio_connect
+
+    opened = []
+    monkeypatch.setattr(
+        studio_connect,
+        "open_app",
+        lambda app_id: opened.append(app_id),
+    )
+    assert app_module._run_gui([]) == 0
+    studio = captured["on_studio"]
+    studio()
+    assert opened == ["epy_studio"]
+
+    def _unavailable(app_id):
+        raise RuntimeError("epy_studio is not installed")
+
+    monkeypatch.setattr(studio_connect, "open_app", _unavailable)
+    studio()  # must not raise
 
 
 class _NullPixmap:
